@@ -5,6 +5,7 @@ import Helmet from 'react-helmet'
 import Layout from "../components/layout"
 import ArticlePreview from '../components/article-preview'
 
+// Refactor info functional component
 class Index extends React.Component {
   render() {
     const siteTitle = get(this, 'props.data.site.siteMetadata.title')
@@ -12,10 +13,10 @@ class Index extends React.Component {
 
     return (
       <Layout location={this.props.location} >
-        <div style={{ background: '#fff' }}>
+        <div>
           <Helmet title={siteTitle} />
           <div className="wrapper">
-            <h2 className="section-headline">Recent articles</h2>
+            <h2 className="section-headline">Latest Empty States</h2>
             <ul className="article-list">
               {posts.map(({ node }) => {
                 return (
@@ -48,7 +49,7 @@ export const pageQuery = graphql`
           slug
           publishDate(formatString: "MMMM Do, YYYY")
           tags
-          heroImage {
+          images {
             fluid(maxWidth: 350, resizingBehavior: SCALE) {
               ...GatsbyContentfulFluid_tracedSVG
             }

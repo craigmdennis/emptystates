@@ -4,6 +4,7 @@ import Helmet from 'react-helmet'
 import Layout from "../components/layout"
 import ArticlePreview from '../components/article-preview'
 
+// Todo: Refactor as functional component
 class Tags extends React.Component {
   render() {
     const { title } = this.props.data.site.siteMetadata
@@ -54,7 +55,7 @@ export const pageQuery = graphql`
           slug
           publishDate(formatString: "MMMM Do, YYYY")
           tags
-          heroImage {
+          images {
             fluid(maxWidth: 350, resizingBehavior: SCALE) {
               ...GatsbyContentfulFluid_tracedSVG
             }

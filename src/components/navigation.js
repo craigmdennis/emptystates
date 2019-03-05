@@ -9,13 +9,22 @@ export default () => (
         <Link to="/">Home</Link>
       </li>
       <li className={styles.navigationItem}>
-        <Link to="/tag/mobile/">Mobile</Link>
+        <Link to="/tags/mobile/">Mobile</Link>
       </li>
       <li className={styles.navigationItem}>
-        <Link to="/tag/tablet/">Tablet</Link>
+        <Link to="/tags/tablet/">Tablet</Link>
       </li>
       <li className={styles.navigationItem}>
-        <Link to="/tag/desktop/">Desktop</Link>
+        <Link to="/tags/desktop/">Desktop</Link>
+      </li>
+      <li className={styles.navigationItem}>
+        <Link to="/tags/games-console/">Games Console</Link>
+      </li>
+      <li className={styles.navigationItem}>
+        <Link to="/tags/android/">Android</Link>
+      </li>
+      <li className={styles.navigationItem}>
+        <Link to="/tags/ios/">iOS</Link>
       </li>
     </ul>
   </nav>

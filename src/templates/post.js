@@ -2,8 +2,8 @@ import React from 'react'
 import { graphql } from 'gatsby'
 import Helmet from 'react-helmet'
 import get from 'lodash/get'
-import Img from 'gatsby-image'
 import Layout from '../components/layout'
+import Images from '../components/images'
 
 class BlogPostTemplate extends React.Component {
   render() {
@@ -13,7 +13,7 @@ class BlogPostTemplate extends React.Component {
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${post.title} | ${siteTitle}`} />
-        <Img alt={post.title} fluid={post.heroImage.fluid} />
+        <Images images={post.images} />
         <div className="wrapper">
           <h1 className="section-headline">{post.title}</h1>
           <p>
@@ -37,7 +37,7 @@ export const pageQuery = graphql`
     contentfulPost(slug: { eq: $slug }) {
       title
       publishDate(formatString: "MMMM Do, YYYY")
-      heroImage {
+      images {
         fluid(maxWidth: 1180) {
           ...GatsbyContentfulFluid_tracedSVG
         }
