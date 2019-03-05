@@ -8,7 +8,7 @@ class Images extends React.Component {
     return (
       <div>
         {images.map(image => (
-          <Img alt={image.alt} fluid={image.fluid} key={image} />
+          <Img alt={image.alt} fixed={image.fixed} key={image} />
         ))}
       </div>
     )

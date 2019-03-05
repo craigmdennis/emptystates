@@ -1,6 +1,6 @@
 const Promise = require('bluebird')
 const path = require('path')
-const _ = require("lodash")
+const _ = require('lodash')
 
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
@@ -18,6 +18,7 @@ exports.createPages = ({ graphql, actions }) => {
                   title
                   slug
                   tags
+                  contentful_id
                 }
               }
             }
@@ -31,9 +32,9 @@ exports.createPages = ({ graphql, actions }) => {
 
         // Posts
         const posts = result.data.allContentfulPost.edges
-        posts.forEach((post, index) => {
+        posts.forEach((post) => {
           createPage({
-            path: `/${post.node.slug}/`,
+            path: `/s/${post.node.contentful_id}/`,
             component: blogPost,
             context: {
               slug: post.node.slug

@@ -1,0 +1,12 @@
+.navigation {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-left: -4px;
+  margin-right: -4px;
+}
+
+.navigation__item > a {
+  display: block;
+  padding: 4px;
+}

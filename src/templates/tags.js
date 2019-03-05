@@ -17,20 +17,18 @@ class Tags extends React.Component {
 
     return (
       <Layout location={this.props.location} >
-        <div>
-          <Helmet title={title} />
-          <div className="wrapper">
-            <h2 className="section-headline">{tagHeader}</h2>
-            <ul className="article-list">
-              {edges.map(({ node }) => {
-                return (
-                  <li key={node.slug}>
-                    <ArticlePreview article={node} />
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+        <Helmet title={title} />
+        <div className="wrapper">
+          <h2 className="section-headline">{tagHeader}</h2>
+          <ul className="article-list">
+            {edges.map(({ node }) => {
+              return (
+                <li>
+                  <ArticlePreview article={node} />
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </Layout>
     )
@@ -40,24 +38,24 @@ class Tags extends React.Component {
 export default Tags
 
 export const pageQuery = graphql`
-  query TagQuery {
+  query TagQuery($tag: String) {
     site {
       siteMetadata {
         title
       }
     }
     allContentfulPost(
-      sort: { fields: [publishDate], order: DESC }) {
+      sort: { fields: [publishDate], order: DESC }
+      filter: { tags: { in: [$tag] } } ) {
       totalCount
       edges {
         node {
           title
-          slug
-          publishDate(formatString: "MMMM Do, YYYY")
           tags
+          publishDate(formatString: "MMMM Do, YYYY")
           images {
-            fluid(maxWidth: 350, resizingBehavior: SCALE) {
-              ...GatsbyContentfulFluid_tracedSVG
+            fixed(width: 200) {
+              ...GatsbyContentfulFixed_withWebp
             }
           }
         }

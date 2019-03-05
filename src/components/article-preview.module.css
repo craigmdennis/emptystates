@@ -1,0 +1,7 @@
+.preview {}
+.preview__imageLink {
+  display: inline-block;
+}
+.preview__image {
+  display: block;
+}

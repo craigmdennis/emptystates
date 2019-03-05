@@ -13,12 +13,10 @@ class BlogPostTemplate extends React.Component {
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${post.title} | ${siteTitle}`} />
-        <Images images={post.images} />
         <div className="wrapper">
           <h1 className="section-headline">{post.title}</h1>
-          <p>
-            {post.publishDate}
-          </p>
+          <Images images={post.images} />
+          <span>{post.publishDate}</span>
         </div>
       </Layout>
     )
@@ -38,8 +36,8 @@ export const pageQuery = graphql`
       title
       publishDate(formatString: "MMMM Do, YYYY")
       images {
-        fluid(maxWidth: 1180) {
-          ...GatsbyContentfulFluid_tracedSVG
+        fixed(width: 400) {
+          ...GatsbyContentfulFixed_withWebp
         }
       }
     }

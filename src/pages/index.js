@@ -20,7 +20,7 @@ class Index extends React.Component {
             <ul className="article-list">
               {posts.map(({ node }) => {
                 return (
-                  <li key={node.slug}>
+                  <li>
                     <ArticlePreview article={node} />
                   </li>
                 )
@@ -46,12 +46,11 @@ export const pageQuery = graphql`
       edges {
         node {
           title
-          slug
           publishDate(formatString: "MMMM Do, YYYY")
           tags
           images {
-            fluid(maxWidth: 350, resizingBehavior: SCALE) {
-              ...GatsbyContentfulFluid_tracedSVG
+            fixed(width: 200) {
+              ...GatsbyContentfulFixed_withWebp
             }
           }
         }
