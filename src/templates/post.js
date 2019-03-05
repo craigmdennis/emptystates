@@ -4,6 +4,7 @@ import Helmet from 'react-helmet'
 import get from 'lodash/get'
 import Layout from '../components/layout'
 import Images from '../components/images'
+import TagList from '../components/taglist'
 
 class BlogPostTemplate extends React.Component {
   render() {
@@ -16,7 +17,8 @@ class BlogPostTemplate extends React.Component {
         <div className="wrapper">
           <h1 className="section-headline">{post.title}</h1>
           <Images images={post.images} />
-          <span>{post.publishDate}</span>
+          <div><small>{post.publishDate}</small></div>
+          <TagList tags={post.tags} />
         </div>
       </Layout>
     )
@@ -34,6 +36,7 @@ export const pageQuery = graphql`
     }
     contentfulPost(slug: { eq: $slug }) {
       title
+      tags
       publishDate(formatString: "MMMM Do, YYYY")
       images {
         fixed(width: 400) {

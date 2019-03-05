@@ -3,7 +3,7 @@ import { Link, graphql } from 'gatsby'
 import get from 'lodash/get'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
-import ArticlePreview from '../components/article-preview'
+import Preview from '../components/preview'
 
 // Refactor info functional component
 class Index extends React.Component {
@@ -17,11 +17,11 @@ class Index extends React.Component {
           <Helmet title={siteTitle} />
           <div className="wrapper">
             <h2 className="section-headline">Latest Empty States</h2>
-            <ul className="article-list">
+            <ul className="post-list">
               {posts.map(({ node }) => {
                 return (
                   <li>
-                    <ArticlePreview article={node} />
+                    <Preview post={node} />
                   </li>
                 )
               })}
@@ -48,6 +48,7 @@ export const pageQuery = graphql`
           title
           publishDate(formatString: "MMMM Do, YYYY")
           tags
+          contentful_id
           images {
             fixed(width: 200) {
               ...GatsbyContentfulFixed_withWebp

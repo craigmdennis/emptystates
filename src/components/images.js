@@ -1,18 +1,18 @@
 import React from 'react'
 import Img from 'gatsby-image'
 
-class Images extends React.Component {
+class ImageList extends React.Component {
   render() {
     const { images } = this.props
 
     return (
-      <div>
+      <React.Fragment>
         {images.map(image => (
           <Img alt={image.alt} fixed={image.fixed} key={image} />
         ))}
-      </div>
+      </React.Fragment>
     )
   }
 }
 
-export default Images
+export default ImageList

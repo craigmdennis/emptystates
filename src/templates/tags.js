@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, graphql } from 'gatsby'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
-import ArticlePreview from '../components/article-preview'
+import Preview from '../components/preview'
 
 // Todo: Refactor as functional component
 class Tags extends React.Component {
@@ -20,11 +20,11 @@ class Tags extends React.Component {
         <Helmet title={title} />
         <div className="wrapper">
           <h2 className="section-headline">{tagHeader}</h2>
-          <ul className="article-list">
+          <ul className="post-list">
             {edges.map(({ node }) => {
               return (
                 <li>
-                  <ArticlePreview article={node} />
+                  <Preview post={node} />
                 </li>
               )
             })}
@@ -52,6 +52,7 @@ export const pageQuery = graphql`
         node {
           title
           tags
+          contentful_id
           publishDate(formatString: "MMMM Do, YYYY")
           images {
             fixed(width: 200) {
