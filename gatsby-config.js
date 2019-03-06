@@ -21,7 +21,12 @@ if (!spaceId || !accessToken) {
 
 module.exports = {
   siteMetadata: {
-    title: 'Gatsby Contentful starter',
+    title: 'Empty States',
+    description: `A curated gallery showcasing designs for when no data can be displayed in the UI.`,
+    siteUrl: `https://emptystat.es`,
+    social: {
+      twitter: `emptystates`,
+    },
   },
   pathPrefix: '/gatsby-contentful-starter',
   plugins: [
@@ -32,6 +37,20 @@ module.exports = {
     {
       resolve: 'gatsby-source-contentful',
       options: contentfulConfig,
-    }
+    },
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        env: {
+          development: {
+            policy: [{ userAgent: '*', disallow: ['/'] }]
+          },
+          production: {
+            policy: [{ userAgent: '*', allow: '/' }]
+          }
+        }
+      }
+    },
+    `gatsby-plugin-sitemap`,
   ],
 }
