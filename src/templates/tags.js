@@ -20,7 +20,7 @@ class Tags extends React.Component {
       <Layout location={this.props.location} >
         <Helmet title={`${tagHeader} | ${siteTitle}`} />
         <h2>{tagHeader}</h2>
-        <Gallery elements={posts} />
+        <Gallery elements={edges} />
       </Layout>
     )
   }
