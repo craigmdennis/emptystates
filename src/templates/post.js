@@ -13,12 +13,10 @@ class PostTemplate extends React.Component {
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${post.title} | ${siteTitle}`} />
-        <div className="wrapper">
-          <h1 className="section-headline">{post.title}</h1>
-          <Img fixed={post.images[0].fixed} key={post.images[0]} />
-          <div><small>{post.publishDate}</small></div>
-          <TagList tags={post.tags} />
-        </div>
+        <h1>{post.title}</h1>
+        <Img fixed={post.images[0].fixed} key={post.images[0]} />
+        <div><small>{post.publishDate}</small></div>
+        <TagList tags={post.tags} />
       </Layout>
     )
   }

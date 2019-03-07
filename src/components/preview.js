@@ -13,10 +13,10 @@ class Preview extends React.Component {
       <div className={styles.preview}>
         <Link to={`/s/${post.contentful_id}`} className={styles.preview__imageLink}>
           <ImageList images={post.images} className={styles.preview__imageThumb} />
-          <h3 className={styles.preview__title}>{post.title}</h3>
+          {/* <h3 className={styles.preview__title}>{post.title}</h3> */}
         </Link>
-        <small>{post.publishDate}</small>
-        <TagList tags={post.tags} />
+        {/* <small>{post.publishDate}</small> */}
+        {/* <TagList tags={post.tags} /> */}
       </div>
     )
   }

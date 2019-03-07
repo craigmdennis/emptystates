@@ -19,18 +19,8 @@ class Tags extends React.Component {
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${tagHeader} | ${siteTitle}`} />
-        <div className="wrapper">
-          <h2 className="section-headline">{tagHeader}</h2>
-          <Gallery>
-            {edges.map(({ node }) => {
-              return (
-                <li>
-                  <Preview post={node} />
-                </li>
-              )
-            })}
-          </Gallery>
-        </div>
+        <h2>{tagHeader}</h2>
+        <Gallery elements={posts} />
       </Layout>
     )
   }

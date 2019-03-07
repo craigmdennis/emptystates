@@ -1,9 +1,8 @@
 import React from 'react'
-import { Link, graphql } from 'gatsby'
+import { graphql } from 'gatsby'
 import get from 'lodash/get'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
-import Preview from '../components/preview'
 import Gallery from '../components/gallery'
 
 // Refactor info functional component
@@ -14,21 +13,9 @@ class Index extends React.Component {
 
     return (
       <Layout location={this.props.location} >
-        <div>
-          <Helmet title={siteTitle} />
-          <div className="wrapper">
-            <h2 className="section-headline">Latest Empty States</h2>
-            <Gallery>
-              {posts.map(({ node }) => {
-                return (
-                  <li>
-                    <Preview post={node} />
-                  </li>
-                )
-              })}
-            </Gallery>
-          </div>
-        </div>
+        <Helmet title={siteTitle} />
+        <h2>Latest Empty States</h2>
+        <Gallery elements={posts} />
       </Layout>
     )
   }

@@ -1,15 +1,9 @@
 .preview {
-  padding: 0.5rem;
-  border-radius: 5px;
+  border-radius: 10px;
   margin-bottom: 1rem;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .preview__imageLink {
-  display: block;
-}
-
-.preview__image {
   display: block;
 }

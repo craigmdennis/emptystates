@@ -11,31 +11,3 @@ html {
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
 }
-
-.post-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.post-list > li {
-  width: calc(100% - 16px);
-}
-
-@media only screen and (min-width: 480px) {
-  .post-list > li {
-    width: calc(100% / 2 - 16px);
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .post-list > li {
-    width: calc(100% / 3 - 16px);
-  }
-}
-
-@media only screen and (min-width: 1024px) {
-  .post-list > li {
-    width: calc(100% / 4 - 16px);
-  }
-}
