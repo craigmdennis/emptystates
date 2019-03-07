@@ -4,6 +4,7 @@ import get from 'lodash/get'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
 import Preview from '../components/preview'
+import Gallery from '../components/gallery'
 
 // Refactor info functional component
 class Index extends React.Component {
@@ -17,7 +18,7 @@ class Index extends React.Component {
           <Helmet title={siteTitle} />
           <div className="wrapper">
             <h2 className="section-headline">Latest Empty States</h2>
-            <ul className="post-list">
+            <Gallery>
               {posts.map(({ node }) => {
                 return (
                   <li>
@@ -25,7 +26,7 @@ class Index extends React.Component {
                   </li>
                 )
               })}
-            </ul>
+            </Gallery>
           </div>
         </div>
       </Layout>
@@ -50,8 +51,8 @@ export const pageQuery = graphql`
           tags
           contentful_id
           images {
-            fixed(width: 200) {
-              ...GatsbyContentfulFixed_withWebp
+            fluid(maxWidth: 400) {
+              ...GatsbyContentfulFluid_withWebp
             }
           }
         }

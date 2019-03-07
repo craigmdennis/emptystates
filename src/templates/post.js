@@ -1,22 +1,21 @@
 import React from 'react'
 import { graphql } from 'gatsby'
 import Helmet from 'react-helmet'
-import get from 'lodash/get'
+import Img from 'gatsby-image'
 import Layout from '../components/layout'
-import Images from '../components/images'
 import TagList from '../components/taglist'
 
-class BlogPostTemplate extends React.Component {
+class PostTemplate extends React.Component {
   render() {
-    const post = get(this.props, 'data.contentfulPost')
-    const siteTitle = get(this.props, 'data.site.siteMetadata.title')
+    const post = this.props.data.contentfulPost
+    const { siteTitle } = this.props.data.site.siteMetadata
 
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${post.title} | ${siteTitle}`} />
         <div className="wrapper">
           <h1 className="section-headline">{post.title}</h1>
-          <Images images={post.images} />
+          <Img fixed={post.images[0].fixed} key={post.images[0]} />
           <div><small>{post.publishDate}</small></div>
           <TagList tags={post.tags} />
         </div>
@@ -25,21 +24,21 @@ class BlogPostTemplate extends React.Component {
   }
 }
 
-export default BlogPostTemplate
+export default PostTemplate
 
 export const pageQuery = graphql`
-  query BlogPostBySlug($slug: String!) {
+  query BlogPostByContentfulID($id: String!) {
     site {
       siteMetadata {
         title
       }
     }
-    contentfulPost(slug: { eq: $slug }) {
+    contentfulPost(contentful_id: { eq: $id }) {
       title
       tags
       publishDate(formatString: "MMMM Do, YYYY")
       images {
-        fixed(width: 400) {
+        fixed(width: 500) {
           ...GatsbyContentfulFixed_withWebp
         }
       }

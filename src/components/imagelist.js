@@ -8,7 +8,7 @@ class ImageList extends React.Component {
     return (
       <React.Fragment>
         {images.map(image => (
-          <Img alt={image.alt} fixed={image.fixed} key={image} />
+          <Img alt={image.alt} fluid={image.fluid} key={image} />
         ))}
       </React.Fragment>
     )

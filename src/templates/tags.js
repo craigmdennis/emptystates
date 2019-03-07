@@ -3,11 +3,12 @@ import { Link, graphql } from 'gatsby'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
 import Preview from '../components/preview'
+import Gallery from '../components/gallery'
 
 // Todo: Refactor as functional component
 class Tags extends React.Component {
   render() {
-    const { title } = this.props.data.site.siteMetadata
+    const { siteTitle } = this.props.data.site.siteMetadata
     const { tag } = this.props.pageContext
     const { edges, totalCount } = this.props.data.allContentfulPost
     const tagHeader = `${totalCount} post${
@@ -17,10 +18,10 @@ class Tags extends React.Component {
 
     return (
       <Layout location={this.props.location} >
-        <Helmet title={title} />
+        <Helmet title={`${tagHeader} | ${siteTitle}`} />
         <div className="wrapper">
           <h2 className="section-headline">{tagHeader}</h2>
-          <ul className="post-list">
+          <Gallery>
             {edges.map(({ node }) => {
               return (
                 <li>
@@ -28,7 +29,7 @@ class Tags extends React.Component {
                 </li>
               )
             })}
-          </ul>
+          </Gallery>
         </div>
       </Layout>
     )
@@ -55,8 +56,8 @@ export const pageQuery = graphql`
           contentful_id
           publishDate(formatString: "MMMM Do, YYYY")
           images {
-            fixed(width: 200) {
-              ...GatsbyContentfulFixed_withWebp
+            fluid(maxWidth: 400) {
+              ...GatsbyContentfulFluid_withWebp
             }
           }
         }
