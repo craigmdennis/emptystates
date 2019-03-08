@@ -3,9 +3,7 @@ import Masonry from 'react-masonry-component';
 import Preview from '../components/preview'
 import styles from './gallery.module.css';
  
-const masonryOptions = {
-  gutter: 16
-};
+const masonryOptions = {};
  
 class Gallery extends React.Component {
   render() {
