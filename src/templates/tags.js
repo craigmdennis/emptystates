@@ -4,7 +4,6 @@ import Helmet from 'react-helmet'
 import Layout from "../components/layout"
 import _ from 'lodash'
 import Gallery from '../components/gallery'
-import Pluralize from 'react-pluralize'
 
 // Todo: Refactor as functional component
 class Tags extends React.Component {
@@ -12,12 +11,8 @@ class Tags extends React.Component {
     const { siteTitle } = this.props.data.site.siteMetadata
     const { tag } = this.props.pageContext
     const { edges, totalCount } = this.props.data.allContentfulPost
-    const tagHeader = {
-      singular: `There is only one ${tag} Empty State`,
-      plural: `There are ${totalCount} ${tag} Empty States`
-    }
-    const title = totalCount === 1 ? tagHeader.singular : tagHeader.plural
-    const wide = tag === 'desktop' ? true : false
+    const title = `${tag} Empty States`
+    const wide = tag.toLowerCase() === 'desktop' ? true : false
   
 
     return (
