@@ -1,8 +1,8 @@
 import React from 'react'
 import { graphql } from 'gatsby'
 import Helmet from 'react-helmet'
-import Layout from "../components/layout"
 import _ from 'lodash'
+import Layout from "../components/layout"
 import Gallery from '../components/gallery'
 
 // Todo: Refactor as functional component
@@ -12,8 +12,7 @@ class Tags extends React.Component {
     const { tag } = this.props.pageContext
     const { edges, totalCount } = this.props.data.allContentfulPost
     const title = `${tag} Empty States`
-    const wide = tag.toLowerCase() === 'desktop' ? true : false
-  
+    const wide = tag.toLowerCase() === 'desktop' ? true : false  
 
     return (
       <Layout location={this.props.location} >

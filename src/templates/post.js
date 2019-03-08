@@ -11,7 +11,11 @@ class PostTemplate extends React.Component {
   render() {
     const post = this.props.data.contentfulPost
     const { siteTitle } = this.props.data.site.siteMetadata
-    const classes = _.indexOf(post.tags, 'desktop') ? styles.item : styles.itemWide
+    const lowerCaseTags = post.tags.map(tag => tag.toLowerCase())
+    const classes =
+      _.indexOf(lowerCaseTags, 'desktop')
+      ? styles.item
+      : styles.itemWide
 
     return (
       <Layout location={this.props.location} >

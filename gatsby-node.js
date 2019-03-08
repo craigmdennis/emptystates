@@ -1,9 +1,15 @@
 const Promise = require('bluebird')
 const path = require('path')
 const _ = require('lodash')
+const slugify = require('slugify')
 
 exports.createPages = ({ graphql, actions }) => {
   const { createPage } = actions
+
+  // To do: Move to config
+  const slugifyConfig = {
+    lower: true
+  }
 
   return new Promise((resolve, reject) => {
     const blogPost = path.resolve('./src/templates/post.js')
@@ -51,10 +57,10 @@ exports.createPages = ({ graphql, actions }) => {
         })
         // Eliminate duplicate tags
         tags = _.uniq(tags)
-        
+      
         tags.forEach(tag => {
           createPage({
-            path: `/tags/${tag}/`,
+            path: `/tags/${slugify(tag, slugifyConfig)}/`,
             component: tagTemplate,
             context: {
               tag
