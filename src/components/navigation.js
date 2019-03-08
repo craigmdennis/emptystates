@@ -12,19 +12,16 @@ export default () => (
         <Link to="/tags/mobile/">Mobile</Link>
       </li>
       <li className={styles.navigation__item}>
-        <Link to="/tags/tablet/">Tablet</Link>
-      </li>
-      <li className={styles.navigation__item}>
         <Link to="/tags/desktop/">Desktop</Link>
-      </li>
-      <li className={styles.navigation__item}>
-        <Link to="/tags/games-console/">Games Console</Link>
       </li>
       <li className={styles.navigation__item}>
         <Link to="/tags/android/">Android</Link>
       </li>
       <li className={styles.navigation__item}>
         <Link to="/tags/ios/">iOS</Link>
+      </li>
+      <li className={styles.navigation__item}>
+        <Link to="/tags/error/">Error States</Link>
       </li>
     </ul>
   </nav>

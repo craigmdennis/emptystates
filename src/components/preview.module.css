@@ -1,9 +1,15 @@
 .preview {
-  border-radius: 10px;
+  border-radius: 5px;
   margin-bottom: 1rem;
   overflow: hidden;
+  transition: transform 200ms ease-in-out, box-shadow 200ms ease-in-out;
 }
 
-.preview__imageLink {
+.preview:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 5px 55px rgba(0,0,0,0.15);
+}
+
+.imageLink {
   display: block;
 }

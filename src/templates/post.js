@@ -4,17 +4,20 @@ import Helmet from 'react-helmet'
 import Img from 'gatsby-image'
 import Layout from '../components/layout'
 import TagList from '../components/taglist'
+import styles from './post.module.css'
 
 class PostTemplate extends React.Component {
   render() {
     const post = this.props.data.contentfulPost
     const { siteTitle } = this.props.data.site.siteMetadata
+    const classes = _.indexOf(post.tags, 'desktop') ? styles.item : styles.itemWide
 
     return (
       <Layout location={this.props.location} >
         <Helmet title={`${post.title} | ${siteTitle}`} />
         <h1>{post.title}</h1>
-        <Img fixed={post.images[0].fixed} key={post.images[0]} />
+        <Img fluid={post.images[0].fluid} key={post.images[0]} className={classes} />
+        {post.description && <p>{post.description}</p>}
         <div><small>{post.publishDate}</small></div>
         <TagList tags={post.tags} />
       </Layout>
@@ -36,8 +39,8 @@ export const pageQuery = graphql`
       tags
       publishDate(formatString: "MMMM Do, YYYY")
       images {
-        fixed(width: 500) {
-          ...GatsbyContentfulFixed_withWebp
+        fluid(maxWidth: 1200) {
+          ...GatsbyContentfulFluid_withWebp
         }
       }
     }

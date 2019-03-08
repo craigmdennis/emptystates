@@ -9,10 +9,11 @@ const masonryOptions = {
  
 class Gallery extends React.Component {
   render() {
+    const childElements = this.props.elements.map(({ node }) => {;
+      const classes = this.props.wide ? styles.itemWide : styles.item
 
-    const childElements = this.props.elements.map(({ node }) => {
       return (
-        <div className={styles.gallery__item}>
+        <div className={classes}>
           <Preview post={node} />
         </div>
       )

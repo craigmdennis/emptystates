@@ -30,7 +30,7 @@ export const pageQuery = graphql`
         title
       }
     }
-    allContentfulPost(sort: { fields: [publishDate], order: DESC }) {
+    allContentfulPost(sort: { fields: [publishDate], order: ASC }) {
       edges {
         node {
           title
@@ -38,7 +38,7 @@ export const pageQuery = graphql`
           tags
           contentful_id
           images {
-            fluid(maxWidth: 400) {
+            fluid(maxWidth: 800) {
               ...GatsbyContentfulFluid_withWebp
             }
           }

@@ -1,9 +1,10 @@
 import React from 'react'
-import { Link, graphql } from 'gatsby'
+import { graphql } from 'gatsby'
 import Helmet from 'react-helmet'
 import Layout from "../components/layout"
-import Preview from '../components/preview'
+import _ from 'lodash'
 import Gallery from '../components/gallery'
+import Pluralize from 'react-pluralize'
 
 // Todo: Refactor as functional component
 class Tags extends React.Component {
@@ -11,16 +12,19 @@ class Tags extends React.Component {
     const { siteTitle } = this.props.data.site.siteMetadata
     const { tag } = this.props.pageContext
     const { edges, totalCount } = this.props.data.allContentfulPost
-    const tagHeader = `${totalCount} post${
-      totalCount === 1 ? "" : "s"
-    } tagged with "${tag}"`
+    const tagHeader = {
+      singular: `There is only one ${tag} Empty State`,
+      plural: `There are ${totalCount} ${tag} Empty States`
+    }
+    const title = totalCount === 1 ? tagHeader.singular : tagHeader.plural
+    const wide = tag === 'desktop' ? true : false
   
 
     return (
       <Layout location={this.props.location} >
-        <Helmet title={`${tagHeader} | ${siteTitle}`} />
-        <h2>{tagHeader}</h2>
-        <Gallery elements={edges} />
+        <Helmet title={`${title} | ${siteTitle}`} />
+        <h2>{title}</h2>
+        <Gallery elements={edges} wide={wide} />
       </Layout>
     )
   }
@@ -36,7 +40,7 @@ export const pageQuery = graphql`
       }
     }
     allContentfulPost(
-      sort: { fields: [publishDate], order: DESC }
+      sort: { fields: [publishDate], order: ASC }
       filter: { tags: { in: [$tag] } } ) {
       totalCount
       edges {
@@ -46,7 +50,7 @@ export const pageQuery = graphql`
           contentful_id
           publishDate(formatString: "MMMM Do, YYYY")
           images {
-            fluid(maxWidth: 400) {
+            fluid(maxWidth: 800) {
               ...GatsbyContentfulFluid_withWebp
             }
           }
