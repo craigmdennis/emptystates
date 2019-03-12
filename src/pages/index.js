@@ -1,20 +1,20 @@
 import React from 'react'
 import { graphql } from 'gatsby'
-import get from 'lodash/get'
 import Helmet from 'react-helmet'
-import Layout from "../components/layout"
+import Layout from '../components/layout'
 import Gallery from '../components/gallery'
+import Header from '../components/header'
 
 // Refactor info functional component
 class Index extends React.Component {
   render() {
-    const siteTitle = get(this, 'props.data.site.siteMetadata.title')
-    const posts = get(this, 'props.data.allContentfulPost.edges')
+    const { title, description, homepage } = this.props.data.site.siteMetadata
+    const posts = this.props.data.allContentfulPost.edges
 
     return (
-      <Layout location={this.props.location} >
-        <Helmet title={siteTitle} />
-        <h2>Latest Empty States</h2>
+      <Layout location={this.props.location}>
+        <Helmet title={title} />
+        <Header title={homepage.title} description={description} />
         <Gallery elements={posts} />
       </Layout>
     )
@@ -27,7 +27,10 @@ export const pageQuery = graphql`
   query IndexQuery {
     site {
       siteMetadata {
-        title
+        homepage {
+          title
+        }
+        description
       }
     }
     allContentfulPost(sort: { fields: [publishDate], order: ASC }) {
@@ -37,7 +40,7 @@ export const pageQuery = graphql`
           publishDate(formatString: "MMMM Do, YYYY")
           tags
           contentful_id
-          images {
+          image {
             fluid(maxWidth: 800) {
               ...GatsbyContentfulFluid_withWebp
             }

@@ -7,7 +7,7 @@ class TagList extends React.Component {
   render() {
     const { tags } = this.props
     const slugifyConfig = {
-      lower: true
+      lower: true,
     }
 
     return (
@@ -17,7 +17,9 @@ class TagList extends React.Component {
             <Link
               to={`/tags/${slugify(tag, slugifyConfig)}`}
               className={styles.taglist__tag}
-              key={tag}>{tag}
+              key={tag}
+            >
+              {tag}
             </Link>
           </li>
         ))}

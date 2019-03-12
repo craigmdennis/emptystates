@@ -1,0 +1,20 @@
+.logo {
+  display: flex;
+  align-items: center;
+  margin-right: 3rem;
+  text-decoration: none;
+}
+
+.name {
+  color: #3c4858;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.svg {
+  width: 2rem;
+  height: 2rem;
+  color: #CCCCCC;
+  margin-right: 1rem;
+}

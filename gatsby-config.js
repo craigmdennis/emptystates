@@ -8,7 +8,8 @@ try {
 // Overwrite the Contentful config with environment variables if they exist
 contentfulConfig = {
   spaceId: process.env.CONTENTFUL_SPACE_ID || contentfulConfig.spaceId,
-  accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN || contentfulConfig.accessToken,
+  accessToken:
+    process.env.CONTENTFUL_DELIVERY_TOKEN || contentfulConfig.accessToken,
 }
 
 const { spaceId, accessToken } = contentfulConfig
@@ -21,11 +22,14 @@ if (!spaceId || !accessToken) {
 
 module.exports = {
   siteMetadata: {
-    title: 'Empty States',
-    description: `A curated gallery showcasing designs for when no data can be displayed in the UI.`,
+    title: `Empty States`,
+    description: `A curated gallery showcasing designs when no data is available in the UI.`,
     siteUrl: `https://emptystat.es`,
     social: {
       twitter: `emptystates`,
+    },
+    homepage: {
+      title: `Delight your users.`,
     },
   },
   pathPrefix: '/gatsby-contentful-starter',
@@ -43,15 +47,25 @@ module.exports = {
       options: {
         env: {
           development: {
-            policy: [{ userAgent: '*', disallow: ['/'] }]
+            policy: [{ userAgent: '*', disallow: ['/'] }],
           },
           production: {
-            policy: [{ userAgent: '*', allow: '/' }]
-          }
-        }
-      }
+            policy: [{ userAgent: '*', allow: '/' }],
+          },
+        },
+      },
     },
     `gatsby-plugin-sitemap`,
     `gatsby-plugin-netlify`,
+    {
+      resolve: 'gatsby-plugin-react-svg',
+    },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `images`,
+        path: `${__dirname}/src/images`,
+      },
+    },
   ],
 }

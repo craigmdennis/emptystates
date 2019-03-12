@@ -1,22 +1,17 @@
 import React from 'react'
 import { Link } from 'gatsby'
-import ImageList from './imagelist'
-import TagList from './taglist'
-
+import Img from 'gatsby-image'
 import styles from './preview.module.css'
 
 class Preview extends React.Component {
   render() {
-    const { post } = this.props
+    const { contentful_id, image } = this.props.post
 
-    return (    
+    return (
       <div className={styles.preview}>
-        <Link to={`/s/${post.contentful_id}`} className={styles.imageLink}>
-          <ImageList images={post.images} className={styles.imageThumb} />
-          {/* <h3 className={styles.preview__title}>{post.title}</h3> */}
+        <Link to={`/s/${contentful_id}`} className={styles.link}>
+          <Img alt={image.alt} fluid={image.fluid} key={image} />
         </Link>
-        {/* <small>{post.publishDate}</small> */}
-        {/* <TagList tags={post.tags} /> */}
       </div>
     )
   }

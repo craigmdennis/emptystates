@@ -2,22 +2,23 @@ import React from 'react'
 import { graphql } from 'gatsby'
 import Helmet from 'react-helmet'
 import _ from 'lodash'
-import Layout from "../components/layout"
+import Layout from '../components/layout'
 import Gallery from '../components/gallery'
+import Header from '../components/header'
 
 // Todo: Refactor as functional component
 class Tags extends React.Component {
   render() {
-    const { siteTitle } = this.props.data.site.siteMetadata
+    const siteTitle = this.props.data.site.siteMetadata.title
     const { tag } = this.props.pageContext
-    const { edges, totalCount } = this.props.data.allContentfulPost
-    const title = `${tag} Empty States`
-    const wide = tag.toLowerCase() === 'desktop' ? true : false  
+    const { edges } = this.props.data.allContentfulPost
+    const title = tag
+    const wide = tag.toLowerCase() === 'desktop' ? true : false
 
     return (
-      <Layout location={this.props.location} >
+      <Layout location={this.props.location}>
         <Helmet title={`${title} | ${siteTitle}`} />
-        <h2>{title}</h2>
+        <Header title={title} />
         <Gallery elements={edges} wide={wide} />
       </Layout>
     )
@@ -35,7 +36,8 @@ export const pageQuery = graphql`
     }
     allContentfulPost(
       sort: { fields: [publishDate], order: ASC }
-      filter: { tags: { in: [$tag] } } ) {
+      filter: { tags: { in: [$tag] } }
+    ) {
       totalCount
       edges {
         node {
@@ -43,7 +45,7 @@ export const pageQuery = graphql`
           tags
           contentful_id
           publishDate(formatString: "MMMM Do, YYYY")
-          images {
+          image {
             fluid(maxWidth: 800) {
               ...GatsbyContentfulFluid_withWebp
             }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import './base.css'
 import Container from './container'
 import Navigation from './navigation'
@@ -13,10 +13,10 @@ class Template extends React.Component {
     }
 
     return (
-      <Container>
+      <Fragment>
         <Navigation />
-        {children}
-      </Container>
+        <Container>{children}</Container>
+      </Fragment>
     )
   }
 }
