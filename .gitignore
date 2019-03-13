@@ -73,3 +73,6 @@ public
 
 # contentful config file
 .contentful.json
+
+# mac
+.DS_Store

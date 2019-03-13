@@ -3,8 +3,7 @@
   margin: 0 -0.5rem;
 }
 
-.item,
-.itemWide {
+.item, .wide {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
   width: calc(100% - 1rem);
@@ -14,8 +13,7 @@
   .item {
     width: calc(100% / 2 - 1rem);
   }
-
-  .itemWide {
+  .wide {
     width: calc(100% - 1rem);
   }
 }
@@ -24,8 +22,7 @@
   .item {
     width: calc(100% / 3 - 1rem);
   }
-
-  .itemWide {
+  .wide {
     width: calc(100% / 3 * 2 - 1rem);
   }
 }
@@ -34,8 +31,7 @@
   .item {
     width: calc(100% / 4 - 1rem);
   }
-
-  .itemWide {
+  .wide {
     width: calc(100% / 2 - 1rem);
   }
 }

@@ -46,7 +46,7 @@ export const pageQuery = graphql`
       tags
       publishDate(formatString: "MMMM Do, YYYY")
       image {
-        fluid(maxWidth: 1200) {
+        fluid(maxWidth: 1280) {
           ...GatsbyContentfulFluid_withWebp
         }
       }
