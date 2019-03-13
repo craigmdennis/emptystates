@@ -3,8 +3,6 @@ import Masonry from 'react-masonry-component'
 import Preview from '../components/preview'
 import styles from './gallery.module.css'
 
-const masonryOptions = {}
-
 class Gallery extends React.Component {
   render() {
     const childElements = this.props.elements.map(({ node }) => {
@@ -18,11 +16,7 @@ class Gallery extends React.Component {
     })
 
     return (
-      <Masonry
-        className={styles.gallery}
-        elementType={'div'}
-        options={masonryOptions}
-      >
+      <Masonry className={styles.gallery} elementType={'div'}>
         {childElements}
       </Masonry>
     )

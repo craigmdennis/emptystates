@@ -4,6 +4,7 @@ import Container from './container'
 import Logo from './logo'
 import styles from './navigation.module.css'
 
+// To Do: Provide an array and loop through it
 export default () => (
   <nav role="navigation">
     <div className={styles.bar}>

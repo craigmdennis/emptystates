@@ -1,11 +1,25 @@
 import React from 'react'
-import { Link } from 'gatsby'
+import { Link, useStaticQuery } from 'gatsby'
 import styles from './logo.module.css'
 import LogoImg from '../images/logo.svg'
 
-export default () => (
-  <Link className={styles.logo} to="/">
-    <LogoImg className={styles.svg} />
-    <span className={styles.name}>Empty States</span>
-  </Link>
-)
+const Logo = () => {
+  const data = useStaticQuery(graphql`
+    query {
+      site {
+        siteMetadata {
+          title
+        }
+      }
+    }
+  `)
+
+  return (
+    <Link className={styles.logo} to="/">
+      <LogoImg className={styles.svg} />
+      <span className={styles.name}>{data.site.siteMetadata.title}</span>
+    </Link>
+  )
+}
+
+export default Logo

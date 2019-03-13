@@ -73,6 +73,7 @@ public
 
 # contentful config file
 .contentful.json
+contentful-export*.json
 
 # mac
 .DS_Store

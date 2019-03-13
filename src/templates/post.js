@@ -43,6 +43,7 @@ export const pageQuery = graphql`
     }
     contentfulPost(contentful_id: { eq: $id }) {
       title
+      url
       tags
       publishDate(formatString: "MMMM Do, YYYY")
       image {
