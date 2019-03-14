@@ -18,7 +18,7 @@ const Index = ({ location }) => {
           description
         }
       }
-      allContentfulPost(sort: { fields: [publishDate], order: ASC }) {
+      allContentfulState(sort: { fields: [publishDate], order: ASC }) {
         edges {
           node {
             title
