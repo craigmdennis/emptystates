@@ -34,7 +34,7 @@ export const pageQuery = graphql`
         title
       }
     }
-    allContentfulState(
+    allContentfulStates(
       sort: { fields: [publishDate], order: ASC }
       filter: { tags: { in: [$tag] } }
     ) {
