@@ -11,7 +11,7 @@ class Tags extends React.Component {
   render() {
     const siteTitle = this.props.data.site.siteMetadata.title
     const { tag } = this.props.pageContext
-    const { edges } = this.props.data.allContentfulPost
+    const { edges } = this.props.data.allContentfulEmptyState
     const title = tag
     const wide = tag.toLowerCase() === 'desktop' ? true : false
 
@@ -34,7 +34,7 @@ export const pageQuery = graphql`
         title
       }
     }
-    allContentfulState (
+    allContentfulEmptyState (
       sort: { fields: [publishDate], order: ASC }
       filter: { tags: { in: [$tag] } }
     ) {
