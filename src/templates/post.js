@@ -10,7 +10,7 @@ import styles from './post.module.css'
 
 class PostTemplate extends React.Component {
   render() {
-    const post = this.props.data.contentfulPost
+    const post = this.props.data.contentfulEmptyState
     const { title } = this.props.data.site.siteMetadata
     const lowerCaseTags = post.tags.map(tag => tag.toLowerCase())
     const classes = _.indexOf(lowerCaseTags, 'desktop')
@@ -41,7 +41,7 @@ export const pageQuery = graphql`
         title
       }
     }
-    contentfulState(contentful_id: { eq: $id }) {
+    contentfulEmptyState(contentful_id: { eq: $id }) {
       title
       url
       tags
