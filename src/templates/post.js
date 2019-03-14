@@ -35,13 +35,13 @@ class PostTemplate extends React.Component {
 export default PostTemplate
 
 export const pageQuery = graphql`
-  query BlogPostByContentfulID($id: String!) {
+  query EmptyStateByContentfulID($id: String!) {
     site {
       siteMetadata {
         title
       }
     }
-    contentfulPost(contentful_id: { eq: $id }) {
+    contentfulState(contentful_id: { eq: $id }) {
       title
       url
       tags
