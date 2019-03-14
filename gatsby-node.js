@@ -18,7 +18,7 @@ exports.createPages = ({ graphql, actions }) => {
       graphql(
         `
           {
-            allContentfulPost(sort: { fields: [publishDate], order: DESC }) {
+            allContentfulEmptyState(sort: { fields: [publishDate], order: DESC }) {
               edges {
                 node {
                   title
@@ -36,7 +36,7 @@ exports.createPages = ({ graphql, actions }) => {
         }
 
         // Posts
-        const posts = result.data.allContentfulPost.edges
+        const posts = result.data.allContentfulEmptyState.edges
         posts.forEach((post) => {
           createPage({
             path: `/s/${post.node.contentful_id}/`,
