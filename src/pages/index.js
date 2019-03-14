@@ -37,10 +37,10 @@ const Index = ({ location }) => {
   `)
 
   const { title, description, homepage } = data.site.siteMetadata
-  const posts = data.allContentfulPost.edges
+  const posts = data.allContentfulEmptyState.edges
 
   return (
-    <Layout location={location}>
+    <Layout>
       <Helmet title={title} />
       <Header title={homepage.title} description={description} />
       <Gallery elements={posts} />
