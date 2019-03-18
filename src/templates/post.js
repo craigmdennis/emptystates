@@ -13,16 +13,14 @@ class PostTemplate extends React.Component {
     const post = this.props.data.contentfulEmptyState
     const { title } = this.props.data.site.siteMetadata
     const lowerCaseTags = post.tags.map(tag => tag.toLowerCase())
-    const classes = _.indexOf(lowerCaseTags, 'desktop')
-      ? styles.item
-      : styles.itemWide
+    const classes = node.tags.includes('Desktop') ? styles.wide : styles.item
 
     return (
       <Layout location={this.props.location}>
         <Helmet title={`${post.title} | ${title}`} />
         <Header title={post.title} />
-        <Img fluid={post.image.fluid} key={post.image} className={classes} />
         {post.description && <p>{post.description}</p>}
+        <Img fluid={post.image.fluid} className={classes} />
         <div>
           <small>{post.publishDate}</small>
         </div>
@@ -45,6 +43,7 @@ export const pageQuery = graphql`
       title
       url
       tags
+      description
       publishDate(formatString: "MMMM Do, YYYY")
       image {
         fluid(maxWidth: 1280) {

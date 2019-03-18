@@ -1,6 +1,7 @@
 .post {}
-.item, .itemWide {
-  width: calc(100% - 16px);
+
+.item, .wide {
+  width: 100%;
 }
 
 @media only screen and (min-width: 480px) {

@@ -18,7 +18,7 @@ const Index = ({ location }) => {
           description
         }
       }
-      allContentfulEmptyState(sort: { fields: [publishDate], order: ASC }) {
+      allContentfulEmptyState(sort: { fields: [publishDate], order: DESC }) {
         edges {
           node {
             title

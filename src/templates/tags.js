@@ -13,13 +13,12 @@ class Tags extends React.Component {
     const { tag } = this.props.pageContext
     const { edges } = this.props.data.allContentfulEmptyState
     const title = tag
-    const wide = tag.toLowerCase() === 'desktop' ? true : false
 
     return (
       <Layout location={this.props.location}>
         <Helmet title={`${title} | ${siteTitle}`} />
         <Header title={title} />
-        <Gallery elements={edges} wide={wide} />
+        <Gallery elements={edges} />
       </Layout>
     )
   }
@@ -34,8 +33,8 @@ export const pageQuery = graphql`
         title
       }
     }
-    allContentfulEmptyState (
-      sort: { fields: [publishDate], order: ASC }
+    allContentfulEmptyState(
+      sort: { fields: [publishDate], order: DESC }
       filter: { tags: { in: [$tag] } }
     ) {
       totalCount

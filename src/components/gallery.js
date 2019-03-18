@@ -6,7 +6,7 @@ import styles from './gallery.module.css'
 class Gallery extends React.Component {
   render() {
     const childElements = this.props.elements.map(({ node }) => {
-      const classes = this.props.wide ? styles.wide : styles.item
+      const classes = node.tags.includes('Desktop') ? styles.wide : styles.item
 
       return (
         <div className={classes}>

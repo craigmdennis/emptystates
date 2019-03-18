@@ -10,12 +10,11 @@ const TagList = ({ tags }) => {
 
   return (
     <ul className={styles.taglist}>
-      {tags.map(tag => (
-        <li>
+      {tags.map((tag, index) => (
+        <li key={tag}>
           <Link
             to={`/tags/${slugify(tag, slugifyConfig)}/`}
             className={styles.taglist__tag}
-            key={tag}
           >
             {tag}
           </Link>
