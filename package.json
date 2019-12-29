@@ -6,7 +6,6 @@
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
     "gatsby": "^2.18.12",
-    "gatsby-image": "^2.2.34",
     "gatsby-plugin-manifest": "^2.2.31",
     "gatsby-plugin-netlify": "^2.1.30",
     "gatsby-plugin-netlify-cms": "^4.1.33",
@@ -14,20 +13,25 @@
     "gatsby-plugin-react-helmet": "^3.1.18",
     "gatsby-plugin-react-svg": "^2.1.2",
     "gatsby-plugin-robots-txt": "^1.5.0",
-    "gatsby-plugin-sharp": "^2.3.5",
+    "gatsby-plugin-sharp": "^2.3.10",
     "gatsby-plugin-sitemap": "^2.2.24",
     "gatsby-remark-relative-images": "^0.2.3",
     "gatsby-source-filesystem": "^2.1.43",
     "gatsby-transformer-remark": "^2.6.45",
     "gatsby-transformer-sharp": "^2.3.9",
+    "gatsby-transformer-yaml": "^2.2.20",
     "lodash": "^4.17.15",
     "netlify-cms-app": "^2.10.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-helmet": "^5.2.1"
+    "react-helmet": "^5.2.1",
+    "react-masonry-component": "^6.2.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.149",
+    "@types/react-helmet": "^5.0.14",
+    "gatsby-image": "^2.2.37",
     "prettier": "^1.19.1"
   },
   "keywords": [

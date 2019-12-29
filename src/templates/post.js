@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { graphql } from "gatsby";
 import Helmet from "react-helmet";
@@ -14,25 +13,27 @@ const PostTemplate = ({
     site: {
       siteMetadata: { title },
     },
-    markdownRemark: { frontmatter },
+    statesYaml,
   },
 }) => {
-  console.log(frontmatter, title);
-
-  const classes = _.includes(frontmatter.tags, "Desktop")
-    ? styles.wide
-    : styles.item;
+  const state = statesYaml;
+  const classes = _.includes(state.tags, "Desktop") ? styles.wide : styles.item;
 
   return (
     <Layout>
-      <Helmet title={`${frontmatter.title} | ${title}`} />
-      <Header title={frontmatter.title} />
-      {frontmatter.description && <p>{frontmatter.description}</p>}
-      {/* <Img fluid={frontmatter.image.fluid} className={classes} /> */}
+      <Helmet title={`${state.title} | ${title}`} />
+      <Header title={state.title} />
+      {state.description && <p>{state.description}</p>}
+      <Img
+        className={classes}
+        alt={state.image.alt ? state.image.alt : ""}
+        fluid={state.image.childImageSharp.fluid}
+        key={state.image}
+      />
       <div>
-        <small>{frontmatter.publishDate}</small>
+        <small>{state.date}</small>
       </div>
-      {/* <TagList tags={frontmatter.tags} /> */}
+      {/* <TagList tags={state.tags} /> */}
     </Layout>
   );
 };
@@ -40,23 +41,27 @@ const PostTemplate = ({
 export default PostTemplate;
 
 export const pageQuery = graphql`
-  query PostQuery($slug: String!) {
+  query PostQuery {
     site {
       siteMetadata {
         title
       }
     }
-    markdownRemark(fields: { slug: { eq: $slug } }) {
-      id
-      excerpt(pruneLength: 160)
-      html
+    statesYaml {
+      title
+      date(formatString: "MMMM DD, YYYY")
+      description
+      tags
       fields {
         slug
       }
-      frontmatter {
-        title
-        date(formatString: "MMMM DD, YYYY")
-        description
+      image {
+        childImageSharp {
+          fluid(maxWidth: 800) {
+            aspectRatio
+            ...GatsbyImageSharpFluid
+          }
+        }
       }
     }
   }

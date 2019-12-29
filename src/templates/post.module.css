@@ -1,6 +1,5 @@
-.post {}
-
-.item, .wide {
+.item,
+.wide {
   width: 100%;
 }
 
