@@ -1,23 +1,29 @@
 - title: "Missed call and voicemail support"
   description: ""
   date: "2017-11-07"
-  tags: "mobile, ios, first use"
+  tags:
+    - mobile
+    - ios
+    - first use
   image: ./missed-call-and-voicemail-support.png
   path: "/s/missed-call-and-voicemail-support/"
 
 - title: "Recent meetings"
   description: "Recent meetings coming soon."
   date: "2017-11-07"
-  tags: "mobile, ios, first use"
+  tags:
+    - mobile
+    - ios
+    - first use
   image: ./recent-meetings.png
   path: "/s/recent-meetings/"
 
-- title:
+- title: "No recent contacts"
   description:
   date: "2019-12-29"
   tags:
   image: ./Photo_12-08-2014_13_01_24.png
-  path: "/s/Photo_12-08-2014_13_01_24/"
+  path: "/s/no-recent-contacts/"
 
 - title:
   description:
@@ -33,10 +39,13 @@
   image: ./Tower_2_-_Repositories.png
   path: "/s/Tower_2_-_Repositories/"
 
-- title:
+- title: Private User
   description:
   date: "2019-12-29"
   tags:
+    - ipad
+    - browser
+    - instagram
   image: ./tumblr_mggzbrxUhV1rdf37to1_1280.png
   path: "/s/tumblr_mggzbrxUhV1rdf37to1_1280/"
 
@@ -148,7 +157,11 @@
 - title: "Access tabs on your computer"
   description:
   date: "2019-12-29"
-  tags: "tablet, browser, ipad, first use"
+  tags:
+    - tablet
+    - browser
+    - ipad
+    - first user
   image: ./tumblr_mhi1rzlw921rdf37to1_1280.jpg
   path: "/s/tumblr_mhi1rzlw921rdf37to1_1280/"
 
@@ -208,10 +221,11 @@
   image: ./tumblr_mhpncgBtBP1rdf37to1_1280.png
   path: "/s/tumblr_mhpncgBtBP1rdf37to1_1280/"
 
-- title:
+- title: "Plugins coming soon"
   description:
   date: "2019-12-29"
-  tags: "desktop"
+  tags:
+    - desktop
   image: ./tumblr_mhpzfw7qkv1rdf37to1_1280.png
   path: "/s/tumblr_mhpzfw7qkv1rdf37to1_1280/"
 
@@ -1370,10 +1384,13 @@
   image: ./tumblr_mga7lykLiE1rdf37to1_1280.png
   path: "/s/tumblr_mga7lykLiE1rdf37to1_1280/"
 
-- title:
+- title: "YouTube app is currently unavailable"
   description:
   date: "2019-12-29"
   tags:
+    - desktop
+    - error
+    - connection error
   image: ./tumblr_mgbxptW6cA1rdf37to1_1280.png
   path: "/s/tumblr_mgbxptW6cA1rdf37to1_1280/"
 

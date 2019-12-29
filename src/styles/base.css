@@ -1,3 +1,7 @@
+:root {
+  --gallery-gap: 1rem;
+}
+
 html {
   box-sizing: border-box;
 }

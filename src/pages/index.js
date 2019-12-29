@@ -1,31 +1,24 @@
 import React from "react";
 import Helmet from "react-helmet";
-import { StaticQuery, Link, graphql } from "gatsby";
+import { Link, graphql } from "gatsby";
 import Gallery from "../components/gallery";
 import Layout from "../components/layout";
 import Header from "../components/header";
+import Preview from "../components/preview";
 
-const IndexPage = ({
-  data: {
-    site: { siteMetadata },
-    allStatesYaml,
-  },
-}) => {
+const IndexPage = ({ data }) => {
+  const { title, description, homepage } = data.site.siteMetadata;
+
   return (
     <Layout>
-      <Helmet title={siteMetadata.title} />
-      <Header
-        title={siteMetadata.homepage.title}
-        description={siteMetadata.description}
-      />
-      <Gallery
-        images={allStatesYaml.edges.map(({ node }) => ({
-          id: node.image.id,
-          ...node.image.childImageSharp.fluid,
-          path: node.path,
-        }))}
-        itemsPerRow={4}
-      />
+      <Helmet title={title} />
+      <Header large={true} title={homepage.title} description={description} />
+
+      <Gallery>
+        {data.allStatesYaml.edges.map(({ node }, index) => (
+          <Preview key={index} node={node} />
+        ))}
+      </Gallery>
     </Layout>
   );
 };
@@ -48,11 +41,13 @@ export const pageQuery = graphql`
         node {
           title
           path
+          fields {
+            slug
+          }
           image {
             id
             childImageSharp {
               fluid {
-                aspectRatio
                 ...GatsbyImageSharpFluid_withWebp
               }
             }

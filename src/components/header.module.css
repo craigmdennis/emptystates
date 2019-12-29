@@ -8,8 +8,20 @@
   margin-bottom: 1rem;
 }
 
+.title:only-child,
+.subtitle:only-child {
+  margin-bottom: 3rem;
+}
+
+.subtitle {
+  composes: title;
+  font-size: 2rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
 .description {
-  color: #3C4858;
+  color: #3c4858;
   font-family: AvenirNext-Regular, Avenir Next, serif;
   font-size: 1.5rem;
   font-weight: 400;

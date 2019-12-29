@@ -45,6 +45,9 @@ export const postQuery = graphql`
       date(formatString: "MMMM DD, YYYY")
       description
       tags
+      fields {
+        slug
+      }
       image {
         childImageSharp {
           fluid(maxWidth: 800) {
