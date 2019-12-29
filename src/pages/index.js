@@ -1,20 +1,16 @@
 import React from "react";
-import PropTypes from "prop-types";
 import Helmet from "react-helmet";
-import { Link, graphql } from "gatsby";
+import { StaticQuery, Link, graphql } from "gatsby";
+import Gallery from "../components/gallery";
 import Layout from "../components/layout";
-import Preview from "../components/preview";
 import Header from "../components/header";
 
 const IndexPage = ({
   data: {
-    allStatesYaml: { edges },
     site: { siteMetadata },
+    allStatesYaml,
   },
 }) => {
-  const Posts = edges
-    .filter(edge => !!edge.node.date) // You can filter your posts based on some criteria
-    .map(edge => <Preview key={edge.node.id} post={edge.node} />);
   return (
     <Layout>
       <Helmet title={siteMetadata.title} />
@@ -22,14 +18,16 @@ const IndexPage = ({
         title={siteMetadata.homepage.title}
         description={siteMetadata.description}
       />
-      {Posts}
+      <Gallery
+        images={allStatesYaml.edges.map(({ node }) => ({
+          id: node.image.id,
+          ...node.image.childImageSharp.fluid,
+          path: node.path,
+        }))}
+        itemsPerRow={4}
+      />
     </Layout>
   );
-};
-
-Header.propTypes = {
-  title: PropTypes.string,
-  description: PropTypes.string,
 };
 
 export default IndexPage;
@@ -45,20 +43,15 @@ export const pageQuery = graphql`
         description
       }
     }
-    allStatesYaml(sort: { order: DESC, fields: [date] }) {
+    allStatesYaml {
       edges {
         node {
-          id
           title
-          date(formatString: "MMMM DD, YYYY")
-          description
-          tags
-          fields {
-            slug
-          }
+          path
           image {
+            id
             childImageSharp {
-              fluid(maxWidth: 800) {
+              fluid {
                 aspectRatio
                 ...GatsbyImageSharpFluid_withWebp
               }

@@ -8,30 +8,23 @@ import Layout from "../components/layout";
 // import TagList from '../components/taglist'
 import styles from "./post.module.css";
 
-const PostTemplate = ({
-  data: {
-    site: {
-      siteMetadata: { title },
-    },
-    statesYaml,
-  },
-}) => {
-  const state = statesYaml;
-  const classes = _.includes(state.tags, "Desktop") ? styles.wide : styles.item;
+const PostTemplate = ({ data: { statesYaml, site } }) => {
+  const { title, description, date, image, tags } = statesYaml;
+  const classes = _.includes(tags, "desktop") ? styles.wide : styles.item;
 
   return (
     <Layout>
-      <Helmet title={`${state.title} | ${title}`} />
-      <Header title={state.title} />
-      {state.description && <p>{state.description}</p>}
+      <Helmet title={`${title} | ${site.siteMetadata.title}`} />
+      <Header title={title} />
+      {description && <p>{description}</p>}
       <Img
         className={classes}
-        alt={state.image.alt ? state.image.alt : ""}
-        fluid={state.image.childImageSharp.fluid}
-        key={state.image}
+        alt={image.alt ? image.alt : ""}
+        fluid={image.childImageSharp.fluid}
+        key={image}
       />
       <div>
-        <small>{state.date}</small>
+        <small>{date}</small>
       </div>
       {/* <TagList tags={state.tags} /> */}
     </Layout>
@@ -40,26 +33,22 @@ const PostTemplate = ({
 
 export default PostTemplate;
 
-export const pageQuery = graphql`
-  query PostQuery {
+export const postQuery = graphql`
+  query PostQuery($slug: String!) {
     site {
       siteMetadata {
         title
       }
     }
-    statesYaml {
+    statesYaml(fields: { slug: { eq: $slug } }) {
       title
       date(formatString: "MMMM DD, YYYY")
       description
       tags
-      fields {
-        slug
-      }
       image {
         childImageSharp {
           fluid(maxWidth: 800) {
-            aspectRatio
-            ...GatsbyImageSharpFluid
+            ...GatsbyImageSharpFluid_withWebp
           }
         }
       }

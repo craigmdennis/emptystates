@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types'
-import React, { Fragment } from 'react'
-import styles from './header.module.css'
+import PropTypes from "prop-types";
+import React, { Fragment } from "react";
+import styles from "./header.module.css";
 
-const Header = props => {
-  const { title, description, children } = props
+const Header = data => {
+  const { title, description, children } = data;
 
   return (
     <header>
@@ -11,13 +11,13 @@ const Header = props => {
       <p className={styles.description}>{description}</p>
       {children}
     </header>
-  )
-}
+  );
+};
 
 Header.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  children: PropTypes.node.isRequired,
-}
+  children: PropTypes.node,
+};
 
-export default Header
+export default Header;
