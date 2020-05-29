@@ -1,6 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { graphql } from 'gatsby';
+import _ from 'lodash';
+
 import Gallery from '../components/gallery';
 import Layout from '../components/layout';
 import Header from '../components/header';
