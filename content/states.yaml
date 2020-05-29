@@ -2260,3 +2260,29 @@
   tags:
   image: ./tumblr_mh6ys2XuYR1rdf37to1_1280.png
   path: '/s/tumblr_mh6ys2XuYR1rdf37to1_1280/'
+
+- title: 'No likes in Figma Community'
+  product:
+    name: Figma
+    url: https://figma.com
+  description:
+  comment:
+  date: '2020-05-29'
+  tags:
+    - desktop
+    - browser
+  image: ./figma-no-likes.png
+  path: '/s/figma-no-likes/'
+
+- title: 'No plugins in Figma Community'
+  product:
+    name: Figma
+    url: https://figma.com
+  description:
+  comment:
+  date: '2020-05-29'
+  tags:
+    - desktop
+    - browser
+  image: ./figma-nothing-publshed.png
+  path: '/s/figma-nothing-publshed/'
