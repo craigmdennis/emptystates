@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types'
-import React, { Fragment } from 'react'
-import Container from './container'
-import Navigation from './navigation'
+import PropTypes from 'prop-types';
+import React, { Fragment } from 'react';
+import Container from './Container';
+import Navigation from './Navigation';
 
 const Layout = ({ children }) => {
   return (
@@ -9,12 +9,11 @@ const Layout = ({ children }) => {
       <Navigation />
       <Container>{children}</Container>
     </Fragment>
-  )
-}
-
+  );
+};
 
 Layout.propTypes = {
   children: PropTypes.node.isRequired,
-}
+};
 
-export default Layout
+export default Layout;

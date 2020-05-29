@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styles from '../styles/header.module.css';
 
-const Header = data => {
-  const { title, description, children, large } = data;
+const Header = (props) => {
+  const { title, description, children, large } = props;
   const sizeClass = large ? styles.title : styles.subtitle;
 
   return (

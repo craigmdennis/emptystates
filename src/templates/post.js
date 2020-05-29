@@ -1,10 +1,11 @@
 import React from 'react';
 import { graphql } from 'gatsby';
-import { Helmet } from 'react-helmet';
 import Img from 'gatsby-image';
 import _ from 'lodash';
-import Header from '../components/header';
-import Layout from '../components/layout';
+
+import Layout from '../components/Layout';
+import SEO from '../components/Seo';
+import Header from '../components/Header';
 // import TagList from '../components/taglist'
 import styles from './post.module.css';
 
@@ -19,21 +20,19 @@ const PostTemplate = ({ data: { statesYaml, site } }) => {
     comment,
   } = statesYaml;
   const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
-  const alt = image.alt ? image.alt : '';
 
   return (
     <Layout>
-      <Helmet title={`${title} | ${site.siteMetadata.title}`} />
-
+      <SEO title={title} />
       <Header title={title} />
 
       {description && <p>{description}</p>}
 
       <Img
         className={classes}
-        alt={alt}
+        alt={`Screenshot of ${title}`}
         fluid={image.childImageSharp.fluid}
-        key={image}
+        key={image.id}
       />
 
       <ul>
@@ -70,6 +69,7 @@ export const postQuery = graphql`
         slug
       }
       image {
+        id
         childImageSharp {
           fluid(maxWidth: 800) {
             ...GatsbyImageSharpFluid_withWebp

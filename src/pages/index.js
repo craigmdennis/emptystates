@@ -1,22 +1,27 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { graphql } from 'gatsby';
-import Gallery from '../components/gallery';
-import Layout from '../components/layout';
-import Header from '../components/header';
-import Preview from '../components/preview';
+
+import Layout from '../components/Layout';
+import SEO from '../components/Seo';
+import Gallery from '../components/Gallery';
+import Preview from '../components/Preview';
+import Header from '../components/Header';
 
 const IndexPage = ({ data }) => {
-  const { title, description, homepage } = data.site.siteMetadata;
+  const {
+    description,
+    homepage: { title },
+  } = data.site.siteMetadata;
 
   return (
     <Layout>
-      <Helmet title={title} />
-      <Header large={true} title={homepage.title} description={description} />
+      <SEO />
+
+      <Header large={true} title={title} description={description} />
 
       <Gallery>
-        {data.allStatesYaml.edges.map((edge, index) => (
-          <Preview key={index} path={edge.node.path} image={edge.node.image} />
+        {data.allStatesYaml.nodes.map(({ title, path, image }, index) => (
+          <Preview key={index} title={title} path={path} image={image} />
         ))}
       </Gallery>
     </Layout>
@@ -37,19 +42,18 @@ export const pageQuery = graphql`
       }
     }
     allStatesYaml {
-      edges {
-        node {
-          title
-          path
-          fields {
-            slug
-          }
-          image {
-            id
-            childImageSharp {
-              fluid {
-                ...GatsbyImageSharpFluid_withWebp
-              }
+      totalCount
+      nodes {
+        title
+        path
+        fields {
+          slug
+        }
+        image {
+          id
+          childImageSharp {
+            fluid {
+              ...GatsbyImageSharpFluid_withWebp
             }
           }
         }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'gatsby';
-import Container from './container';
-import Logo from './logo';
+import Container from './Container';
+import Logo from './Logo';
 import styles from '../styles/navigation.module.css';
 
 const navigationItems = [
@@ -19,7 +19,7 @@ const navigationItems = [
   },
   {
     anchorText: 'iOS',
-    path: '/tags/iso/',
+    path: '/tags/ios/',
   },
   {
     anchorText: 'Android',

@@ -1,28 +1,27 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { graphql } from 'gatsby';
 import _ from 'lodash';
 
-import Gallery from '../components/gallery';
-import Layout from '../components/layout';
-import Header from '../components/header';
-import Preview from '../components/preview';
+import Layout from '../components/Layout';
+import SEO from '../components/Seo';
+import Gallery from '../components/Gallery';
+import Preview from '../components/Preview';
+import Header from '../components/Header';
+
+import processTags from '../utils/processTags';
 
 const Tags = ({ pageContext, data }) => {
   const { tag } = pageContext;
-  const { title } = data.site.siteMetadata;
-
-  // Special case for iOS
-  const tagTitle = tag !== 'ios' ? _.startCase(tag) : 'iOS';
+  const title = processTags(tag);
 
   return (
     <Layout>
-      <Helmet title={`${tagTitle} | ${title}`} />
-      <Header title={tagTitle} />
+      <SEO title={title} />
+      <Header title={title} />
 
       <Gallery>
-        {data.allStatesYaml.edges.map((edge, index) => (
-          <Preview key={index} path={edge.node.path} image={edge.node.image} />
+        {data.allStatesYaml.nodes.map(({ title, path, image }, index) => (
+          <Preview key={index} title={title} path={path} image={image} />
         ))}
       </Gallery>
     </Layout>
@@ -44,19 +43,17 @@ export const pageQuery = graphql`
       filter: { tags: { in: [$tag] } }
     ) {
       totalCount
-      edges {
-        node {
-          title
-          path
-          fields {
-            slug
-          }
-          image {
-            id
-            childImageSharp {
-              fluid {
-                ...GatsbyImageSharpFluid_withWebp
-              }
+      nodes {
+        title
+        path
+        fields {
+          slug
+        }
+        image {
+          id
+          childImageSharp {
+            fluid {
+              ...GatsbyImageSharpFluid_withWebp
             }
           }
         }
