@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `Empty States`,
-    description: `A curated gallery showcasing designs when no data is available in the UI.`,
+    description: `A curated gallery showcasing designs where no data is available in the UI.`,
     siteUrl: `https://emptystat.es`,
     social: {
       twitter: `emptystates`,
