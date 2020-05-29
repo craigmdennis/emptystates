@@ -1,15 +1,16 @@
-import React from "react";
-import { Link } from "gatsby";
-import Img from "gatsby-image";
-import styles from "./preview.module.css";
+import React from 'react';
+import { Link } from 'gatsby';
+import Img from 'gatsby-image';
+import styles from '../styles/preview.module.css';
 
-const Preview = ({ node }) => {
+const Preview = ({ path, image }) => {
   return (
-    <Link to={node.path}>
+    <Link to={path}>
       <Img
+        loading="lazy"
         className={styles.item}
-        key={node.image.id}
-        fluid={node.image.childImageSharp.fluid}
+        key={image.id}
+        fluid={image.childImageSharp.fluid}
       />
     </Link>
   );

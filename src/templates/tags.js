@@ -1,17 +1,17 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { graphql } from "gatsby";
-import Gallery from "../components/gallery";
-import Layout from "../components/layout";
-import Header from "../components/header";
-import Preview from "../components/preview";
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import { graphql } from 'gatsby';
+import Gallery from '../components/gallery';
+import Layout from '../components/layout';
+import Header from '../components/header';
+import Preview from '../components/preview';
 
 const Tags = ({ pageContext, data }) => {
   const { tag } = pageContext;
   const { title } = data.site.siteMetadata;
 
   // Special case for iOS
-  const tagTitle = tag !== "ios" ? _.startCase(tag) : "iOS";
+  const tagTitle = tag !== 'ios' ? _.startCase(tag) : 'iOS';
 
   return (
     <Layout>
@@ -19,8 +19,8 @@ const Tags = ({ pageContext, data }) => {
       <Header title={tagTitle} />
 
       <Gallery>
-        {data.allStatesYaml.edges.map(({ node }) => (
-          <Preview node={node} />
+        {data.allStatesYaml.edges.map((edge, index) => (
+          <Preview key={index} path={edge.node.path} image={edge.node.image} />
         ))}
       </Gallery>
     </Layout>
@@ -45,11 +45,14 @@ export const pageQuery = graphql`
       edges {
         node {
           title
+          path
+          fields {
+            slug
+          }
           image {
             id
             childImageSharp {
               fluid {
-                aspectRatio
                 ...GatsbyImageSharpFluid_withWebp
               }
             }

@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React, { Fragment } from "react";
-import styles from "./header.module.css";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styles from '../styles/header.module.css';
 
 const Header = data => {
   const { title, description, children, large } = data;

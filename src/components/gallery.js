@@ -1,8 +1,7 @@
-import React, { useRef, useState } from "react";
-import styles from "./gallery.module.css";
+import React, { useState } from 'react';
+import styles from '../styles/gallery.module.css';
 
 const Gallery = ({ children, columnCount = 3 }) => {
-  const ref = useRef();
   const [numCols, setNumCols] = useState(columnCount);
   const cols = [...Array(numCols)].map(() => []);
   const fillCols = (children, cols) => {
@@ -12,7 +11,7 @@ const Gallery = ({ children, columnCount = 3 }) => {
   fillCols(children, cols);
 
   return (
-    <div className={styles.masonry} ref={ref}>
+    <div className={styles.masonry}>
       {[...Array(numCols)].map((_, index) => (
         <div className={styles.col} key={index}>
           {cols[index]}

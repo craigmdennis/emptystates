@@ -1,8 +1,8 @@
-import React from 'react'
-import { Link } from 'gatsby'
-import Container from './container'
-import Logo from './logo'
-import styles from './navigation.module.css'
+import React from 'react';
+import { Link } from 'gatsby';
+import Container from './container';
+import Logo from './logo';
+import styles from '../styles/navigation.module.css';
 
 // To Do: Provide an array and loop through it
 export default () => (
@@ -71,4 +71,4 @@ export default () => (
       </Container>
     </div>
   </nav>
-)
+);

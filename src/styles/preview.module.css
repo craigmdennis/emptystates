@@ -1,5 +1,5 @@
 .item {
-  background: white;
+  background: #fff;
   border-radius: 0.25rem;
   overflow: hidden;
   transition: transform 250ms ease-in-out, box-shadow 250ms ease-in-out;
@@ -9,7 +9,7 @@
 }
 
 .item:after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;

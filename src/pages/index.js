@@ -1,10 +1,10 @@
-import React from "react";
-import Helmet from "react-helmet";
-import { Link, graphql } from "gatsby";
-import Gallery from "../components/gallery";
-import Layout from "../components/layout";
-import Header from "../components/header";
-import Preview from "../components/preview";
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import { graphql } from 'gatsby';
+import Gallery from '../components/gallery';
+import Layout from '../components/layout';
+import Header from '../components/header';
+import Preview from '../components/preview';
 
 const IndexPage = ({ data }) => {
   const { title, description, homepage } = data.site.siteMetadata;
@@ -15,8 +15,8 @@ const IndexPage = ({ data }) => {
       <Header large={true} title={homepage.title} description={description} />
 
       <Gallery>
-        {data.allStatesYaml.edges.map(({ node }, index) => (
-          <Preview key={index} node={node} />
+        {data.allStatesYaml.edges.map((edge, index) => (
+          <Preview key={index} path={edge.node.path} image={edge.node.image} />
         ))}
       </Gallery>
     </Layout>

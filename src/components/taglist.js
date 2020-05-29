@@ -1,12 +1,12 @@
-import React from 'react'
-import { Link } from 'gatsby'
-import slugify from 'slugify'
-import styles from './taglist.module.css'
+import React from 'react';
+import { Link } from 'gatsby';
+import slugify from 'slugify';
+import styles from '../styles/taglist.module.css';
 
 const TagList = ({ tags }) => {
   const slugifyConfig = {
     lower: true,
-  }
+  };
 
   return (
     <ul className={styles.taglist}>
@@ -21,7 +21,7 @@ const TagList = ({ tags }) => {
         </li>
       ))}
     </ul>
-  )
-}
+  );
+};
 
-export default TagList
+export default TagList;
