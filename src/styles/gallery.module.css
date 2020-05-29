@@ -1,4 +1,4 @@
-.masonry {
+.gallery {
   display: grid;
   grid-auto-flow: column;
   grid-gap: var(--gallery-gap);

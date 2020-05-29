@@ -7,7 +7,7 @@ import Layout from '../components/Layout';
 import SEO from '../components/Seo';
 import Header from '../components/Header';
 // import TagList from '../components/taglist'
-import styles from './post.module.css';
+import styles from '../styles/post.module.css';
 
 const PostTemplate = ({ data: { statesYaml, site } }) => {
   const {
