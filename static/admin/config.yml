@@ -1,13 +1,13 @@
 backend:
   name: git-gateway
-  branch: master
+  branch: develop
 
 media_folder: static/images
 public_folder: /images
 
 collections:
-  - name: 'states'
-    label: 'States'
+  - name: 'blog'
+    label: 'Blog'
     folder: 'content/states'
     create: true
     slug: 'index'
@@ -20,6 +20,4 @@ collections:
       - { label: 'Title', name: 'title', widget: 'string' }
       - { label: 'Publish Date', name: 'date', widget: 'datetime' }
       - { label: 'Description', name: 'description', widget: 'string' }
-      - { label: 'Related States', name: 'related', widget: 'relation' }
-      - { label: 'Tags', name: 'tags', widget: 'list' }
       - { label: 'Body', name: 'body', widget: 'markdown' }

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { Fragment, Helmet } from 'react';
 import Container from './Container';
 import Navigation from './Navigation';
 
