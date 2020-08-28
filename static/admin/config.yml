@@ -1,23 +1,46 @@
 backend:
   name: git-gateway
   branch: develop
+  commit_messages:
+    create: 'Create {{collection}} “{{slug}}”'
+    update: 'Update {{collection}} “{{slug}}”'
+    delete: 'Delete {{collection}} “{{slug}}”'
+    uploadMedia: '[skip ci] Upload “{{path}}”'
+    deleteMedia: '[skip ci] Delete “{{path}}”'
+
+local_backend: true
 
 media_folder: static/images
-public_folder: /images
+public_folder: content/images
 
 collections:
-  - name: 'blog'
-    label: 'Blog'
+  - name: 'states'
+    label: 'States'
+    label_singular: 'state'
+    extension: 'md'
     folder: 'content/states'
-    create: true
-    slug: 'index'
-    media_folder: ''
-    public_folder: ''
     path: '{{title}}/index'
-    editor:
-      preview: false
+    create: true
+    slug: '{{title}}/index'
     fields:
-      - { label: 'Title', name: 'title', widget: 'string' }
-      - { label: 'Publish Date', name: 'date', widget: 'datetime' }
-      - { label: 'Description', name: 'description', widget: 'string' }
-      - { label: 'Body', name: 'body', widget: 'markdown' }
+      - { label: 'Title', name: 'title', widget: 'string', required: true }
+      - {
+          label: 'Publish Date',
+          name: 'date',
+          widget: 'datetime',
+          required: true,
+        }
+      - { label: 'Image', name: 'image', widget: image, required: true }
+      - {
+          label: 'Related States',
+          name: 'related',
+          widget: 'relation',
+          collection: 'states',
+          searchFields: ['title', 'image'],
+          valueField: 'title',
+          displayFields: ['title'],
+          required: false,
+          multiple: true,
+        }
+      - { label: 'Tags', name: 'tags', widget: 'list', required: true }
+      - { label: 'Body', name: 'body', widget: 'markdown', required: false }
