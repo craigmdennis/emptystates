@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import styles from '../styles/gallery.module.css';
 
 const Gallery = ({ children, columnCount = 3 }) => {
@@ -19,6 +20,11 @@ const Gallery = ({ children, columnCount = 3 }) => {
       ))}
     </div>
   );
+};
+
+Gallery.propTypes = {
+  children: PropTypes.array.isRequired,
+  columnCount: PropTypes.number,
 };
 
 export default Gallery;

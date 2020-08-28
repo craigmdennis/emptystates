@@ -1,0 +1,9 @@
+#!/bin/bash
+for filename in ./*; do
+    mkdir ${filename%.*} && mv ${filename} ${filename%.*}
+    touch ${filename%.*}/index.md
+    echo "---" >> ${filename%.*}/index.md
+    echo "title: " >> ${filename%.*}/index.md
+    echo "image: ${filename}" >> ${filename%.*}/index.md
+    echo "---" >> ${filename%.*}/index.md
+done

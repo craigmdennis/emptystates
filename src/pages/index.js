@@ -13,17 +13,27 @@ const IndexPage = ({ data }) => {
     homepage: { title },
   } = data.site.siteMetadata;
 
+  // Iterate over the data and populate an array of Previews
+  const previews = data.allMarkdownRemark.edges.map((edge, index) => {
+    const { frontmatter, fields } = edge.node;
+
+    return (
+      <Preview
+        key={index}
+        title={frontmatter.title}
+        path={fields.slug}
+        image={frontmatter.image}
+      />
+    );
+  });
+
   return (
     <Layout>
       <SEO />
 
       <Header large={true} title={title} description={description} />
 
-      <Gallery>
-        {data.allStatesYaml.nodes.map(({ title, path, image }, index) => (
-          <Preview key={index} title={title} path={path} image={image} />
-        ))}
-      </Gallery>
+      <Gallery>{previews}</Gallery>
     </Layout>
   );
 };
@@ -41,19 +51,23 @@ export const pageQuery = graphql`
         description
       }
     }
-    allStatesYaml {
-      totalCount
-      nodes {
-        title
-        path
-        fields {
-          slug
-        }
-        image {
-          id
-          childImageSharp {
-            fluid {
-              ...GatsbyImageSharpFluid_withWebp
+    allMarkdownRemark {
+      edges {
+        node {
+          fields {
+            slug
+          }
+          html
+          frontmatter {
+            # date(formatString: "MMMM DD, YYYY")
+            # title
+            image {
+              id
+              childImageSharp {
+                fluid(maxWidth: 800) {
+                  ...GatsbyImageSharpFluid_withWebp
+                }
+              }
             }
           }
         }

@@ -9,38 +9,30 @@ import Header from '../components/Header';
 // import TagList from '../components/taglist'
 import styles from '../styles/post.module.css';
 
-const PostTemplate = ({ data: { statesYaml, site } }) => {
-  const {
-    title,
-    description,
-    date,
-    image,
-    tags,
-    product,
-    comment,
-  } = statesYaml;
-  const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
+const PostTemplate = ({ data }) => {
+  const { frontmatter, fields } = data.markdownRemark;
+  // const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
 
   return (
     <Layout>
-      <SEO title={title} />
-      <Header title={title} />
+      <SEO title={frontmatter.title} />
+      <Header title={frontmatter.title} />
 
-      {description && <p>{description}</p>}
+      {frontmatter.description && <p>{frontmatter.description}</p>}
 
       <Img
-        className={classes}
-        alt={`Screenshot of ${title}`}
-        fluid={image.childImageSharp.fluid}
-        key={image.id}
+        className={styles.item}
+        alt={`Screenshot of ${frontmatter.title}`}
+        fluid={frontmatter.image.childImageSharp.fluid}
+        key={frontmatter.image.id}
       />
 
-      <ul>
+      {/* <ul>
         {product.name && <li>{product.name}</li>}
         <li>{date}</li>
-      </ul>
+      </ul> */}
 
-      {comment && <p>{comment}</p>}
+      {/* {comment && <p>{comment}</p>} */}
 
       {/* TODO: Add list of all screens with the same ${product} */}
     </Layout>
@@ -56,23 +48,19 @@ export const postQuery = graphql`
         title
       }
     }
-    statesYaml(fields: { slug: { eq: $slug } }) {
-      title
-      date(formatString: "MMMM DD, YYYY")
-      description
-      product {
-        name
-      }
-      comment
-      tags
+    markdownRemark(fields: { slug: { eq: $slug } }) {
+      html
       fields {
         slug
       }
-      image {
-        id
-        childImageSharp {
-          fluid(maxWidth: 800) {
-            ...GatsbyImageSharpFluid_withWebp
+      frontmatter {
+        # date(formatString: "MMMM DD, YYYY")
+        image {
+          id
+          childImageSharp {
+            fluid(maxWidth: 800) {
+              ...GatsbyImageSharpFluid_withWebp
+            }
           }
         }
       }

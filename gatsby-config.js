@@ -19,7 +19,13 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `content`,
-        path: `${__dirname}/content`,
+        path: `${__dirname}/content/states`,
+      },
+    },
+    {
+      resolve: 'gatsby-transformer-remark',
+      options: {
+        plugins: [], // just in case those previously mentioned remark plugins sound cool :)
       },
     },
     {
