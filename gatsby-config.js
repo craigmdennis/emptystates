@@ -1,13 +1,14 @@
 module.exports = {
   siteMetadata: {
-    title: `Empty States`,
-    description: `A curated gallery showcasing designs where no data is available in the UI.`,
-    siteUrl: `https://emptystat.es`,
+    title: 'Empty States',
+    description:
+      'A curated gallery showcasing designs where no data is available in the UI.',
+    siteUrl: 'https://emptystat.es',
     social: {
-      twitter: `emptystates`,
+      twitter: 'emptystates',
     },
     homepage: {
-      title: `Delight your users.`,
+      title: 'Delight your users.',
     },
   },
   plugins: [
@@ -16,9 +17,9 @@ module.exports = {
     'gatsby-transformer-sharp',
     'gatsby-plugin-react-helmet',
     {
-      resolve: `gatsby-source-filesystem`,
+      resolve: 'gatsby-source-filesystem',
       options: {
-        name: `content`,
+        name: 'content',
         path: `${__dirname}/content/states`,
       },
     },
@@ -41,14 +42,14 @@ module.exports = {
         },
       },
     },
-    `gatsby-plugin-sitemap`,
-    `gatsby-plugin-netlify`,
-    `gatsby-plugin-netlify-cms`,
+    'gatsby-plugin-sitemap',
+    'gatsby-plugin-netlify',
+    'gatsby-plugin-netlify-cms',
     'gatsby-plugin-react-svg',
     {
-      resolve: `gatsby-source-filesystem`,
+      resolve: 'gatsby-source-filesystem',
       options: {
-        name: `images`,
+        name: 'images',
         path: `${__dirname}/src/images`,
       },
     },

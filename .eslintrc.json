@@ -1,5 +1,10 @@
 {
-  "extends": ["prettier", "prettier/react"],
+  "extends": [
+    "prettier",
+    "prettier/standard",
+    "prettier/react",
+    "plugin:react/recommended"
+  ],
   "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,
@@ -13,7 +18,13 @@
     "es6": true,
     "node": true
   },
-  "plugins": ["prettier", "react", "react-hooks"],
+  "plugins": ["prettier", "react", "react-hooks","html"],
+  "settings": {
+    "react": {
+      "pragma": "React",
+      "version": "detect"
+    }
+  },
   "globals": {
     "define": true,
     "require": true,
@@ -68,14 +79,8 @@
         "before": false
       }
     ],
-    "comma-style": [
-      2,
-      "last"
-    ],
-    "complexity": [
-      2,
-      32
-    ],
+    "comma-style": [2, "last"],
+    "complexity": [2, 32],
     "consistent-this": 0,
     "dot-notation": 2,
     "eol-last": 2,
@@ -88,23 +93,11 @@
         "beforeColon": false
       }
     ],
-    "keyword-spacing": [
-      2,
-      {}
-    ],
-    "linebreak-style": [
-      2,
-      "unix"
-    ],
+    "keyword-spacing": [2, {}],
+    "linebreak-style": [2, "unix"],
     "lines-around-comment": 0,
-    "max-depth": [
-      2,
-      5
-    ],
-    "max-len": [
-      2,
-      300
-    ],
+    "max-depth": [2, 5],
+    "max-len": [2, 300],
     "no-caller": 2,
     "no-empty": [
       2,
@@ -120,6 +113,7 @@
     "no-spaced-func": 2,
     "no-trailing-spaces": 2,
     "no-undef": 2,
+    "no-warning-comments": 0,
     "no-unused-expressions": [
       2,
       {
@@ -134,18 +128,12 @@
       {
         "blankLine": "always",
         "next": "*",
-        "prev": [
-          "import"
-        ]
+        "prev": ["import"]
       },
       {
         "blankLine": "any",
-        "next": [
-          "import"
-        ],
-        "prev": [
-          "import"
-        ]
+        "next": ["import"],
+        "prev": ["import"]
       }
     ],
     "prettier/prettier": "error",
@@ -161,10 +149,7 @@
     "react-hooks/rules-of-hooks": "error",
     "react/jsx-uses-vars": 1,
     "react/react-in-jsx-scope": 1,
-    "semi": [
-      2,
-      "always"
-    ],
+    "semi": [2, "always"],
     "semi-spacing": [
       2,
       {
@@ -172,10 +157,7 @@
         "before": false
       }
     ],
-    "space-before-blocks": [
-      2,
-      "always"
-    ],
+    "space-before-blocks": [2, "always"],
     "space-before-function-paren": [
       2,
       {
@@ -183,19 +165,10 @@
         "named": "never"
       }
     ],
-    "space-in-parens": [
-      2,
-      "never"
-    ],
+    "space-in-parens": [2, "never"],
     "space-infix-ops": 2,
     "space-unary-ops": 0,
-    "wrap-iife": [
-      2,
-      "any"
-    ],
-    "yoda": [
-      2,
-      "never"
-    ]
+    "wrap-iife": [2, "any"],
+    "yoda": [2, "never"]
   }
 }
