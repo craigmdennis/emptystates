@@ -29,10 +29,14 @@ const navigationItems = [
     anchorText: 'Errors',
     path: '/tags/error/',
   },
+  {
+    anchorText: 'Submit',
+    path: '/submit/',
+  },
 ];
 
 // To Do: Provide an array and loop through it
-export default () => (
+const Navigation = () => (
   <nav role="navigation">
     <div className={styles.bar}>
       <Container>
@@ -58,3 +62,5 @@ export default () => (
     </div>
   </nav>
 );
+
+export default Navigation;

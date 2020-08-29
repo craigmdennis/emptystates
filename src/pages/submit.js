@@ -5,36 +5,42 @@ import Layout from '../components/Layout';
 const UserSubmissionPage = () => {
   return (
     <Layout>
-      <form name="sumbission" method="POST" data-netlify="true">
-        <p>
+      <form
+        name="User Submissions"
+        method="POST"
+        action="/thanks/"
+        encType="multipart/form-data"
+        data-netlify="true"
+      >
+        <div>
           <label>
             Your Name: <input type="text" name="name" />
           </label>
-        </p>
-        <p>
+        </div>
+        <div>
           <label>
             Your Twitter Handle:{' '}
             <input type="text" name="twitter" placeholder="@emptystates" />
           </label>
-        </p>
-        <p>
+        </div>
+        <div>
           <label>
             Your Email: <input type="email" name="email" />
           </label>
-        </p>
-        <p>
+        </div>
+        <div>
           <label>
             Message: <textarea name="message"></textarea>
           </label>
-        </p>
-        <p>
+        </div>
+        <div>
           <label>
             Empty State: <input type="file" name="file" />
           </label>
-        </p>
-        <p>
+        </div>
+        <div>
           <button type="submit">Send</button>
-        </p>
+        </div>
       </form>
     </Layout>
   );
