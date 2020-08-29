@@ -8,10 +8,11 @@ const UserSubmissionPage = () => {
       <form
         name="User Submissions"
         method="POST"
-        action="/thanks/"
+        action="/thanks"
         encType="multipart/form-data"
         data-netlify="true"
       >
+        <input type="hidden" name="form-name" value="User Submissions" />
         <div>
           <label>
             Your Name: <input type="text" name="name" />
