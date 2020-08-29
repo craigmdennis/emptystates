@@ -9,7 +9,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { useStaticQuery, graphql } from 'gatsby';
-// import defaultOpenGraphImage from '../images/craigmdennis.png';
 
 const SEO = ({ description, lang, meta, keywords, title, image }) => {
   const { site } = useStaticQuery(
@@ -27,8 +26,6 @@ const SEO = ({ description, lang, meta, keywords, title, image }) => {
   );
 
   const metaDescription = description || site.siteMetadata.description;
-  // const ogImageUrl =
-  //   site.siteMetadata.siteUrl + (image || defaultOpenGraphImage);
 
   return (
     <Helmet

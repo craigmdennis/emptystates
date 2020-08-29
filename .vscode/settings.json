@@ -8,5 +8,6 @@
   },
   "[javascriptreact]": {
     "editor.formatOnSave": false
-  }
+  },
+  "css.lint.unknownAtRules": "ignore"
 }

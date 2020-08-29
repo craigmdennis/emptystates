@@ -12,6 +12,7 @@ module.exports = {
     },
   },
   plugins: [
+    'gatsby-plugin-postcss',
     'gatsby-transformer-yaml',
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp',
