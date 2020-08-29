@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 const UserSubmissionPage = () => {
   return (
     <Layout>
-      <form name="sumbission" method="POST" data-netlify="true">
+      <form name="sumbission" method="POST" data-netlify="true" action="/thanks">
         <p>
           <label>
             Your Name: <input type="text" name="name" />
