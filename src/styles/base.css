@@ -5,6 +5,10 @@
   --secondaryColor: #3c4858;
 }
 
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
 @media (prefers-color-scheme: dark) {
   :root {
     --primaryBackground: #333333;

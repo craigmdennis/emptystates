@@ -7,9 +7,6 @@ module.exports = {
     social: {
       twitter: 'emptystates',
     },
-    homepage: {
-      title: 'Delight your users.',
-    },
   },
   plugins: [
     'gatsby-plugin-postcss',

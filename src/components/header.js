@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styles from '../styles/header.module.css';
 
-const Header = (props) => {
-  const { title, description, children, large } = props;
+const Header = ({ title, description, children, large = false }) => {
   const sizeClass = large ? styles.title : styles.subtitle;
 
   return (
@@ -20,10 +19,6 @@ Header.propTypes = {
   description: PropTypes.string,
   children: PropTypes.node,
   large: PropTypes.bool,
-};
-
-Header.defaultProps = {
-  large: false,
 };
 
 export default Header;

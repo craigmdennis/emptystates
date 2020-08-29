@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
 import _ from 'lodash';
@@ -6,35 +7,44 @@ import _ from 'lodash';
 import Layout from '../components/Layout';
 import SEO from '../components/Seo';
 import Header from '../components/Header';
-// import TagList from '../components/taglist'
+import TagList from '../components/taglist';
 import styles from '../styles/post.module.css';
 
 const PostTemplate = ({ data }) => {
-  const { frontmatter, fields } = data.markdownRemark;
-  // const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
+  const {
+    title,
+    description,
+    tags,
+    date,
+    image,
+  } = data.markdownRemark.frontmatter;
+  const { slug } = data.markdownRemark.fields;
+  const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
+
+  console.log(tags);
+
+  const EditLink = () => {
+    const admin = `http://localhost:8000/admin/#/collections/states/entries${slug}index`;
+    return <a href={`${admin}`}>Edit</a>;
+  };
 
   return (
     <Layout>
-      <SEO title={frontmatter.title} />
-      <Header title={frontmatter.title} />
-
-      {frontmatter.description && <p>{frontmatter.description}</p>}
+      <SEO title={title} />
+      <Header title={title} />
 
       <Img
-        className={styles.item}
-        alt={`Screenshot of ${frontmatter.title}`}
-        fluid={frontmatter.image.childImageSharp.fluid}
-        key={frontmatter.image.id}
+        className={`${styles.item} ${classes}`}
+        alt={`Screenshot of ${title}`}
+        fluid={image.childImageSharp.fluid}
+        key={image.id}
       />
 
-      {/* <ul>
-        {product.name && <li>{product.name}</li>}
-        <li>{date}</li>
-      </ul> */}
+      {process.env.NODE_ENV === 'development' && <EditLink />}
 
-      {/* {comment && <p>{comment}</p>} */}
+      <p>{date}</p>
 
-      {/* TODO: Add list of all screens with the same ${product} */}
+      {description && <p>{description}</p>}
     </Layout>
   );
 };
@@ -54,7 +64,9 @@ export const postQuery = graphql`
         slug
       }
       frontmatter {
-        # date(formatString: "MMMM DD, YYYY")
+        title
+        tags
+        date(formatString: "MMMM DD, YYYY")
         image {
           id
           childImageSharp {
@@ -67,3 +79,7 @@ export const postQuery = graphql`
     }
   }
 `;
+
+PostTemplate.propTypes = {
+  data: PropTypes.object.isRequired,
+};

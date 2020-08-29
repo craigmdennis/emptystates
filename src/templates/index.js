@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { graphql } from 'gatsby';
 
 import Layout from '../components/Layout';
@@ -8,30 +9,25 @@ import Preview from '../components/Preview';
 import Header from '../components/Header';
 
 const IndexPage = ({ data }) => {
-  const {
-    description,
-    homepage: { title },
-  } = data.site.siteMetadata;
+  const { edges } = data.allMarkdownRemark;
+  const { description } = data.site.siteMetadata;
+  const pageTitle = 'Delight your users';
 
   // Iterate over the data and populate an array of Previews
-  const previews = data.allMarkdownRemark.edges.map((edge, index) => {
-    const { frontmatter, fields } = edge.node;
+  const previews = edges.map((edge, index) => {
+    const {
+      frontmatter: { title, image },
+      fields: { slug },
+    } = edge.node;
 
-    return (
-      <Preview
-        key={index}
-        title={frontmatter.title}
-        path={fields.slug}
-        image={frontmatter.image}
-      />
-    );
+    return <Preview key={index} title={title} path={slug} image={image} />;
   });
 
   return (
     <Layout>
       <SEO />
 
-      <Header large={true} title={title} description={description} />
+      <Header large={true} title={pageTitle} description={description} />
 
       <Gallery>{previews}</Gallery>
     </Layout>
@@ -41,17 +37,18 @@ const IndexPage = ({ data }) => {
 export default IndexPage;
 
 export const pageQuery = graphql`
-  query {
+  query pageQuery($skip: Int!, $limit: Int!) {
     site {
       siteMetadata {
-        homepage {
-          title
-        }
         title
         description
       }
     }
-    allMarkdownRemark {
+    allMarkdownRemark(
+      sort: { fields: [frontmatter___date], order: DESC }
+      limit: $limit
+      skip: $skip
+    ) {
       edges {
         node {
           fields {
@@ -59,8 +56,8 @@ export const pageQuery = graphql`
           }
           html
           frontmatter {
-            # date(formatString: "MMMM DD, YYYY")
-            # title
+            date(formatString: "MMMM DD, YYYY")
+            title
             image {
               id
               childImageSharp {
@@ -75,3 +72,7 @@ export const pageQuery = graphql`
     }
   }
 `;
+
+IndexPage.propTypes = {
+  data: PropTypes.object.isRequired,
+};
