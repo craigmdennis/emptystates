@@ -29,10 +29,6 @@ const navigationItems = [
     anchorText: 'Errors',
     path: '/tags/error/',
   },
-  {
-    anchorText: 'Submit',
-    path: '/submit',
-  },
 ];
 
 // To Do: Provide an array and loop through it

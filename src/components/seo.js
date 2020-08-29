@@ -9,8 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { useStaticQuery, graphql } from 'gatsby';
+// import defaultOpenGraphImage from '../images/craigmdennis.png';
 
-const SEO = ({ description, lang, meta, keywords, title }) => {
+const SEO = ({ description, lang, meta, keywords, title, image }) => {
   const { site } = useStaticQuery(
     graphql`
       query {
@@ -26,6 +27,8 @@ const SEO = ({ description, lang, meta, keywords, title }) => {
   );
 
   const metaDescription = description || site.siteMetadata.description;
+  // const ogImageUrl =
+  //   site.siteMetadata.siteUrl + (image || defaultOpenGraphImage);
 
   return (
     <Helmet
@@ -48,6 +51,14 @@ const SEO = ({ description, lang, meta, keywords, title }) => {
           property: 'og:description',
           content: metaDescription,
         },
+        // {
+        //   property: 'og:image',
+        //   content: ogImageUrl,
+        // },
+        // {
+        //   property: 'image',
+        //   content: ogImageUrl,
+        // },
         {
           property: 'og:type',
           content: 'website',
@@ -68,6 +79,10 @@ const SEO = ({ description, lang, meta, keywords, title }) => {
           name: 'twitter:description',
           content: metaDescription,
         },
+        // {
+        //   property: 'twitter:image',
+        //   content: ogImageUrl,
+        // },
       ]
         .concat(
           keywords.length > 0
