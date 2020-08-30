@@ -7,6 +7,12 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
 
   const result = await graphql(`
     {
+      site {
+        siteMetadata {
+          title
+          description
+        }
+      }
       allMarkdownRemark(
         sort: { fields: [frontmatter___date], order: DESC }
         limit: 1000
@@ -29,6 +35,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   }
 
   const posts = result.data.allMarkdownRemark.edges;
+
   const postsPerPage = 60;
   const numPages = Math.ceil(posts.length / postsPerPage);
   Array.from({ length: numPages }).forEach((_, i) => {
@@ -40,11 +47,12 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
         skip: i * postsPerPage,
         numPages,
         currentPage: i + 1,
+        site: result.data.site,
       },
     });
   });
 
-  // Create post pages
+  // Create individual post pages
   const postTemplate = path.resolve('./src/templates/post.js');
 
   posts.forEach((post) => {
@@ -53,7 +61,10 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     createPage({
       path: slug,
       component: postTemplate,
-      context: { slug: slug },
+      context: {
+        slug: slug,
+        site: result.data.site,
+      },
     });
   });
 

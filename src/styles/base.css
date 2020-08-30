@@ -17,6 +17,12 @@
   }
 }
 
+@media (min-width: 1200px) {
+  :root {
+    --gallery-gap: 2rem
+  }
+}
+
 html {
   box-sizing: border-box;
 }

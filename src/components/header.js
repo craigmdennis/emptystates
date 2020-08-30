@@ -17,7 +17,7 @@ const Header = ({ title, description, children, large = false }) => {
 Header.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  children: PropTypes.node,
+  children: PropTypes.any,
   large: PropTypes.bool,
 };
 

@@ -10,18 +10,12 @@ import Header from '../components/Header';
 import TagList from '../components/taglist';
 import styles from '../styles/post.module.css';
 
-const PostTemplate = ({ data }) => {
-  const {
-    title,
-    description,
-    tags,
-    date,
-    image,
-  } = data.markdownRemark.frontmatter;
-  const { slug } = data.markdownRemark.fields;
-  const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
+const PostTemplate = ({ data, pageContext }) => {
+  const { title, tags, date, related, image } = data.markdownRemark.frontmatter;
 
-  console.log(tags);
+  const { html } = data.markdownRemark;
+  const { slug } = pageContext;
+  const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
 
   const EditLink = () => {
     const admin = `http://localhost:8000/admin/#/collections/states/entries${slug}index`;
@@ -44,7 +38,7 @@ const PostTemplate = ({ data }) => {
 
       <p>{date}</p>
 
-      {description && <p>{description}</p>}
+      {html && <div dangerouslySetInnerHTML={{ __html: html }} />}
     </Layout>
   );
 };
@@ -53,20 +47,13 @@ export default PostTemplate;
 
 export const postQuery = graphql`
   query PostQuery($slug: String!) {
-    site {
-      siteMetadata {
-        title
-      }
-    }
     markdownRemark(fields: { slug: { eq: $slug } }) {
       html
-      fields {
-        slug
-      }
       frontmatter {
         title
         tags
         date(formatString: "MMMM DD, YYYY")
+        related
         image {
           id
           childImageSharp {
@@ -81,5 +68,22 @@ export const postQuery = graphql`
 `;
 
 PostTemplate.propTypes = {
-  data: PropTypes.object.isRequired,
+  data: PropTypes.shape({
+    markdownRemark: PropTypes.shape({
+      html: PropTypes.any,
+      frontmatter: PropTypes.shape({
+        title: PropTypes.string,
+        tags: PropTypes.string,
+        date: PropTypes.string,
+        related: PropTypes.string,
+        image: PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          childImageSharp: PropTypes.object.isRequired,
+        }),
+      }),
+    }),
+  }),
+  pageContext: PropTypes.shape({
+    slug: PropTypes.string.isRequired,
+  }),
 };

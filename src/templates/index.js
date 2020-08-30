@@ -7,10 +7,11 @@ import SEO from '../components/Seo';
 import Gallery from '../components/Gallery';
 import Preview from '../components/Preview';
 import Header from '../components/Header';
+import Pagination from '../components/Pagination';
 
-const IndexPage = ({ data }) => {
+const IndexPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
-  const { description } = data.site.siteMetadata;
+  const { numPages, currentPage, site } = pageContext;
   const pageTitle = 'Delight your users';
 
   // Iterate over the data and populate an array of Previews
@@ -26,10 +27,13 @@ const IndexPage = ({ data }) => {
   return (
     <Layout>
       <SEO />
-
-      <Header large={true} title={pageTitle} description={description} />
-
+      <Header
+        large={true}
+        title={pageTitle}
+        description={site.siteMetadata.description}
+      />
       <Gallery>{previews}</Gallery>
+      <Pagination numPages={numPages} currentPage={currentPage} />
     </Layout>
   );
 };
@@ -38,12 +42,6 @@ export default IndexPage;
 
 export const pageQuery = graphql`
   query pageQuery($skip: Int!, $limit: Int!) {
-    site {
-      siteMetadata {
-        title
-        description
-      }
-    }
     allMarkdownRemark(
       sort: { fields: [frontmatter___date], order: DESC }
       limit: $limit
@@ -74,5 +72,16 @@ export const pageQuery = graphql`
 `;
 
 IndexPage.propTypes = {
-  data: PropTypes.object.isRequired,
+  data: PropTypes.shape({
+    allMarkdownRemark: PropTypes.shape({
+      edges: PropTypes.array.isRequired,
+    }),
+  }),
+  pageContext: PropTypes.shape({
+    numPages: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    site: PropTypes.shape({
+      siteMetadata: PropTypes.object.isRequired,
+    }),
+  }),
 };
