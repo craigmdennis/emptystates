@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const slugify = require('slugify');
 const path = require('path');
 const { createFilePath } = require('gatsby-source-filesystem');
 
@@ -13,7 +13,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
           description
         }
       }
-      allMarkdownRemark(
+      postsRemark: allMarkdownRemark(
         sort: { fields: [frontmatter___date], order: DESC }
         limit: 1000
       ) {
@@ -25,6 +25,11 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
           }
         }
       }
+      tagsGroup: allMarkdownRemark(limit: 2000) {
+        group(field: frontmatter___tags) {
+          fieldValue
+        }
+      }
     }
   `);
 
@@ -34,8 +39,10 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     return Promise.reject(result.errors);
   }
 
-  const posts = result.data.allMarkdownRemark.edges;
+  // Collect Posts
+  const posts = result.data.postsRemark.edges;
 
+  // Create paginated post list pages
   const postsPerPage = 60;
   const numPages = Math.ceil(posts.length / postsPerPage);
   Array.from({ length: numPages }).forEach((_, i) => {
@@ -68,14 +75,33 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     });
   });
 
-  // // Create tag pages
-  // // www.gatsbyjs.org/docs/adding-tags-and-categories-to-blog-posts/
+  // Create tags list pages
+  const tagTemplate = path.resolve('./src/templates/tags.js');
+  const tags = result.data.tagsGroup.group;
+
+  const slugifyConfig = {
+    lower: true,
+  };
+
+  tags.forEach((tag) => {
+    createPage({
+      path: `/tags/${slugify(tag.fieldValue, slugifyConfig)}/`,
+      component: tagTemplate,
+      context: {
+        tag: tag.fieldValue,
+        site: result.data.site,
+      },
+    });
+  });
 };
 
+// Create standalone pages
 exports.onCreateNode = ({ node, getNode, actions }) => {
   const { createNodeField } = actions;
+
   if (node.internal.type === 'MarkdownRemark') {
     const slug = createFilePath({ node, getNode, basePath: 'pages' });
+
     createNodeField({
       node,
       name: 'slug',

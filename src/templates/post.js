@@ -38,6 +38,8 @@ const PostTemplate = ({ data, pageContext }) => {
 
       <p>{date}</p>
 
+      {tags && <TagList tags={tags} />}
+
       {html && <div dangerouslySetInnerHTML={{ __html: html }} />}
     </Layout>
   );
@@ -73,9 +75,9 @@ PostTemplate.propTypes = {
       html: PropTypes.any,
       frontmatter: PropTypes.shape({
         title: PropTypes.string,
-        tags: PropTypes.string,
+        tags: PropTypes.array.isRequired,
         date: PropTypes.string,
-        related: PropTypes.string,
+        related: PropTypes.array,
         image: PropTypes.shape({
           id: PropTypes.string.isRequired,
           childImageSharp: PropTypes.object.isRequired,

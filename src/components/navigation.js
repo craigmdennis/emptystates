@@ -25,10 +25,10 @@ const navigationItems = [
     anchorText: 'Android',
     path: '/tags/android/',
   },
-  {
-    anchorText: 'Errors',
-    path: '/tags/error/',
-  },
+  // {
+  //   anchorText: 'Errors',
+  //   path: '/tags/error/',
+  // },
   {
     anchorText: 'Submit',
     path: '/submit/',
