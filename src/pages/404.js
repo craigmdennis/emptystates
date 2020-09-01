@@ -1,9 +1,9 @@
 import React from 'react';
 
-import Layout from '../components/Layout';
-import SEO from '../components/Seo';
-import Header from '../components/Header';
-import Container from '../components/Container';
+import Layout from '../components/layout';
+import SEO from '../components/seo';
+import Header from '../components/header';
+import Container from '../components/container';
 
 const NotFoundPage = () => (
   <Layout>

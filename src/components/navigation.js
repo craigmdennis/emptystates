@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'gatsby';
-import Container from './Container';
-import Logo from './Logo';
+import Container from './container';
+import Logo from './logo';
 import styles from '../styles/navigation.module.css';
 
 const navigationItems = [

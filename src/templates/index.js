@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { graphql } from 'gatsby';
 
-import Layout from '../components/Layout';
-import SEO from '../components/Seo';
-import Gallery from '../components/Gallery';
-import Preview from '../components/Preview';
-import Header from '../components/Header';
-import Pagination from '../components/Pagination';
+import Layout from '../components/layout';
+import SEO from '../components/seo';
+import Gallery from '../components/gallery';
+import Preview from '../components/preview';
+import Header from '../components/header';
+import Pagination from '../components/pagination';
 
 const IndexPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;

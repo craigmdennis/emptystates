@@ -4,9 +4,9 @@ import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
 import _ from 'lodash';
 
-import Layout from '../components/Layout';
-import SEO from '../components/Seo';
-import Header from '../components/Header';
+import Layout from '../components/layout';
+import SEO from '../components/seo';
+import Header from '../components/header';
 import TagList from '../components/taglist';
 import styles from '../styles/post.module.css';
 

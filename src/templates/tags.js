@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import { graphql } from 'gatsby';
 import _ from 'lodash';
 
-import Layout from '../components/Layout';
-import SEO from '../components/Seo';
-import Gallery from '../components/Gallery';
-import Preview from '../components/Preview';
-import Header from '../components/Header';
+import Layout from '../components/layout';
+import SEO from '../components/seo';
+import Gallery from '../components/gallery';
+import Preview from '../components/preview';
+import Header from '../components/header';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges, totalCount } = data.allMarkdownRemark;
