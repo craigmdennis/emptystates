@@ -8,7 +8,6 @@ import SEO from '../components/Seo';
 import Gallery from '../components/Gallery';
 import Preview from '../components/Preview';
 import Header from '../components/Header';
-import Pagination from '../components/Pagination';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges, totalCount } = data.allMarkdownRemark;
@@ -43,7 +42,6 @@ const TagPage = ({ data, pageContext }) => {
       <Gallery wide={wide} columnCount={columnCount}>
         {previews}
       </Gallery>
-      {/* <Pagination numPages={numPages} currentPage={currentPage} /> */}
     </Layout>
   );
 };
