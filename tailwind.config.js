@@ -2,7 +2,7 @@ module.exports = {
   future: {
     removeDeprecatedGapUtilities: true,
   },
-  purge: [],
+  purge: ['./src/pages/submit.js', './src/pages/thanks.js'],
   theme: {
     extend: {
       colors: {
