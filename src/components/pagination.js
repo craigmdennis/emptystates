@@ -6,7 +6,7 @@ const Pagination = ({ currentPage, numPages, pathbase = '' }) => (
   <nav className="pagination">
     {currentPage > 1 ? (
       <Link title="Go to previous page" to={`${pathbase}/${currentPage - 1}`}>
-        &larr; Newer posts
+        &larr; Previous
       </Link>
     ) : (
       <span />
@@ -14,7 +14,7 @@ const Pagination = ({ currentPage, numPages, pathbase = '' }) => (
     Page {currentPage} of {numPages}
     {currentPage < numPages ? (
       <Link title="Go to next page" to={`${pathbase}/${currentPage + 1}`}>
-        Older posts &rarr;
+        Next &rarr;
       </Link>
     ) : (
       <span />

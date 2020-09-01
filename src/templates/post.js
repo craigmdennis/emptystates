@@ -5,9 +5,10 @@ import Img from 'gatsby-image';
 import _ from 'lodash';
 
 import Layout from '../components/layout';
-import SEO from '../components/seo';
+import SEO from '../components/seo.js';
 import Header from '../components/header';
 import TagList from '../components/taglist';
+
 import styles from '../styles/post.module.css';
 
 const PostTemplate = ({ data, pageContext }) => {

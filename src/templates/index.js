@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import { graphql } from 'gatsby';
 
 import Layout from '../components/layout';
-import SEO from '../components/seo';
+import SEO from '../components/seo.js';
 import Gallery from '../components/gallery';
 import Preview from '../components/preview';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
+import TagList from '../components/taglist';
 
 const IndexPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
@@ -27,11 +28,15 @@ const IndexPage = ({ data, pageContext }) => {
   return (
     <Layout>
       <SEO />
-      <Header
-        large={true}
-        title={pageTitle}
-        description={site.siteMetadata.description}
-      />
+      {currentPage === 1 ? (
+        <Header
+          large={true}
+          title={pageTitle}
+          description={site.siteMetadata.description}
+        />
+      ) : (
+        ''
+      )}
       <Gallery>{previews}</Gallery>
       <Pagination numPages={numPages} currentPage={currentPage} />
     </Layout>

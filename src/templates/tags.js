@@ -4,7 +4,7 @@ import { graphql } from 'gatsby';
 import _ from 'lodash';
 
 import Layout from '../components/layout';
-import SEO from '../components/seo';
+import SEO from '../components/seo.js';
 import Gallery from '../components/gallery';
 import Preview from '../components/preview';
 import Header from '../components/header';

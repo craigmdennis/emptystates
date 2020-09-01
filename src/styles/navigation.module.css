@@ -14,13 +14,14 @@
   margin-right: 1rem;
 }
 
-.item {
+.item,
+.bullet {
   display: flex;
   align-items: center;
 }
 
-.item:not(:last-child):after {
-  content: "";
+.bullet:not(:last-of-type):after {
+  content: '';
   margin-right: 1rem;
   width: 0.25rem;
   height: 0.25rem;
@@ -35,7 +36,7 @@
 }
 
 .active:before {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   bottom: 0;
