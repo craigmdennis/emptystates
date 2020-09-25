@@ -13,11 +13,9 @@ const TagPage = ({ data, pageContext }) => {
   const { edges, totalCount } = data.allMarkdownRemark;
   const { numPages, currentPage, tag } = pageContext;
   const pageTitle = `${tag === 'ios' ? 'iOS' : _.capitalize(tag)} States`;
-  const tags = pageContext.tags;
 
   let columnCount = 3;
   let wide = false;
-  // const description = `${totalCount} result${totalCount === 1 ? '' : 's'}`;
 
   // Reduce the column count when desktop tagged
   if (tag === 'desktop') {
@@ -92,8 +90,9 @@ TagPage.propTypes = {
     }),
   }),
   pageContext: PropTypes.shape({
-    // numPages: PropTypes.number.isRequired,
-    // currentPage: PropTypes.number.isRequired,
+    numPages: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
     tag: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
   }),
 };

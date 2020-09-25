@@ -35,7 +35,7 @@ const Navigation = () => (
       <Container>
         <div className={styles.navigation}>
           <Logo />
-          <ul className={`${styles.menu} flex-1`}>
+          <ul className={`${styles.menu}`}>
             {navigationItems.map((item, index) => {
               return (
                 <li className={styles.bullet} key={index}>
@@ -50,17 +50,17 @@ const Navigation = () => (
               );
             })}
           </ul>
-          <div className={`${styles.item} flex-1`}>
+          {/* <div className={`${styles.item} flex-1`}>
             <Search />
-          </div>
-          <div className={`${styles.item} ml-8`}>
+          </div> */}
+          {/* <div className={`${styles.item} ml-8`}>
             <Link
               to={'/submit/'}
               className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
             >
               Submit Your Own
             </Link>
-          </div>
+          </div> */}
         </div>
       </Container>
     </div>

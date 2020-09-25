@@ -9,5 +9,8 @@
   "[javascriptreact]": {
     "editor.formatOnSave": false
   },
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.unknownProperties": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownProperties": "ignore"
 }

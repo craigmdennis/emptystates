@@ -3,11 +3,12 @@
   --primaryBackground: #f8f8fe;
   --primaryColor: #333;
   --secondaryColor: #3c4858;
+  --gapSmall: 0.5rem;
+  --gapLarge: 2rem;
+  --sansFontFamily: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol';
 }
-
-@tailwind base;
-@tailwind utilities;
-@tailwind components;
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -19,7 +20,7 @@
 
 @media (min-width: 1200px) {
   :root {
-    --gallery-gap: 2rem
+    --gallery-gap: 2rem;
   }
 }
 
@@ -38,6 +39,7 @@ body {
   margin: 0;
   background: var(--primaryBackground);
   color: var(--primaryColor);
+  font-family: var(--sansFontFamily);
 }
 
 .visually-hidden {

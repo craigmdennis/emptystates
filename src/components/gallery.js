@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from '../styles/gallery.module.css';
 
-const Gallery = ({ children, columnCount = 3, wide = false }) => {
+const Gallery = ({ children, columnCount = 3, wide }) => {
   const [numCols, setNumCols] = useState(columnCount);
   const cols = [...Array(numCols)].map(() => []);
   const fillCols = (children, cols) => {
@@ -25,7 +25,7 @@ const Gallery = ({ children, columnCount = 3, wide = false }) => {
 Gallery.propTypes = {
   children: PropTypes.array.isRequired,
   columnCount: PropTypes.number,
-  wide: PropTypes.bool.isRequired,
+  wide: PropTypes.bool,
 };
 
 export default Gallery;
