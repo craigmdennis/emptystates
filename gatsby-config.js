@@ -51,5 +51,28 @@ module.exports = {
         path: `${__dirname}/src/images`,
       },
     },
+    {
+      resolve: 'gatsby-plugin-manifest',
+      options: {
+        name: 'Empty States',
+        short_name: 'Empty States',
+        start_url: '/',
+        background_color: '#f8f8fe',
+        theme_color: '#3c4858',
+        display: 'standalone',
+        icon: 'src/images/logo.svg',
+      },
+    },
+    {
+      resolve: 'gatsby-plugin-offline',
+      options: {
+        workboxConfig: {
+          globPatterns: ['**/icon*', 'src/images/logo.svg'],
+        },
+        options: {
+          precachePages: ['/mobile/'],
+        },
+      },
+    },
   ],
 };

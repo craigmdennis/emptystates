@@ -1,8 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'gatsby';
+
+import HamburgerIcon from '../images/icon-menu.svg';
+import CloseIcon from '../images/icon-close.svg';
 import Container from './container';
 import Logo from './logo';
-import Search from './search';
 import styles from '../styles/navigation.module.css';
 
 const navigationItems = [
@@ -26,45 +29,60 @@ const navigationItems = [
     anchorText: 'Android',
     path: '/tags/android/',
   },
+  // {
+  //   anchorText: 'Random',
+  //   path: '/',
+  // },
 ];
 
 // To Do: Provide an array and loop through it
-const Navigation = () => (
-  <nav role="navigation">
-    <div className={styles.bar}>
-      <Container>
-        <div className={styles.navigation}>
-          <Logo />
-          <ul className={`${styles.menu}`}>
-            {navigationItems.map((item, index) => {
-              return (
-                <li className={styles.bullet} key={index}>
-                  <Link
-                    activeClassName={styles.active}
-                    className={styles.link}
-                    to={item.path}
-                  >
-                    {item.anchorText}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          {/* <div className={`${styles.item} flex-1`}>
-            <Search />
-          </div> */}
-          {/* <div className={`${styles.item} ml-8`}>
-            <Link
-              to={'/submit/'}
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+const Navigation = ({ onHamburgerClick, state }) => {
+  return (
+    <nav role="navigation">
+      <div className={styles.bar}>
+        <Container>
+          <div className={styles.navigation}>
+            <div
+              onClick={state === 'open' ? onHamburgerClick : null}
+              className={styles.logo}
             >
-              Submit Your Own
-            </Link>
-          </div> */}
-        </div>
-      </Container>
-    </div>
-  </nav>
-);
+              <Logo />
+            </div>
+            <button onClick={onHamburgerClick} className={styles.hamburger}>
+              {state === 'closed' && <HamburgerIcon className={styles.icon} />}
+              {state === 'open' && <CloseIcon className={styles.icon} />}
+            </button>
+            <ul
+              className={state === 'open' ? styles.menuopen : styles.menuclosed}
+            >
+              {navigationItems.map((item, index) => {
+                return (
+                  <li className={styles.item} key={index}>
+                    <Link
+                      activeClassName={styles.active}
+                      className={styles.link}
+                      to={item.path}
+                    >
+                      {item.anchorText}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Container>
+      </div>
+    </nav>
+  );
+};
 
 export default Navigation;
+
+Navigation.propTypes = {
+  onHamburgerClick: PropTypes.func,
+  state: PropTypes.oneOf(['open', 'closed']),
+};
+
+Navigation.defaultProps = {
+  state: 'closed',
+};

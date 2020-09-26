@@ -22,15 +22,17 @@
   width: 32px;
   height: 32px;
   border-radius: 3px;
-  text-decoration: 0;
+  text-decoration: none;
 }
 
 .paginationButtonEnabled {
   composes: paginationButton;
   color: var(--primaryColor);
 
-  &:hover {
+  &:hover,
+  &:focus {
     background: grey;
+    text-decoration: none;
   }
 }
 
