@@ -8,6 +8,7 @@ import SEO from '../components/seo.js';
 import Gallery from '../components/gallery';
 import Preview from '../components/preview';
 import Header from '../components/header';
+import Pagination from '../components/pagination';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges, totalCount } = data.allMarkdownRemark;
@@ -37,9 +38,10 @@ const TagPage = ({ data, pageContext }) => {
     <Layout>
       <SEO title={pageTitle} />
       <Header title={pageTitle} />
-      <Gallery wide={wide} columnCount={columnCount}>
-        {previews}
-      </Gallery>
+      <Gallery>{previews}</Gallery>
+      {numPages > 1 && (
+        <Pagination numPages={numPages} currentPage={currentPage} />
+      )}
     </Layout>
   );
 };

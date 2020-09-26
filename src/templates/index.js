@@ -38,7 +38,9 @@ const IndexPage = ({ data, pageContext }) => {
         ''
       )}
       <Gallery>{previews}</Gallery>
-      <Pagination numPages={numPages} currentPage={currentPage} />
+      {numPages > 1 && (
+        <Pagination numPages={numPages} currentPage={currentPage} />
+      )}
     </Layout>
   );
 };
