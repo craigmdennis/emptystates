@@ -1,9 +1,9 @@
 :root {
   --gallery-gap: 1rem;
   --primaryBackground: #f8f8fe;
-  --secondaryBackground: #eee;
-  --primaryColor: #333;
-  --primaryBorder: #444;
+  --secondaryBackground: #f2f2fa;
+  --primaryColor: #333333;
+  --primaryBorder: rgba(0, 0, 0, 0.05);
   --secondaryColor: #3c4858;
   --gapSmall: 0.5rem;
   --gapLarge: 2rem;
@@ -19,7 +19,7 @@
     --secondaryBackground: #363636;
     --primaryColor: #fff;
     --secondaryColor: #f8f8fe;
-    --primaryBorder: #ccc;
+    --primaryBorder: #444;
   }
 }
 
