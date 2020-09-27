@@ -2,6 +2,10 @@
   display: grid;
   grid-gap: var(--gallery-gap);
   grid-template-columns: repeat(2, 1fr);
+
+  &:first-child {
+    margin-top: var(--gallery-gap);
+  }
 }
 
 .gallery.wide {

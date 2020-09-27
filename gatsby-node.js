@@ -5,6 +5,26 @@ const { createFilePath } = require('gatsby-source-filesystem');
 // Posts & Tags to show per page
 const POSTS_PER_PAGE = 60;
 
+// Allow non-existent frontmatter fields
+// github.com/gatsbyjs/gatsby/issues/2392#issuecomment-526637536
+// https: exports.createSchemaCustomization = ({ actions }) => {
+//   const { createTypes } = actions;
+//   const typeDefs = `
+//     type MarkdownRemark implements Node {
+//       frontmatter: Frontmatter
+//     }
+//     type Frontmatter {
+//       title: [String!]!
+//       date: [Date!]!
+//       image: [String!]!
+//       tags: [String!]!
+//     }
+//   `;
+//   createTypes(typeDefs);
+// };
+
+// Create redirect if present in the frontmatter
+
 exports.createPages = async ({ actions, graphql, reporter }) => {
   const { createPage } = actions;
 
@@ -22,6 +42,9 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
       ) {
         edges {
           node {
+            frontmatter {
+              redirect
+            }
             fields {
               slug
             }
@@ -43,12 +66,23 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     return Promise.reject(result.errors);
   }
 
-  // Collect Posts
+  // Create individual post pages
   const posts = result.data.postsRemark.edges;
   const postTemplate = path.resolve('./src/templates/post.js');
 
   posts.forEach((post) => {
-    const slug = post.node.fields.slug;
+    const { redirect, slug } = post.node.fields;
+    const { createRedirect } = actions;
+
+    console.log(redirect);
+
+    if (redirect && redirect !== '') {
+      createRedirect({
+        fromPath: redirect,
+        toPath: slug,
+        isPermanent: true,
+      });
+    }
 
     createPage({
       path: slug,
@@ -60,6 +94,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     });
   });
 
+  // Create paginated index pages
   const numPages = Math.ceil(posts.length / POSTS_PER_PAGE);
   const indexTemplate = path.resolve('./src/templates/index.js');
   Array.from({ length: numPages }).forEach((_, i) => {
@@ -84,8 +119,6 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   const slugifyConfig = {
     lower: true,
   };
-
-  // For each tag, calculate the number of posts
 
   /// Need to paginate
   tags.forEach((tag) => {

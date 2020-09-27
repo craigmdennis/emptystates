@@ -1,1 +1,5 @@
-# Rewrite Rules
+# Redirect all Tumblr posts
+/post/*         /s/:splat
+
+# Redirect individual posts
+/178852624623/no-saved-posts-in-confluence-for-android 

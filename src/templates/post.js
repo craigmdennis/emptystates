@@ -11,17 +11,20 @@ import TagList from '../components/taglist';
 
 import styles from '../styles/post.module.css';
 
+const EditLink = ({ slug }) => {
+  const editSlug = slug.substring(2); // Remove the /s/ prefix
+  const admin = `http://localhost:8000/admin/#/collections/states/entries${editSlug}index`;
+  return <a href={`${admin}`}>Edit</a>;
+};
+
+export { EditLink };
+
 const PostTemplate = ({ data, pageContext }) => {
   const { title, tags, date, image } = data.markdownRemark.frontmatter;
 
   const { html } = data.markdownRemark;
   const { slug } = pageContext;
   const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
-
-  const EditLink = () => {
-    const admin = `http://localhost:8000/admin/#/collections/states/entries${slug}index`;
-    return <a href={`${admin}`}>Edit</a>;
-  };
 
   return (
     <Layout>
@@ -35,7 +38,7 @@ const PostTemplate = ({ data, pageContext }) => {
         key={image.id}
       />
 
-      {process.env.NODE_ENV === 'development' && <EditLink />}
+      {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />}
 
       <p>{date}</p>
 
@@ -88,4 +91,8 @@ PostTemplate.propTypes = {
   pageContext: PropTypes.shape({
     slug: PropTypes.string.isRequired,
   }),
+};
+
+EditLink.propTypes = {
+  slug: PropTypes.string.isRequired,
 };

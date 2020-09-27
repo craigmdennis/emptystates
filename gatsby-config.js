@@ -9,8 +9,8 @@ module.exports = {
     },
   },
   plugins: [
+    'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-postcss',
-    'gatsby-transformer-yaml',
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp',
     'gatsby-plugin-react-helmet',
@@ -40,7 +40,6 @@ module.exports = {
         },
       },
     },
-    'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-sitemap',
     'gatsby-plugin-netlify',
     'gatsby-plugin-netlify-cms',
@@ -50,6 +49,7 @@ module.exports = {
       options: {
         name: 'images',
         path: `${__dirname}/src/images`,
+        ignore: '**/*.gif',
       },
     },
     {
@@ -71,7 +71,7 @@ module.exports = {
           globPatterns: ['**/icon*'],
         },
         options: {
-          precachePages: ['/mobile'],
+          precachePages: ['/mobile/'],
         },
       },
     },

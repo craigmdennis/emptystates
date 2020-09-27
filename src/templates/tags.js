@@ -16,12 +16,13 @@ const TagPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
   const { tag, numPages, currentPage } = pageContext;
   const pageTitle = `${displayTagNameCorrectly(tag)} States`;
+  const shouldUseWide = ['desktop', 'tablet', 'macOS'];
 
   let columnCount = 3;
   let wide = false;
 
   // Reduce the column count when desktop or tablet tagged
-  if (['desktop', 'tablet'].includes(tag)) {
+  if (shouldUseWide.includes(tag.toLowerCase())) {
     columnCount = 2;
     wide = true;
   }
