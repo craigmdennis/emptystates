@@ -58,6 +58,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
 
   // Create paginated post list pages
   const postsPerPage = 60;
+
   const numPages = Math.ceil(posts.length / postsPerPage);
   const indexTemplate = path.resolve('./src/templates/index.js');
   Array.from({ length: numPages }).forEach((_, i) => {
@@ -83,8 +84,8 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     lower: true,
   };
 
+  /// Need to paginate
   tags.forEach((tag) => {
-    console.log(tag.fieldValue);
     createPage({
       path: `/tags/${slugify(tag.fieldValue, slugifyConfig)}`,
       component: tagTemplate,
@@ -109,8 +110,6 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
     if (fileNode.sourceInstanceName === 'states') {
       prefix = '/s';
     }
-
-    console.log(`${slug}`);
 
     createNodeField({
       node,
