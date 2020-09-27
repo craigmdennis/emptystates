@@ -33,12 +33,12 @@ const Pagination = ({ currentPage, numPages, basePath = '' }) => {
   const pages = Array.from({ length: numPages }, (_, i) => i + 1);
 
   const previousLink = `${basePath}/${
-    currentPage === 2 ? '' : currentPage - 1
+    currentPage === 2 ? '' : currentPage - 1 + '/'
   }`;
 
   const nextLink = `${basePath}/${
-    currentPage === numPages ? '' : currentPage + 1
-  }`;
+    currentPage === numPages ? '' : currentPage + 1 + '/'
+  }/`;
 
   return (
     <nav className={styles.paginaton}>
@@ -59,7 +59,7 @@ const Pagination = ({ currentPage, numPages, basePath = '' }) => {
       and the last page */}
       {pages.map((pageNumber, index) => {
         const midPageLink =
-          pageNumber === 1 ? `${basePath}` : `${basePath}/${pageNumber}`;
+          pageNumber === 1 ? `${basePath}` : `${basePath}/${pageNumber}/`;
 
         return (
           <PaginationButton

@@ -17,7 +17,7 @@ module.exports = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        name: 'content',
+        name: 'states',
         path: `${__dirname}/content/states`,
       },
     },
@@ -67,10 +67,10 @@ module.exports = {
       resolve: 'gatsby-plugin-offline',
       options: {
         workboxConfig: {
-          globPatterns: ['**/icon*', 'src/images/logo.svg'],
+          globPatterns: ['**/icon*'],
         },
         options: {
-          precachePages: ['/mobile/'],
+          precachePages: ['/mobile'],
         },
       },
     },

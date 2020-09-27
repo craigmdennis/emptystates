@@ -12,7 +12,7 @@ import TagList from '../components/taglist';
 import styles from '../styles/post.module.css';
 
 const PostTemplate = ({ data, pageContext }) => {
-  const { title, tags, date, related, image } = data.markdownRemark.frontmatter;
+  const { title, tags, date, image } = data.markdownRemark.frontmatter;
 
   const { html } = data.markdownRemark;
   const { slug } = pageContext;
@@ -56,7 +56,6 @@ export const postQuery = graphql`
         title
         tags
         date(formatString: "MMMM DD, YYYY")
-        related
         image {
           id
           childImageSharp {

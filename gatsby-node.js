@@ -1,5 +1,5 @@
-const slugify = require('slugify');
 const path = require('path');
+const slugify = require('slugify');
 const { createFilePath } = require('gatsby-source-filesystem');
 
 exports.createPages = async ({ actions, graphql, reporter }) => {
@@ -41,26 +41,6 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
 
   // Collect Posts
   const posts = result.data.postsRemark.edges;
-
-  // Create paginated post list pages
-  const postsPerPage = 60;
-  const numPages = Math.ceil(posts.length / postsPerPage);
-  Array.from({ length: numPages }).forEach((_, i) => {
-    createPage({
-      path: i === 0 ? '/' : `/${i + 1}`,
-      component: path.resolve('./src/templates/index.js'),
-      context: {
-        limit: postsPerPage,
-        skip: i * postsPerPage,
-        numPages: numPages,
-        currentPage: i + 1,
-        site: result.data.site,
-        tags: result.data.tagsGroup.group,
-      },
-    });
-  });
-
-  // Create individual post pages
   const postTemplate = path.resolve('./src/templates/post.js');
 
   posts.forEach((post) => {
@@ -76,17 +56,37 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     });
   });
 
+  // Create paginated post list pages
+  const postsPerPage = 60;
+  const numPages = Math.ceil(posts.length / postsPerPage);
+  const indexTemplate = path.resolve('./src/templates/index.js');
+  Array.from({ length: numPages }).forEach((_, i) => {
+    createPage({
+      path: i === 0 ? '/' : `${i + 1}`,
+      component: indexTemplate,
+      context: {
+        limit: postsPerPage,
+        skip: i * postsPerPage,
+        numPages: numPages,
+        currentPage: i + 1,
+        site: result.data.site,
+        tags: result.data.tagsGroup.group,
+      },
+    });
+  });
+
   // Create tags list pages
-  const tagTemplate = path.resolve('./src/templates/tags.js');
   const tags = result.data.tagsGroup.group;
+  const tagTemplate = path.resolve('./src/templates/tags.js');
 
   const slugifyConfig = {
     lower: true,
   };
 
   tags.forEach((tag) => {
+    console.log(tag.fieldValue);
     createPage({
-      path: `/tags/${slugify(tag.fieldValue, slugifyConfig)}/`,
+      path: `/tags/${slugify(tag.fieldValue, slugifyConfig)}`,
       component: tagTemplate,
       context: {
         tag: tag.fieldValue,
@@ -101,12 +101,21 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
   const { createNodeField } = actions;
 
   if (node.internal.type === 'MarkdownRemark') {
-    const slug = createFilePath({ node, getNode, basePath: 'pages' });
+    const fileNode = getNode(node.parent);
+    const slug = createFilePath({ node, getNode });
+    let prefix = `/${fileNode.sourceInstanceName}`;
+
+    // Set a path prefix for states
+    if (fileNode.sourceInstanceName === 'states') {
+      prefix = '/s';
+    }
+
+    console.log(`${slug}`);
 
     createNodeField({
       node,
       name: 'slug',
-      value: slug,
+      value: `${prefix}${slug}`,
     });
   }
 };

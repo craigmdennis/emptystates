@@ -19,7 +19,7 @@ const TagPage = ({ data, pageContext }) => {
   let wide = false;
 
   // Reduce the column count when desktop tagged
-  if (tag === 'desktop') {
+  if (['desktop, tablet'].includes(tag)) {
     columnCount = 2;
     wide = true;
   }
