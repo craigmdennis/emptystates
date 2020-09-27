@@ -11,13 +11,15 @@ backend:
 local_backend: true
 
 media_folder: static/images
-public_folder: content/images
+public_folder: /images
 
 collections:
   - name: 'states'
     label: 'States'
     label_singular: 'State'
     extension: 'md'
+    media_folder: ''
+    public_folder: ''
     folder: 'content/states'
     path: '{{title}}/index'
     create: true

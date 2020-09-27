@@ -41,8 +41,8 @@ module.exports = {
       },
     },
     'gatsby-plugin-sitemap',
-    'gatsby-plugin-netlify',
     'gatsby-plugin-netlify-cms',
+    'gatsby-plugin-netlify',
     'gatsby-plugin-react-svg',
     {
       resolve: 'gatsby-source-filesystem',

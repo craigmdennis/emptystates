@@ -1,2 +1,4 @@
 # Redirect all Tumblr posts
 /post/*         /s/:splat
+/admin          /admin/#/
+/admin/         /admin/#/
