@@ -1,7 +1,9 @@
 import _ from 'lodash';
 
 const displayTagNameCorrectly = (tag) => {
-  switch (tag) {
+  const lowerTag = tag.toLowerCase();
+
+  switch (lowerTag) {
     case 'ios':
       return 'iOS';
 
