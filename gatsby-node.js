@@ -71,12 +71,13 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   const postTemplate = path.resolve('./src/templates/post.js');
 
   posts.forEach((post) => {
-    const { redirect, slug } = post.node.fields;
+    const { slug } = post.node.fields;
+    const { redirect } = post.node.frontmatter;
     const { createRedirect } = actions;
 
-    console.log(redirect);
+    if (redirect && redirect !== null) {
+      console.log(`Creating redirect: ${redirect} → ${slug}`);
 
-    if (redirect && redirect !== '') {
       createRedirect({
         fromPath: redirect,
         toPath: slug,
