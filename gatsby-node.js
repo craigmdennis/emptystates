@@ -5,26 +5,6 @@ const { createFilePath } = require('gatsby-source-filesystem');
 // Posts & Tags to show per page
 const POSTS_PER_PAGE = 60;
 
-// Allow non-existent frontmatter fields
-// github.com/gatsbyjs/gatsby/issues/2392#issuecomment-526637536
-// https: exports.createSchemaCustomization = ({ actions }) => {
-//   const { createTypes } = actions;
-//   const typeDefs = `
-//     type MarkdownRemark implements Node {
-//       frontmatter: Frontmatter
-//     }
-//     type Frontmatter {
-//       title: [String!]!
-//       date: [Date!]!
-//       image: [String!]!
-//       tags: [String!]!
-//     }
-//   `;
-//   createTypes(typeDefs);
-// };
-
-// Create redirect if present in the frontmatter
-
 exports.createPages = async ({ actions, graphql, reporter }) => {
   const { createPage } = actions;
 
@@ -125,6 +105,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
   tags.forEach((tag) => {
     const numPages = Math.ceil(tag.totalCount / POSTS_PER_PAGE);
     Array.from({ length: numPages }).forEach((_, i) => {
+      // Create redirect if present in the frontmatter
       createPage({
         path:
           i === 0
