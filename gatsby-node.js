@@ -2,6 +2,9 @@ const path = require('path');
 const slugify = require('slugify');
 const { createFilePath } = require('gatsby-source-filesystem');
 
+// Posts & Tags to show per page
+const POSTS_PER_PAGE = 60;
+
 exports.createPages = async ({ actions, graphql, reporter }) => {
   const { createPage } = actions;
 
@@ -25,9 +28,10 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
           }
         }
       }
-      tagsGroup: allMarkdownRemark(limit: 2000) {
+      tagsGroup: allMarkdownRemark(limit: 1000) {
         group(field: frontmatter___tags) {
           fieldValue
+          totalCount
         }
       }
     }
@@ -56,18 +60,15 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     });
   });
 
-  // Create paginated post list pages
-  const postsPerPage = 60;
-
-  const numPages = Math.ceil(posts.length / postsPerPage);
+  const numPages = Math.ceil(posts.length / POSTS_PER_PAGE);
   const indexTemplate = path.resolve('./src/templates/index.js');
   Array.from({ length: numPages }).forEach((_, i) => {
     createPage({
       path: i === 0 ? '/' : `${i + 1}`,
       component: indexTemplate,
       context: {
-        limit: postsPerPage,
-        skip: i * postsPerPage,
+        limit: POSTS_PER_PAGE,
+        skip: i * POSTS_PER_PAGE,
         numPages: numPages,
         currentPage: i + 1,
         site: result.data.site,
@@ -84,15 +85,27 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     lower: true,
   };
 
+  // For each tag, calculate the number of posts
+
   /// Need to paginate
   tags.forEach((tag) => {
-    createPage({
-      path: `/tags/${slugify(tag.fieldValue, slugifyConfig)}`,
-      component: tagTemplate,
-      context: {
-        tag: tag.fieldValue,
-        site: result.data.site,
-      },
+    const numPages = Math.ceil(tag.totalCount / POSTS_PER_PAGE);
+    Array.from({ length: numPages }).forEach((_, i) => {
+      createPage({
+        path:
+          i === 0
+            ? `/tags/${slugify(tag.fieldValue, slugifyConfig)}`
+            : `/tags/${slugify(tag.fieldValue, slugifyConfig)}/${i + 1}`,
+        component: tagTemplate,
+        context: {
+          limit: POSTS_PER_PAGE,
+          skip: i * POSTS_PER_PAGE,
+          numPages: numPages,
+          currentPage: i + POSTS_PER_PAGE,
+          tag: tag.fieldValue,
+          site: result.data.site,
+        },
+      });
     });
   });
 };

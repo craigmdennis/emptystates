@@ -29,23 +29,17 @@ const navigationItems = [
     anchorText: 'Android',
     path: '/tags/android/',
   },
-  // {
-  //   anchorText: 'Random',
-  //   path: '/',
-  // },
 ];
 
 // To Do: Provide an array and loop through it
 const Navigation = ({ onHamburgerClick, state }) => {
+  const clickedEvent = state === 'open' ? onHamburgerClick : null;
   return (
     <nav role="navigation">
       <div className={styles.bar}>
         <Container>
           <div className={styles.navigation}>
-            <div
-              onClick={state === 'open' ? onHamburgerClick : null}
-              className={styles.logo}
-            >
+            <div onClick={clickedEvent} className={styles.logo}>
               <Logo />
             </div>
             <button onClick={onHamburgerClick} className={styles.hamburger}>
@@ -62,6 +56,7 @@ const Navigation = ({ onHamburgerClick, state }) => {
                       activeClassName={styles.active}
                       className={styles.link}
                       to={item.path}
+                      onClick={clickedEvent}
                     >
                       {item.anchorText}
                     </Link>

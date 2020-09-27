@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-const displayTag = (tag) => {
+const displayTagNameCorrectly = (tag) => {
   switch (tag) {
     case 'ios':
       return 'iOS';
@@ -16,4 +16,4 @@ const displayTag = (tag) => {
   }
 };
 
-export default displayTag;
+export default displayTagNameCorrectly;

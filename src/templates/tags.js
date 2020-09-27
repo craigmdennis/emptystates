@@ -10,12 +10,12 @@ import Preview from '../components/preview';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
 
-import displayTag from '../utils/displayTag';
+import displayTagNameCorrectly from '../utils/displayTagNameCorrectly';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
-  const { tag } = pageContext;
-  const pageTitle = `${displayTag(tag)} States`;
+  const { tag, numPages, currentPage, site } = pageContext;
+  const pageTitle = `${displayTagNameCorrectly(tag)} States`;
 
   let columnCount = 3;
   let wide = false;
@@ -43,9 +43,13 @@ const TagPage = ({ data, pageContext }) => {
       <Gallery columnCount={columnCount} wide={wide}>
         {previews}
       </Gallery>
-      {/* {numPages > 1 && (
-        <Pagination numPages={numPages} currentPage={currentPage} />
-      )} */}
+      {numPages > 1 && (
+        <Pagination
+          numPages={numPages}
+          currentPage={currentPage}
+          basePath={`tags/${tag}`}
+        />
+      )}
     </Layout>
   );
 };
@@ -53,10 +57,12 @@ const TagPage = ({ data, pageContext }) => {
 export default TagPage;
 
 export const pageQuery = graphql`
-  query tagPageQuery($tag: String) {
+  query tagPageQuery($tag: String, $skip: Int!, $limit: Int!) {
     allMarkdownRemark(
       sort: { fields: [frontmatter___date], order: DESC }
       filter: { frontmatter: { tags: { in: [$tag] } } }
+      limit: $limit
+      skip: $skip
     ) {
       group(field: frontmatter___tags) {
         fieldValue

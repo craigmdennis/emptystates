@@ -40,6 +40,7 @@ module.exports = {
         },
       },
     },
+    'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-sitemap',
     'gatsby-plugin-netlify',
     'gatsby-plugin-netlify-cms',

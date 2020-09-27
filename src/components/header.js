@@ -6,7 +6,7 @@ const Header = ({ title, description, children, large = false }) => {
   const sizeClass = large ? styles.title : styles.subtitle;
 
   return (
-    <header>
+    <header className={styles.header}>
       {title && <h1 className={sizeClass}>{title}</h1>}
       {description && <p className={styles.description}>{description}</p>}
       {children}

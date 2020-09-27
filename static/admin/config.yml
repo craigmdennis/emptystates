@@ -1,12 +1,12 @@
 backend:
   name: git-gateway
-  branch: develop
+  branch: master
   commit_messages:
-    create: 'Create {{collection}} “{{slug}}”'
-    update: 'Update {{collection}} “{{slug}}”'
-    delete: 'Delete {{collection}} “{{slug}}”'
-    uploadMedia: '[skip ci] Upload “{{path}}”'
-    deleteMedia: '[skip ci] Delete “{{path}}”'
+    create: 'Create {{collection}}: {{title}}'
+    update: 'Update {{collection}}: {{title}}'
+    delete: 'Delete {{collection}}: {{title}}'
+    uploadMedia: '[skip ci] Upload: {{path}}'
+    deleteMedia: '[skip ci] Delete: {{path}}'
 
 local_backend: true
 
@@ -21,7 +21,7 @@ collections:
     folder: 'content/states'
     path: '{{title}}/index'
     create: true
-    slug: '{{title}}/index'
+    title: '{{title}}/index'
     preview: false
     fields:
       - { label: 'Title', name: 'title', widget: 'string', required: true }
@@ -32,6 +32,7 @@ collections:
           required: true,
         }
       - { label: 'Image', name: 'image', widget: image, required: true }
+      - { label: 'Tags', name: 'tags', widget: 'list', required: true }
       - {
           label: 'Related States',
           name: 'related',
@@ -43,5 +44,4 @@ collections:
           required: false,
           multiple: true,
         }
-      - { label: 'Tags', name: 'tags', widget: 'list', required: true }
       - { label: 'Body', name: 'body', widget: 'markdown', required: false }

@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Fragment, useState } from 'react';
 import Container from './container';
 import Navigation from './navigation';
-import styles from '../styles/layout.module.css';
 
 const Layout = ({ children }) => {
   const [menuState, setMenuState] = useState('closed');
@@ -12,9 +11,7 @@ const Layout = ({ children }) => {
   return (
     <Fragment>
       <Navigation onHamburgerClick={toggleMenu} state={menuState} />
-      <div className={styles.spacing}>
-        <Container>{children}</Container>
-      </div>
+      <Container>{children}</Container>
     </Fragment>
   );
 };
