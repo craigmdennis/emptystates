@@ -14,7 +14,7 @@ import displayTagNameCorrectly from '../utils/displayTagNameCorrectly';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
-  const { tag, numPages, currentPage, site } = pageContext;
+  const { tag, numPages, currentPage } = pageContext;
   const pageTitle = `${displayTagNameCorrectly(tag)} States`;
 
   let columnCount = 3;
@@ -98,10 +98,11 @@ TagPage.propTypes = {
   data: PropTypes.shape({
     allMarkdownRemark: PropTypes.shape({
       edges: PropTypes.array.isRequired,
-      totalCount: PropTypes.number.isRequired,
     }),
   }),
   pageContext: PropTypes.shape({
     tag: PropTypes.string.isRequired,
+    numPages: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
   }),
 };
