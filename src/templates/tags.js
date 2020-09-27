@@ -10,16 +10,18 @@ import Preview from '../components/preview';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
 
+import displayTag from '../utils/displayTag';
+
 const TagPage = ({ data, pageContext }) => {
-  const { edges, totalCount } = data.allMarkdownRemark;
-  const { numPages, currentPage, tag } = pageContext;
-  const pageTitle = `${tag === 'ios' ? 'iOS' : _.capitalize(tag)} States`;
+  const { edges } = data.allMarkdownRemark;
+  const { tag } = pageContext;
+  const pageTitle = `${displayTag(tag)} States`;
 
   let columnCount = 3;
   let wide = false;
 
-  // Reduce the column count when desktop tagged
-  if (['desktop, tablet'].includes(tag)) {
+  // Reduce the column count when desktop or tablet tagged
+  if (['desktop', 'tablet'].includes(tag)) {
     columnCount = 2;
     wide = true;
   }
@@ -38,10 +40,12 @@ const TagPage = ({ data, pageContext }) => {
     <Layout>
       <SEO title={pageTitle} />
       <Header title={pageTitle} />
-      <Gallery>{previews}</Gallery>
-      {numPages > 1 && (
+      <Gallery columnCount={columnCount} wide={wide}>
+        {previews}
+      </Gallery>
+      {/* {numPages > 1 && (
         <Pagination numPages={numPages} currentPage={currentPage} />
-      )}
+      )} */}
     </Layout>
   );
 };
@@ -92,9 +96,6 @@ TagPage.propTypes = {
     }),
   }),
   pageContext: PropTypes.shape({
-    numPages: PropTypes.number.isRequired,
-    currentPage: PropTypes.number.isRequired,
     tag: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
   }),
 };
