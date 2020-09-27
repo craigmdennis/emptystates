@@ -10,6 +10,13 @@ backend:
 
 local_backend: true
 
+site_url: https://emptystat.es
+
+slug:
+  encoding: 'ascii'
+  clean_accents: true
+  sanitize_replacement: '-'
+
 media_folder: static/images
 public_folder: /images
 
