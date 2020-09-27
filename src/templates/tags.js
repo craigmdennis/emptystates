@@ -14,7 +14,7 @@ import displayTagNameCorrectly from '../utils/displayTagNameCorrectly';
 
 const TagPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
-  const { tag, numPages, currentPage } = pageContext;
+  const { tag, numPages, currentPage, site } = pageContext;
   const pageTitle = `${displayTagNameCorrectly(tag)} States`;
   const shouldUseWide = ['desktop', 'tablet', 'macOS'];
 
