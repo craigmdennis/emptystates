@@ -5,7 +5,9 @@ import PropTypes from 'prop-types';
 
 import styles from '../styles/preview.module.css';
 
-const Preview = ({ title, path, image: { id, childImageSharp } }) => {
+const Preview = ({ title, path, image }) => {
+  const { id, childImageSharp } = image;
+
   return (
     <Link to={path}>
       <Img
