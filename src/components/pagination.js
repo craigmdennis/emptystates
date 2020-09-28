@@ -59,7 +59,7 @@ const Pagination = ({ currentPage, numPages, basePath = '' }) => {
           <PaginationButton
             key={`pagination-${index}`}
             to={midPageLink}
-            type={index === currentPage ? 'span' : 'link'}
+            type={index + 1 === currentPage ? 'span' : 'link'}
           >
             {pageNumber}
           </PaginationButton>
