@@ -55,6 +55,7 @@ const Navigation = ({ onHamburgerClick, state }) => {
                     <Link
                       activeClassName={styles.active}
                       className={styles.link}
+                      partiallyActive={item.path !== '/'}
                       to={item.path}
                       onClick={clickedEvent}
                     >
