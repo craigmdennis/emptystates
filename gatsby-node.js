@@ -56,13 +56,13 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
     const { createRedirect } = actions;
 
     if (redirect && redirect !== null) {
-      console.log(`Creating redirect: ${redirect} → ${slug}`);
-
       createRedirect({
         fromPath: redirect,
         toPath: slug,
         isPermanent: true,
       });
+
+      console.log(`Creating redirect: ${redirect} → ${slug}`);
     }
 
     createPage({

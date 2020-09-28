@@ -9,6 +9,8 @@ module.exports = {
     },
   },
   plugins: [
+    'gatsby-plugin-netlify-cms',
+    'gatsby-plugin-netlify',
     'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-postcss',
     'gatsby-plugin-sharp',
@@ -41,8 +43,6 @@ module.exports = {
       },
     },
     'gatsby-plugin-sitemap',
-    'gatsby-plugin-netlify-cms',
-    'gatsby-plugin-netlify',
     'gatsby-plugin-react-svg',
     {
       resolve: 'gatsby-source-filesystem',
