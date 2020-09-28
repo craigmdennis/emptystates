@@ -116,7 +116,7 @@ exports.createPages = async ({ actions, graphql, reporter }) => {
           limit: POSTS_PER_PAGE,
           skip: i * POSTS_PER_PAGE,
           numPages: numPages,
-          currentPage: i + POSTS_PER_PAGE,
+          currentPage: i + 1,
           tag: tag.fieldValue,
           site: result.data.site,
         },

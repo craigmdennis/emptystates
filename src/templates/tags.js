@@ -34,13 +34,7 @@ const TagPage = ({ data, pageContext }) => {
       fields: { slug },
     } = edge.node;
 
-    if (Boolean(image)) {
-      return <Preview key={index} title={title} path={slug} image={image} />;
-    } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`The image for post '${title}' could not be found.`);
-      }
-    }
+    return <Preview key={index} title={title} path={slug} image={image} />;
   });
 
   return (
@@ -54,7 +48,7 @@ const TagPage = ({ data, pageContext }) => {
         <Pagination
           numPages={numPages}
           currentPage={currentPage}
-          basePath={`tags/${tag}`}
+          basePath={`tags/${tag}/`}
         />
       )}
     </Layout>

@@ -8,7 +8,6 @@ import Gallery from '../components/gallery';
 import Preview from '../components/preview';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
-import TagList from '../components/taglist';
 
 const IndexPage = ({ data, pageContext }) => {
   const { edges } = data.allMarkdownRemark;
@@ -17,18 +16,10 @@ const IndexPage = ({ data, pageContext }) => {
 
   // Iterate over the data and populate an array of Previews
   const previews = edges.map((edge, index) => {
-    const {
-      frontmatter: { title, image },
-      fields: { slug },
-    } = edge.node;
+    const { title, image } = edge.node.frontmatter;
+    const { slug } = edge.node.fields;
 
-    if (Boolean(image)) {
-      return <Preview key={index} title={title} path={slug} image={image} />;
-    } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`The image for post '${title}' could not be found.`);
-      }
-    }
+    return <Preview key={index} title={title} path={slug} image={image} />;
   });
 
   return (
