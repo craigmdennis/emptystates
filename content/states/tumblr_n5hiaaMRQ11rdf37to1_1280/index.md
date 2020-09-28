@@ -1,8 +1,9 @@
 ---
-title: tumblr_n5hiaaMRQ11rdf37to1_1280
-image: ./tumblr_n5hiaaMRQ11rdf37to1_1280.png
-date: '1970-01-01T00:00:00.000Z'
+title: Sync projects or drag and drop designs to InVision
+date: 2020-09-28T19:29:58.141Z
+image: cleanshot-2020-09-28-at-20.27.41.png
 tags:
-  - mobile
+  - desktop
+  - browser
+product: InVision
 ---
-
