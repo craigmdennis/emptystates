@@ -1,13 +1,7 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
-import { GatsbyImage } from 'gatsby-plugin-image'
 import Layout from '../components/layout'
-
-// CHANGE THIS
-import {
-  grid,
-  article
-} from '../components/layout.module.css'
+import Gallery from '../components/Gallery'
 
 const IndexPage = ({ data }) => {
   return (
@@ -15,21 +9,7 @@ const IndexPage = ({ data }) => {
       <h1>Find inspiration for your empty states.</h1>
       <p>Browse or search for designs demonstrating how others handle an empty screen.</p>
       <Link to="/submit/">Submit your own</Link>
-
-      <div className={grid}>
-        {
-          data.allMdx.nodes.map((node) => (
-            <Link key={node.id} to={`states/${node.slug}`} className={article}>
-              <GatsbyImage
-                alt=""
-                image={node.frontmatter.image.childImageSharp.gatsbyImageData}
-              />
-              <h2>{node.frontmatter.title}</h2>
-              <p>Posted: {node.frontmatter.date}</p>
-            </Link>
-          ))
-        }
-      </div>
+      <Gallery nodes={data.allMdx.nodes} />
     </Layout>
   )
 }
