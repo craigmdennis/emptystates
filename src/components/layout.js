@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Link, useStaticQuery, graphql } from 'gatsby'
+import Search from "./search"
 import {
   container,
   heading,
@@ -7,6 +8,8 @@ import {
   navLinkItem,
   navLinkText
 } from './layout.module.css'
+
+const searchIndices = [{ name: `prod_EmptyStates`, title: `States` }]
 
 const Layout = ({ pageTitle, children }) => {
   const data = useStaticQuery(graphql`
@@ -27,10 +30,7 @@ const Layout = ({ pageTitle, children }) => {
           <li className={navLinkItem}><Link to="/" className={navLinkText}>Home</Link></li>
           <li className={navLinkItem}><Link to="/submit/" className={navLinkText}>Submit</Link></li>
         </ul>
-        <form>
-          <input type="search" placeholder="Search…" />
-          <button type="submit">Search</button>
-        </form>
+        <Search indices={searchIndices} />
         <ul className={navLinks}>
           <li className={navLinkItem}><Link to="#" className={navLinkText}>Create an account</Link></li>
           <li className={navLinkItem}><Link to="#" className={navLinkText}>Log in</Link></li>
