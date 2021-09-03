@@ -1,17 +1,10 @@
 import algoliasearch from "algoliasearch/lite"
 import { createRef, default as React, useState, useMemo } from "react"
 import { InstantSearch } from "react-instantsearch-dom"
-import { ThemeProvider } from "styled-components"
-import StyledSearchBox from "./styled-search-box"
-import StyledSearchResult from "./styled-search-result"
-import StyledSearchRoot from "./styled-search-root"
+import SearchBox from "./search-box"
 import useClickOutside from "./use-click-outside"
-
-const theme = {
-  foreground: "#050505",
-  background: "white",
-  faded: "#888",
-}
+import SearchResult from "./search-result"
+import { container, result } from "./search.module.css"
 
 export default function Search({ indices }) {
   const rootRef = createRef()
@@ -29,20 +22,19 @@ export default function Search({ indices }) {
   useClickOutside(rootRef, () => setFocus(false))
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledSearchRoot ref={rootRef}>
-        <InstantSearch
-          searchClient={searchClient}
-          indexName={indices[0].name}
-          onSearchStateChange={({ query }) => setQuery(query)}
-        >
-          <StyledSearchBox onFocus={() => setFocus(true)} hasFocus={hasFocus} />
-          <StyledSearchResult
-            show={query && query.length > 0 && hasFocus}
-            indices={indices}
-          />
-        </InstantSearch>
-      </StyledSearchRoot>
-    </ThemeProvider>
+    <div className={container}>
+      <InstantSearch
+        searchClient={searchClient}
+        indexName={indices[0].name}
+        onSearchStateChange={({ query }) => setQuery(query)}
+      >
+        <SearchBox hasFocus={hasFocus} />
+        <SearchResult
+          className={result}
+          show={query && query.length > 0 && hasFocus}
+          indices={indices}
+        />
+      </InstantSearch>
+    </div>
   )
 }
