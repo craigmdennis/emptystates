@@ -1,15 +1,14 @@
-import * as React from 'react'
-import { Link } from 'gatsby'
-import { GatsbyImage } from 'gatsby-plugin-image'
+import * as React from 'react';
+import { Link } from 'gatsby';
+import { GatsbyImage } from 'gatsby-plugin-image';
 
 import {
   grid,
-} from '../components/gallery.module.css'
+} from './gallery.module.css';
 
-const Gallery = ({nodes}) => {
-  return (
-    <div className={grid}>
-      {
+const Gallery = ({ nodes }) => (
+  <div className={grid}>
+    {
         nodes.map((node) => (
           <Link key={node.id} to={`states/${node.slug}/`}>
             <GatsbyImage
@@ -17,12 +16,14 @@ const Gallery = ({nodes}) => {
               image={node.frontmatter.image.childImageSharp.gatsbyImageData}
             />
             <h2>{node.frontmatter.title}</h2>
-            <p>Posted: {node.frontmatter.date}</p>
+            <p>
+              Posted:
+              {node.frontmatter.date}
+            </p>
           </Link>
         ))
       }
-    </div>
-  )
-}
+  </div>
+);
 
 export default Gallery;

@@ -1,5 +1,5 @@
-import { Link } from "gatsby"
-import { default as React } from "react"
+import { Link } from 'gatsby';
+import React from 'react';
 import {
   connectStateResults,
   Highlight,
@@ -7,20 +7,20 @@ import {
   Index,
   Snippet,
   PoweredBy,
-} from "react-instantsearch-dom"
+} from 'react-instantsearch-dom';
 
 const HitCount = connectStateResults(({ searchResults }) => {
-  const hitCount = searchResults && searchResults.nbHits
+  const hitCount = searchResults && searchResults.nbHits;
 
   return hitCount > 0 ? (
     <div className="HitCount">
-      {hitCount} result{hitCount !== 1 ? `s` : ``}
+      {`${hitCount} result${hitCount !== 1 ? 's' : ''}`}
     </div>
-  ) : null
-})
+  ) : null;
+});
 
 const PageHit = ({ hit }) => (
-  <div>
+  <div className="Hit">
     <Link to={`/states/${hit.slug}`}>
       <h4>
         <Highlight attribute="title" hit={hit} tagName="mark" />
@@ -28,21 +28,23 @@ const PageHit = ({ hit }) => (
     </Link>
     <Snippet attribute="excerpt" hit={hit} tagName="mark" />
   </div>
-)
+);
 
 const HitsInIndex = ({ index }) => (
   <Index indexName={index.name}>
     <HitCount />
     <Hits className="Hits" hitComponent={PageHit} />
   </Index>
-)
+);
 
-const SearchResult = ({ indices, className }) => (
-  <div className={className}>
-    {indices.map(index => (
+const SearchResult = ({ indices, show }) => (
+  <div
+    style={{ display: show ? 'block' : 'none' }}
+  >
+    {indices.map((index) => (
       <HitsInIndex index={index} key={index.name} />
     ))}
   </div>
-)
+);
 
-export default SearchResult
+export default SearchResult;
