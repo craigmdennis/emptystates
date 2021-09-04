@@ -1,7 +1,7 @@
-const escapeStringRegexp = require("escape-string-regexp")
+const escapeStringRegexp = require('escape-string-regexp');
 
-const pagePath = `content/states`
-const indexName = `prod_EmptyStates`
+const pagePath = 'content/states';
+const indexName = 'dev_EmptyStates';
 
 const stateQuery = `{
   states: allMdx(
@@ -17,26 +17,30 @@ const stateQuery = `{
           date
           image {
             childImageSharp {
-              gatsbyImageData(width: 50)
+              gatsbyImageData(width: 200)
             }
           }
           tags
           product
         }
         slug
-        excerpt(pruneLength: 5000)
+        excerpt(pruneLength: 250)
       }
     }
   }
-}`
+}`;
 
-function pageToAlgoliaRecord({ node: { id, frontmatter, slug, ...rest } }) {
+function pageToAlgoliaRecord({
+  node: {
+    id, frontmatter, slug, ...rest
+  },
+}) {
   return {
     objectID: id,
     ...frontmatter,
     slug,
     ...rest,
-  }
+  };
 }
 
 const queries = [
@@ -44,8 +48,8 @@ const queries = [
     query: stateQuery,
     transformer: ({ data }) => data.states.edges.map(pageToAlgoliaRecord),
     indexName,
-    settings: { attributesToSnippet: [`excerpt:20`] },
+    settings: { attributesToSnippet: ['excerpt:20'] },
   },
-]
+];
 
-module.exports = queries
+module.exports = queries;

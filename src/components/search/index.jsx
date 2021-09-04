@@ -3,6 +3,7 @@ import React, {
   createRef, useState, useMemo,
 } from 'react';
 import { InstantSearch, SearchBox } from 'react-instantsearch-dom';
+
 import useClickOutside from './use-click-outside';
 import SearchResult from './search-result';
 
@@ -40,6 +41,7 @@ export default function Search({ indices }) {
             event.preventDefault();
           }}
         />
+
         <SearchResult
           className={result}
           show={searchQuery && searchQuery.length > 0 && hasFocus}
