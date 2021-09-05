@@ -1,78 +1,49 @@
+require('dotenv').config();
+
 module.exports = {
   siteMetadata: {
-    title: 'Empty States',
-    description:
-      'A curated gallery showcasing designs where no data is available in the UI.',
     siteUrl: 'https://emptystat.es',
-    social: {
-      twitter: 'emptystates',
-    },
+    title: 'Empty States',
   },
+
   plugins: [
-    'gatsby-plugin-netlify-cms',
-    'gatsby-plugin-netlify',
-    'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-postcss',
+    'gatsby-plugin-image',
+    'gatsby-plugin-react-helmet',
+    'gatsby-plugin-sitemap',
+    'gatsby-plugin-mdx',
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp',
-    'gatsby-plugin-react-helmet',
-    {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        name: 'states',
-        path: `${__dirname}/content/states`,
-      },
-    },
-    {
-      resolve: 'gatsby-transformer-remark',
-      options: {
-        plugins: [], // just in case those previously mentioned remark plugins sound cool :)
-      },
-    },
-    {
-      resolve: 'gatsby-plugin-robots-txt',
-      options: {
-        env: {
-          development: {
-            policy: [{ userAgent: '*', disallow: ['/'] }],
-          },
-          production: {
-            policy: [{ userAgent: '*', allow: '/' }],
-          },
-        },
-      },
-    },
-    'gatsby-plugin-sitemap',
-    'gatsby-plugin-react-svg',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
         name: 'images',
-        path: `${__dirname}/src/images`,
-        ignore: '**/*.gif',
+        path: './src/images/',
       },
+      __key: 'images',
     },
     {
-      resolve: 'gatsby-plugin-manifest',
+      resolve: 'gatsby-source-filesystem',
       options: {
-        name: 'Empty States',
-        short_name: 'Empty States',
-        start_url: '/',
-        background_color: '#f8f8fe',
-        theme_color: '#3c4858',
-        display: 'standalone',
-        icon: 'src/images/logo.svg',
+        name: 'pages',
+        path: './src/pages/',
       },
+      __key: 'pages',
     },
     {
-      resolve: 'gatsby-plugin-offline',
+      resolve: 'gatsby-source-filesystem',
       options: {
-        workboxConfig: {
-          globPatterns: ['**/icon*'],
-        },
-        options: {
-          precachePages: ['/mobile/'],
-        },
+        name: 'states',
+        path: `${__dirname}/content/states/`,
+      },
+      __key: 'states',
+    },
+    {
+      resolve: 'gatsby-plugin-algolia',
+      options: {
+        appId: process.env.GATSBY_ALGOLIA_APP_ID,
+        apiKey: process.env.ALGOLIA_ADMIN_KEY,
+        queries: require('./src/utils/algolia-queries'),
       },
     },
   ],

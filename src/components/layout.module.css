@@ -1,0 +1,41 @@
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: auto;
+  max-width: 1144px;
+  font-family: sans-serif;
+  position: relative;
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  grid-gap: 24px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.nav-link-item {
+  padding-right: 2rem;
+}
+
+.nav-link-text {
+  color: black;
+}
