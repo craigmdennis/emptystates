@@ -1,40 +1,43 @@
 import * as React from 'react';
-import { Link, graphql } from 'gatsby';
+import { Helmet } from 'react-helmet';
+import { graphql } from 'gatsby';
 import { GatsbyImage } from 'gatsby-plugin-image';
 import { MDXRenderer } from 'gatsby-plugin-mdx';
+import PropTypes from 'prop-types';
 import Layout from '../components/layout';
 
-const State = ({ data, state }) => {
-  console.log(state);
+const State = ({ data }) => {
+  const { date, image, title } = data.mdx.frontmatter;
+  const { body } = data.mdx;
+
   return (
-    <Layout pageTitle={data.mdx.frontmatter.title}>
-      <GatsbyImage
-        alt=""
-        image={data.mdx.frontmatter.image.childImageSharp.gatsbyImageData}
-      />
-      <p>
-        Posted:
-        {data.mdx.frontmatter.date}
-      </p>
-      {data.mdx.body
-        && (
-        <MDXRenderer>
-          {data.mdx.body}
-        </MDXRenderer>
-        )}
+    <Layout pageTitle={title}>
+      <Helmet>
+        <title>{`${title} | ${data.site.siteMetadata.title}`}</title>
+      </Helmet>
+
+      <GatsbyImage alt="" image={image.childImageSharp.gatsbyImageData} />
+
+      {date && <p>{`Posted: ${date}`}</p>}
+      {body && <MDXRenderer>{body}</MDXRenderer>}
     </Layout>
   );
 };
 
 export const query = graphql`
-  query StateQuery ($slug: String!) {
-    mdx(slug: { eq: $slug } ) {
+  query StateQuery($slug: String!) {
+    site {
+      siteMetadata {
+        title
+      }
+    }
+    mdx(slug: { eq: $slug }) {
       frontmatter {
         title
         date(formatString: "MMMM D, YYYY")
         image {
           childImageSharp {
-            gatsbyImageData(width: 800)
+            gatsbyImageData(height: 1024)
           }
         }
         product
@@ -46,3 +49,16 @@ export const query = graphql`
 `;
 
 export default State;
+
+State.propTypes = {
+  data: PropTypes.shape({
+    mdx: PropTypes.shape({
+      frontmatter: PropTypes.shape({
+        date: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        image: PropTypes.isRequired,
+      }),
+      body: PropTypes.string,
+    }),
+  }).isRequired,
+};

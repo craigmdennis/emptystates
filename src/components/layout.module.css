@@ -12,10 +12,13 @@ html {
   margin: auto;
   max-width: 1144px;
   font-family: sans-serif;
+  position: relative;
 }
 
-.heading {
-  color: rebeccapurple;
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  grid-gap: 24px;
 }
 
 .nav-links {

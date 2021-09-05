@@ -1,6 +1,11 @@
 exports.createPages = async function ({ actions, graphql }) {
   const { data } = await graphql(`
     query {
+      site {
+        siteMetadata {
+          title
+        }
+      }
       allMdx {
         edges {
           node {

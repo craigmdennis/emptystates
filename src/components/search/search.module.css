@@ -29,3 +29,12 @@
   margin: 0;
   padding: 0;
 }
+
+.results {
+  background: white;
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}

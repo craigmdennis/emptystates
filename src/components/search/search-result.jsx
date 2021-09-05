@@ -10,7 +10,7 @@ import {
 } from 'react-instantsearch-dom';
 
 import {
-  media, body, image, grid,
+  media, body, image, grid, results,
 } from './search.module.css';
 
 const HitCount = connectStateResults(({ searchResults }) => {
@@ -50,7 +50,7 @@ const HitsInIndex = ({ index }) => (
 );
 
 const SearchResult = ({ indices, show }) => (
-  <div style={{ display: show ? 'block' : 'none' }}>
+  <div style={{ display: show ? 'block' : 'none' }} className={results}>
     {indices.map((index) => (
       <HitsInIndex index={index} key={index.name} />
     ))}

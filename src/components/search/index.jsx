@@ -7,8 +7,6 @@ import { InstantSearch, SearchBox } from 'react-instantsearch-dom';
 import useClickOutside from './use-click-outside';
 import SearchResult from './search-result';
 
-import { container, result } from './search.module.css';
-
 export default function Search({ indices }) {
   const rootRef = createRef();
   const [searchQuery, setSearchQuery] = useState();
@@ -24,7 +22,7 @@ export default function Search({ indices }) {
   useClickOutside(rootRef, () => setFocus(false));
 
   return (
-    <div className={container} ref={rootRef}>
+    <div ref={rootRef}>
       <InstantSearch
         refresh
         searchClient={searchClient}
@@ -43,7 +41,6 @@ export default function Search({ indices }) {
         />
 
         <SearchResult
-          className={result}
           show={searchQuery && searchQuery.length > 0 && hasFocus}
           indices={indices}
         />
