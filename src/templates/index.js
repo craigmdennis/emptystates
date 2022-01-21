@@ -16,7 +16,7 @@ const IndexPage = ({ data, pageContext }) => {
 
   // Iterate over the data and populate an array of Previews
   const previews = edges.map((edge, index) => {
-    const { title, image } = edge.node.frontmatter;
+    const { title, image, referral } = edge.node.frontmatter;
     const { slug } = edge.node.fields;
 
     return <Preview key={index} title={title} path={slug} image={image} />;

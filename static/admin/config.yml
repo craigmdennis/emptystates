@@ -65,6 +65,12 @@ collections:
         required: false
         hint: 'What is the name of the app or product. This will be used to help find related states below.'
 
+      - label: 'Referral Link'
+        name: 'referral'
+        widget: 'string'
+        required: false
+        hint: 'A link to the website. Ideally a referral link.'
+
       - label: 'Related States'
         name: 'related'
         widget: 'relation'

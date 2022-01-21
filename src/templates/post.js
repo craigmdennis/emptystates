@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { graphql } from 'gatsby';
+import { graphql, Link } from 'gatsby';
 import Img from 'gatsby-image';
 import _ from 'lodash';
 
@@ -20,23 +20,41 @@ const EditLink = ({ slug }) => {
 export { EditLink };
 
 const PostTemplate = ({ data, pageContext }) => {
-  const { title, tags, date, image } = data.markdownRemark.frontmatter;
+  const {
+    title,
+    tags,
+    date,
+    image,
+    referral,
+  } = data.markdownRemark.frontmatter;
 
   const { html } = data.markdownRemark;
   const { slug } = pageContext;
   const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
+
+  const ConditionalWrapper = ({ condition, wrapper, children }) =>
+    condition ? wrapper(children) : children;
 
   return (
     <Layout>
       <SEO title={title} />
       <Header title={title} />
 
-      <Img
-        className={`${styles.item} ${classes}`}
-        alt={`Screenshot of ${title}`}
-        fluid={image.childImageSharp.fluid}
-        key={image.id}
-      />
+      <ConditionalWrapper
+        condition={referral}
+        wrapper={(children) => (
+          <a href={referral} target="_blank" rel="noreferrer">
+            {children}
+          </a>
+        )}
+      >
+        <Img
+          className={`${styles.item} ${classes}`}
+          alt={`Screenshot of ${title}`}
+          fluid={image.childImageSharp.fluid}
+          key={image.id}
+        />
+      </ConditionalWrapper>
 
       {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />}
 
@@ -59,6 +77,7 @@ export const postQuery = graphql`
         title
         tags
         date(formatString: "MMMM DD, YYYY")
+        referral
         image {
           id
           childImageSharp {
@@ -80,6 +99,7 @@ PostTemplate.propTypes = {
         title: PropTypes.string,
         tags: PropTypes.array.isRequired,
         date: PropTypes.string,
+        referral: PropTypes.string,
         related: PropTypes.array,
         image: PropTypes.shape({
           id: PropTypes.string.isRequired,

@@ -2,8 +2,8 @@
   "name": "emptystat.es",
   "private": true,
   "description": "A curated gallery showcasing designs when no data is available in the UI.",
-  "version": "0.1.0",
-  "author": "Craig Dennis <craig@simplebitdesign.com>",
+  "version": "1.0.0",
+  "author": "Craig Dennis <craig@emptystat.es>",
   "dependencies": {
     "gatsby": "^2.22.12",
     "gatsby-image": "^2.4.5",
