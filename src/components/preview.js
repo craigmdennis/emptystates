@@ -1,22 +1,22 @@
 import React from 'react';
 import { Link } from 'gatsby';
-import Img from 'gatsby-image';
+import { GatsbyImage } from 'gatsby-plugin-image';
 import PropTypes from 'prop-types';
 
-import styles from '../styles/preview.module.css';
+import * as styles from '../styles/preview.module.css';
 
 const Preview = ({ title, path, image }) => {
   const { id, childImageSharp } = image;
 
   return (
     <Link to={path}>
-      <Img
+      {/* <GatsbyImage
         alt=""
         loading="lazy"
         className={styles.item}
         key={id}
-        fluid={childImageSharp.fluid}
-      />
+        image={childImageSharp.gatsbyImageData}
+      /> */}
       <span className="visually-hidden">{title}</span>
     </Link>
   );

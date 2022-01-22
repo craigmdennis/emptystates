@@ -1,6 +1,6 @@
 import React from 'react';
 import { graphql, Link, useStaticQuery } from 'gatsby';
-import styles from '../styles/logo.module.css';
+import * as styles from '../styles/logo.module.css';
 import LogoImg from '../images/logo.svg';
 
 const Logo = () => {

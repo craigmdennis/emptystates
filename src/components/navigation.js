@@ -6,7 +6,7 @@ import HamburgerIcon from '../images/icon-menu.svg';
 import CloseIcon from '../images/icon-close.svg';
 import Container from './container';
 import Logo from './logo';
-import styles from '../styles/navigation.module.css';
+import * as styles from '../styles/navigation.module.css';
 
 const navigationItems = [
   {

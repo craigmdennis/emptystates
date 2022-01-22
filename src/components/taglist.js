@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'gatsby';
 import slugify from 'slugify';
 
-import styles from '../styles/taglist.module.css';
+import * as styles from '../styles/taglist.module.css';
 
 const TagList = ({ tags }) => {
   const slugifyConfig = {

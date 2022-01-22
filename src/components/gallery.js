@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styles from '../styles/gallery.module.css';
+import * as styles from '../styles/gallery.module.css';
 
 const Gallery = ({ children, columnCount = 3, wide }) => {
   const [numCols, setNumCols] = useState(columnCount);
@@ -14,7 +14,7 @@ const Gallery = ({ children, columnCount = 3, wide }) => {
   return (
     <div className={`${styles.gallery} ${wide ? styles.wide : ''}`}>
       {[...Array(numCols)].map((_, index) => (
-        <div className={styles.col} key={index}>
+        <div key={index}>
           {cols[index]}
         </div>
       ))}

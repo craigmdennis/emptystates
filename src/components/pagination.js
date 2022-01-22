@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'gatsby';
 import PropTypes from 'prop-types';
-import styles from '../styles/pagination.module.css';
+import * as styles from '../styles/pagination.module.css';
 import ChevrontLeft from '../images/icon-chevron-left.svg';
 import ChevrontRight from '../images/icon-chevron-right.svg';
 

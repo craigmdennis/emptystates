@@ -1,23 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { graphql, Link } from 'gatsby';
-import Img from 'gatsby-image';
+import { graphql } from 'gatsby';
+import { GatsbyImage } from 'gatsby-plugin-image';
 import _ from 'lodash';
 
 import Layout from '../components/layout';
 import SEO from '../components/seo.js';
 import Header from '../components/header';
 import TagList from '../components/taglist';
+import EditLink from '../components/editlink';
 
-import styles from '../styles/post.module.css';
+import * as styles from '../styles/post.module.css';
 
-const EditLink = ({ slug }) => {
-  const editSlug = slug.substring(2); // Remove the /s/ prefix
-  const admin = `http://localhost:8000/admin/#/collections/states/entries${editSlug}index`;
-  return <a href={`${admin}`}>Edit</a>;
-};
 
-export { EditLink };
 
 const PostTemplate = ({ data, pageContext }) => {
   const {
@@ -48,12 +43,12 @@ const PostTemplate = ({ data, pageContext }) => {
           </a>
         )}
       >
-        <Img
+        {/* <GatsbyImage
           className={`${styles.item} ${classes}`}
           alt={`Screenshot of ${title}`}
-          fluid={image.childImageSharp.fluid}
+          image={childImageSharp.gatsbyImageData}
           key={image.id}
-        />
+        /> */}
       </ConditionalWrapper>
 
       {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />}

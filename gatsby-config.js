@@ -9,8 +9,8 @@ module.exports = {
     },
   },
   plugins: [
-    'gatsby-plugin-netlify-cms',
-    'gatsby-plugin-netlify',
+    // 'gatsby-plugin-netlify-cms',
+    // 'gatsby-plugin-netlify',
     'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-postcss',
     'gatsby-plugin-sharp',
@@ -21,6 +21,14 @@ module.exports = {
       options: {
         name: 'states',
         path: `${__dirname}/content/states`,
+      },
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'images',
+        path: `${__dirname}/src/images`,
+        ignore: [`**/\.*`],
       },
     },
     {
@@ -45,14 +53,6 @@ module.exports = {
     'gatsby-plugin-sitemap',
     'gatsby-plugin-react-svg',
     {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        name: 'images',
-        path: `${__dirname}/src/images`,
-        ignore: '**/*.gif',
-      },
-    },
-    {
       resolve: 'gatsby-plugin-manifest',
       options: {
         name: 'Empty States',
@@ -67,11 +67,9 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-offline',
       options: {
+        precachePages: ['/mobile/'],
         workboxConfig: {
           globPatterns: ['**/icon*'],
-        },
-        options: {
-          precachePages: ['/mobile/'],
         },
       },
     },
