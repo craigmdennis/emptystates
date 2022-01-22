@@ -1,6 +1,7 @@
 .item,
 .item.wide {
   width: 100%;
+  border-radius: 0.25rem;
 }
 
 @media only screen and (min-width: 480px) {
