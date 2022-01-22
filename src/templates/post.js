@@ -12,7 +12,8 @@ import EditLink from '../components/editlink';
 
 import * as styles from '../styles/post.module.css';
 
-const PostTemplate = ({ data, pageContext }) => {
+const PostTemplate = ({ data }) => {
+
   const {
     title,
     tags,
@@ -22,7 +23,6 @@ const PostTemplate = ({ data, pageContext }) => {
   } = data.markdownRemark.frontmatter;
 
   const { html } = data.markdownRemark;
-  const { slug } = pageContext;
   const classes = _.includes(tags, 'desktop') ? styles.wide : styles.item;
 
   const ConditionalWrapper = ({ condition, wrapper, children }) =>
@@ -48,8 +48,6 @@ const PostTemplate = ({ data, pageContext }) => {
           key={image.id}
         />
       </ConditionalWrapper>
-
-      {/* {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />} */}
 
       <p>{date}</p>
 

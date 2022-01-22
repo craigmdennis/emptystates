@@ -21,7 +21,6 @@
     "gatsby-transformer-yaml": "^4.5.0",
     "ink": "^3.2.0",
     "lodash": "^4.17.21",
-    "netlify-cms-app": "^2.15.65",
     "pluralize": "^8.0.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
@@ -46,7 +45,6 @@
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-standard": "^4.1.0",
     "gatsby-plugin-force-trailing-slashes": "^1.0.5",
-    "gatsby-plugin-netlify-cms": "^6.5.0",
     "gatsby-plugin-postcss": "^5.5.0",
     "postcss": "^8.4.5",
     "postcss-comment": "^2.0.0",
@@ -64,12 +62,10 @@
   "scripts": {
     "build": "gatsby build",
     "dev": "gatsby develop",
-    "start": "concurrently \"npm run dev\" \"npm run netlify-cms\"",
     "netlify-cms": "npx netlify-cms-proxy-server",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "serve": "gatsby serve",
-    "clean": "gatsby clean",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+    "clean": "gatsby clean"
   },
   "repository": {
     "type": "git",
