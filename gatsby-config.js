@@ -9,8 +9,7 @@ module.exports = {
     },
   },
   plugins: [
-    // 'gatsby-plugin-netlify-cms',
-    // 'gatsby-plugin-netlify',
+    'gatsby-plugin-netlify-cms',
     'gatsby-plugin-force-trailing-slashes',
     'gatsby-plugin-postcss',
     'gatsby-plugin-sharp',

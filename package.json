@@ -46,6 +46,7 @@
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-standard": "^4.1.0",
     "gatsby-plugin-force-trailing-slashes": "^1.0.5",
+    "gatsby-plugin-netlify-cms": "^6.5.0",
     "gatsby-plugin-postcss": "^5.5.0",
     "postcss": "^8.4.5",
     "postcss-comment": "^2.0.0",
