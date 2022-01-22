@@ -32,9 +32,11 @@
     "webpack": "^5.67.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.16.12",
+    "@babel/eslint-parser": "^7.16.5",
+    "@babel/preset-react": "^7.16.7",
     "@types/lodash": "^4.14.178",
     "@types/react-helmet": "^6.1.5",
-    "babel-eslint": "^10.1.0",
     "concurrently": "^7.0.0",
     "eslint": "^8.7.0",
     "eslint-config-babel": "^9.0.0",
