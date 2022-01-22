@@ -12,8 +12,6 @@ import EditLink from '../components/editlink';
 
 import * as styles from '../styles/post.module.css';
 
-
-
 const PostTemplate = ({ data, pageContext }) => {
   const {
     title,
@@ -43,15 +41,15 @@ const PostTemplate = ({ data, pageContext }) => {
           </a>
         )}
       >
-        {/* <GatsbyImage
+        <GatsbyImage
           className={`${styles.item} ${classes}`}
           alt={`Screenshot of ${title}`}
-          image={childImageSharp.gatsbyImageData}
+          image={image.childImageSharp.gatsbyImageData}
           key={image.id}
-        /> */}
+        />
       </ConditionalWrapper>
 
-      {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />}
+      {/* {process.env.NODE_ENV === 'development' && <EditLink slug={slug} />} */}
 
       <p>{date}</p>
 
@@ -76,9 +74,11 @@ export const postQuery = graphql`
         image {
           id
           childImageSharp {
-            fluid(maxWidth: 800) {
-              ...GatsbyImageSharpFluid_withWebp
-            }
+            gatsbyImageData(
+              layout: CONSTRAINED
+              placeholder: BLURRED
+              formats: [AUTO, WEBP]
+            )
           }
         }
       }

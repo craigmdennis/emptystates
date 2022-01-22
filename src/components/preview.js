@@ -10,13 +10,13 @@ const Preview = ({ title, path, image }) => {
 
   return (
     <Link to={path}>
-      {/* <GatsbyImage
+      <GatsbyImage
         alt=""
         loading="lazy"
         className={styles.item}
         key={id}
         image={childImageSharp.gatsbyImageData}
-      /> */}
+      />
       <span className="visually-hidden">{title}</span>
     </Link>
   );

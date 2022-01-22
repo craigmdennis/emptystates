@@ -16,7 +16,7 @@ const IndexPage = ({ data, pageContext }) => {
 
   // Iterate over the data and populate an array of Previews
   const previews = edges.map((edge, index) => {
-    const { title, image, referral } = edge.node.frontmatter;
+    const { title, image } = edge.node.frontmatter;
     const { slug } = edge.node.fields;
 
     return <Preview key={index} title={title} path={slug} image={image} />;
@@ -25,6 +25,7 @@ const IndexPage = ({ data, pageContext }) => {
   return (
     <Layout>
       <SEO />
+      
       {currentPage === 1 ? (
         <Header
           large={true}
@@ -34,7 +35,9 @@ const IndexPage = ({ data, pageContext }) => {
       ) : (
         ''
       )}
+
       <Gallery>{previews}</Gallery>
+
       {numPages > 1 && (
         <Pagination numPages={numPages} currentPage={currentPage} />
       )}
@@ -64,7 +67,7 @@ export const pageQuery = graphql`
               id
               childImageSharp {
                 gatsbyImageData(
-                  layout: FIXED
+                  layout: CONSTRAINED
                   width: 600
                   placeholder: BLURRED
                   formats: [AUTO, WEBP]
