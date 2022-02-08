@@ -1,14 +1,19 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react'
 
-const Container = ({ children }) => (
-  <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1rem' }}>
-    {children}
-  </div>
-);
+const Container = ({ children, as = 'div' }) => {
+  const Tag = as
 
-export default Container;
+  return (
+    <Tag
+      style={{
+        maxWidth: 'var(--size-max-width)',
+        margin: '0 auto',
+        padding: 'var(--space-2xl) var(--size-gutter)',
+      }}
+    >
+      {children}
+    </Tag>
+  )
+}
 
-Container.propTypes = {
-  children: PropTypes.node,
-};
+export default Container

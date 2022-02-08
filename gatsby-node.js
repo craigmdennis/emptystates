@@ -1,148 +1,53 @@
-const path = require('path');
-const slugify = require('slugify');
-const { createFilePath } = require('gatsby-source-filesystem');
+const path = require('path')
 
-// Posts & Tags to show per page
-const POSTS_PER_PAGE = 60;
+exports.createPages = async ({ graphql, actions, reporter }) => {
+  const { createPage } = actions
 
-exports.createPages = async ({ actions, graphql, reporter }) => {
-  const { createPage } = actions;
+  // Define a template for blog post
+  const blogPost = path.resolve('./src/templates/blog-post.js')
 
-  const result = await graphql(`
-    {
-      site {
-        siteMetadata {
-          title
-          description
-        }
-      }
-      postsRemark: allMarkdownRemark(
-        sort: { fields: [frontmatter___date], order: DESC }
-        limit: 1000
-      ) {
-        edges {
-          node {
-            frontmatter {
-              redirect
-            }
-            fields {
-              slug
-            }
+  const result = await graphql(
+    `
+      {
+        allContentfulBlogPost {
+          nodes {
+            title
+            slug
           }
         }
       }
-      tagsGroup: allMarkdownRemark(limit: 1000) {
-        group(field: frontmatter___tags) {
-          fieldValue
-          totalCount
-        }
-      }
-    }
-  `);
+    `
+  )
 
   if (result.errors) {
-    reporter.panicOnBuild('Error while running GraphQL query.');
-    result.errors.forEach((e) => console.error(e.toString()));
-    return Promise.reject(result.errors);
+    reporter.panicOnBuild(
+      `There was an error loading your Contentful posts`,
+      result.errors
+    )
+    return
   }
 
-  // Create individual post pages
-  const posts = result.data.postsRemark.edges;
-  const postTemplate = path.resolve('./src/templates/post.js');
+  const posts = result.data.allContentfulBlogPost.nodes
 
-  posts.forEach((post) => {
-    const { slug } = post.node.fields;
-    const { redirect } = post.node.frontmatter;
-    const { createRedirect } = actions;
+  // Create blog posts pages
+  // But only if there's at least one blog post found in Contentful
+  // `context` is available in the template as a prop and as a variable in GraphQL
 
-    if (redirect && redirect !== null) {
-      createRedirect({
-        fromPath: redirect,
-        toPath: slug,
-        isPermanent: true,
-      });
+  if (posts.length > 0) {
+    posts.forEach((post, index) => {
+      const previousPostSlug = index === 0 ? null : posts[index - 1].slug
+      const nextPostSlug =
+        index === posts.length - 1 ? null : posts[index + 1].slug
 
-      console.log(`Creating redirect: ${redirect} → ${slug}`);
-    }
-
-    createPage({
-      path: slug,
-      component: postTemplate,
-      context: {
-        slug: slug,
-        site: result.data.site,
-      },
-    });
-  });
-
-  // Create paginated index pages
-  const numPages = Math.ceil(posts.length / POSTS_PER_PAGE);
-  const indexTemplate = path.resolve('./src/templates/index.js');
-  Array.from({ length: numPages }).forEach((_, i) => {
-    createPage({
-      path: i === 0 ? '/' : `${i + 1}`,
-      component: indexTemplate,
-      context: {
-        limit: POSTS_PER_PAGE,
-        skip: i * POSTS_PER_PAGE,
-        numPages: numPages,
-        currentPage: i + 1,
-        site: result.data.site,
-        tags: result.data.tagsGroup.group,
-      },
-    });
-  });
-
-  // Create tags list pages
-  const tags = result.data.tagsGroup.group;
-  const tagTemplate = path.resolve('./src/templates/tags.js');
-
-  const slugifyConfig = {
-    lower: true,
-  };
-
-  /// Need to paginate
-  tags.forEach((tag) => {
-    const numPages = Math.ceil(tag.totalCount / POSTS_PER_PAGE);
-    Array.from({ length: numPages }).forEach((_, i) => {
-      // Create redirect if present in the frontmatter
       createPage({
-        path:
-          i === 0
-            ? `/tags/${slugify(tag.fieldValue, slugifyConfig)}`
-            : `/tags/${slugify(tag.fieldValue, slugifyConfig)}/${i + 1}`,
-        component: tagTemplate,
+        path: `/blog/${post.slug}/`,
+        component: blogPost,
         context: {
-          limit: POSTS_PER_PAGE,
-          skip: i * POSTS_PER_PAGE,
-          numPages: numPages,
-          currentPage: i + 1,
-          tag: tag.fieldValue,
-          site: result.data.site,
+          slug: post.slug,
+          previousPostSlug,
+          nextPostSlug,
         },
-      });
-    });
-  });
-};
-
-// Create standalone pages
-exports.onCreateNode = ({ node, getNode, actions }) => {
-  const { createNodeField } = actions;
-
-  if (node.internal.type === 'MarkdownRemark') {
-    const fileNode = getNode(node.parent);
-    const slug = createFilePath({ node, getNode });
-    let prefix = `/${fileNode.sourceInstanceName}`;
-
-    // Set a path prefix for states
-    if (fileNode.sourceInstanceName === 'states') {
-      prefix = '/s';
-    }
-
-    createNodeField({
-      node,
-      name: 'slug',
-      value: `${prefix}${slug}`,
-    });
+      })
+    })
   }
-};
+}

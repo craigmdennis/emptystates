@@ -1,23 +1,23 @@
-import PropTypes from 'prop-types';
-import React, { Fragment, useState } from 'react';
-import Container from './container';
-import Navigation from './navigation';
+import React from 'react'
 
-const Layout = ({ children }) => {
-  const [menuState, setMenuState] = useState('closed');
-  const toggleMenu = () => {
-    menuState === 'closed' ? setMenuState('open') : setMenuState('closed');
-  };
-  return (
-    <Fragment>
-      <Navigation onHamburgerClick={toggleMenu} state={menuState} />
-      <Container>{children}</Container>
-    </Fragment>
-  );
-};
+import './variables.css'
+import './global.css'
+import Seo from './seo'
+import Navigation from './navigation'
+import Footer from './footer'
+class Template extends React.Component {
+  render() {
+    const { children } = this.props
 
-export default Layout;
+    return (
+      <>
+        <Seo />
+        <Navigation />
+        <main>{children}</main>
+        <Footer />
+      </>
+    )
+  }
+}
 
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
-};
+export default Template
