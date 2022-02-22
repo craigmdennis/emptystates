@@ -5,6 +5,9 @@
     "ecmaVersion": 8,
     "requireConfigFile": false,
     "sourceType": "module",
+    "babelOptions": {
+       "presets": ["@babel/preset-react"]
+    },
     "ecmaFeatures": {
       "jsx": true
     }

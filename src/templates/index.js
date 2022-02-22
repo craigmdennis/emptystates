@@ -25,7 +25,7 @@ const IndexPage = ({ data, pageContext }) => {
   return (
     <Layout>
       <SEO />
-      
+
       {currentPage === 1 ? (
         <Header
           large={true}
