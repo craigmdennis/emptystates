@@ -1,7 +1,67 @@
 ---
 import Layout from "../layouts/Base.astro";
+import Gallery from "../components/Gallery.astro";
+import GalleryCard from "../components/GalleryCard.astro";
+import Pagination from "../components/Pagination.astro";
+import { getEmDashCollection } from "emdash:content";
+
+const ITEMS_PER_PAGE = 60;
+
+const url = Astro.url;
+const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
+const deviceFilter = url.searchParams.get("device") ?? undefined;
+const platformFilter = url.searchParams.get("platform") ?? undefined;
+
+// Build query filters
+const where: Record<string, string> = { status: "published" };
+if (deviceFilter) where.device_type = deviceFilter;
+if (platformFilter) where.platform = platformFilter;
+
+// Fetch one extra to detect next page
+const { entries: allEntries } = await getEmDashCollection("states", {
+  where,
+  limit: ITEMS_PER_PAGE + 1,
+});
+
+const hasNextPage = allEntries.length > ITEMS_PER_PAGE;
+const entries = allEntries.slice(0, ITEMS_PER_PAGE);
+
+// Page title
+const filterLabel = deviceFilter
+  ? deviceFilter.charAt(0).toUpperCase() + deviceFilter.slice(1)
+  : null;
+const title = filterLabel ? `${filterLabel} Empty States` : "emptystat.es";
 ---
 
-<Layout title="emptystat.es">
-  <p class="text-base-content/60 text-sm">Gallery will be built in the next task.</p>
+<Layout title={title}>
+  {entries.length > 0 ? (
+    <>
+      <Gallery>
+        {entries.map((entry) => (
+          <GalleryCard
+            slug={entry.data.slug}
+            title={entry.data.title}
+            imageUrl={entry.data.screenshot?.url ?? ""}
+            imageAlt={entry.data.screenshot?.alt}
+            deviceType={entry.data.device_type}
+            focalX={entry.data.focal_x}
+            focalY={entry.data.focal_y}
+          />
+        ))}
+      </Gallery>
+
+      <Pagination
+        currentPage={page}
+        hasNextPage={hasNextPage}
+        baseUrl={url}
+      />
+    </>
+  ) : (
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+      <p class="text-base-content/40 text-sm font-mono">No states found</p>
+      {(deviceFilter || platformFilter) && (
+        <a href="/" class="btn btn-sm btn-ghost font-mono mt-4">Clear filters</a>
+      )}
+    </div>
+  )}
 </Layout>
