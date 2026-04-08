@@ -1,0 +1,43 @@
+{
+  "name": "emptystates",
+  "version": "1.0.0",
+  "description": "[![Netlify Status](https://api.netlify.com/api/v1/badges/a9e4ab87-7ebd-4aaf-93ea-cbdaad5fcc7d/deploy-status)](https://app.netlify.com/sites/emptystates/deploys)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "clean": "astro clean"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craigmdennis/emptystates.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/craigmdennis/emptystates/issues"
+  },
+  "homepage": "https://github.com/craigmdennis/emptystates#readme",
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.1.8",
+    "@astrojs/react": "^5.0.3",
+    "@emdash-cms/cloudflare": "^0.1.0",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.1.5",
+    "daisyui": "^5.5.19",
+    "emdash": "^0.1.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "wrangler": "^4.81.0"
+  }
+}
