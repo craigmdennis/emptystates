@@ -1,0 +1,11 @@
+---
+/**
+ * CSS Grid gallery wrapper.
+ * Uses auto-fill with a minimum column width of 260px.
+ * Children (GalleryCards) can span multiple columns for wide device types.
+ */
+---
+
+<div class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+  <slot />
+</div>
