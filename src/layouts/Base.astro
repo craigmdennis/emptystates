@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import SearchIsland from "../components/SearchIsland.tsx";
 
 interface Props {
   title: string;
@@ -55,8 +56,10 @@ const currentDevice = Astro.url.searchParams.get("device");
           emptystat.es
         </a>
 
-        <!-- Search slot (filled by pages that need it) -->
-        <div id="search-mount" class="flex-1 max-w-xs hidden sm:block"></div>
+        <!-- Search -->
+        <div class="flex-1 max-w-xs hidden sm:block">
+          <SearchIsland client:idle />
+        </div>
 
         <!-- Device nav -->
         <nav aria-label="Filter by device" class="flex gap-1 flex-wrap">
