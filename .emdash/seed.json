@@ -1,0 +1,112 @@
+{
+  "$schema": "https://emdashcms.com/seed.schema.json",
+  "version": "1",
+  "collections": [
+    {
+      "slug": "states",
+      "label": "Empty States",
+      "labelSingular": "Empty State",
+      "description": "Curated empty state UI screenshots",
+      "icon": "image",
+      "supports": ["drafts"],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Title",
+          "type": "string",
+          "required": true,
+          "validation": { "maxLength": 200 }
+        },
+        {
+          "slug": "slug",
+          "label": "URL Slug",
+          "type": "slug",
+          "required": true,
+          "unique": true
+        },
+        {
+          "slug": "screenshot",
+          "label": "Screenshot",
+          "type": "image",
+          "required": true
+        },
+        {
+          "slug": "app_name",
+          "label": "App Name",
+          "type": "string"
+        },
+        {
+          "slug": "app_url",
+          "label": "App URL",
+          "type": "string"
+        },
+        {
+          "slug": "device_type",
+          "label": "Device Type",
+          "type": "select",
+          "required": true,
+          "validation": {
+            "options": ["mobile", "tablet", "desktop", "tv", "watch", "game"]
+          }
+        },
+        {
+          "slug": "platform",
+          "label": "Platform",
+          "type": "select",
+          "validation": {
+            "options": ["ios", "android", "web", "macos", "windows"]
+          }
+        },
+        {
+          "slug": "tags",
+          "label": "Tags",
+          "type": "multiSelect",
+          "validation": {
+            "options": [
+              "onboarding",
+              "error",
+              "no-results",
+              "no-content",
+              "first-run",
+              "permissions",
+              "location",
+              "illustration",
+              "text-only",
+              "success",
+              "upgrade",
+              "connection",
+              "search",
+              "notification",
+              "empty-cart",
+              "empty-inbox"
+            ]
+          }
+        },
+        {
+          "slug": "focal_x",
+          "label": "Focal Point X (%)",
+          "type": "integer",
+          "defaultValue": 50,
+          "validation": { "min": 0, "max": 100 }
+        },
+        {
+          "slug": "focal_y",
+          "label": "Focal Point Y (%)",
+          "type": "integer",
+          "defaultValue": 50,
+          "validation": { "min": 0, "max": 100 }
+        },
+        {
+          "slug": "ocr_text",
+          "label": "OCR Text",
+          "type": "text"
+        },
+        {
+          "slug": "captured_at",
+          "label": "Captured At",
+          "type": "datetime"
+        }
+      ]
+    }
+  ]
+}
