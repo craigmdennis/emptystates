@@ -6,9 +6,10 @@
  * - Image constrained to width, centered vertically
  * - Background fill for leftover space
  * - Wide device types (desktop, tv, game) span 2 columns
- * - Title overlay appears on hover
+ * - Hover: zoom + pan via ZoomIsland React component
  * - Custom property --focal-x/--focal-y for focus mode cropping
  */
+import ZoomIsland from "./ZoomIsland.tsx";
 
 interface Props {
   slug: string;
@@ -35,21 +36,21 @@ const isWide = ["desktop", "tv", "game"].includes(deviceType);
 
 <div
   class:list={[
-    "group relative rounded-md overflow-hidden bg-base-200 aspect-[4/3] flex items-center justify-center",
+    "group relative rounded-md overflow-hidden bg-base-200 aspect-[4/3]",
     isWide && "col-span-2",
   ]}
   style={`--focal-x: ${focalX}%; --focal-y: ${focalY}%;`}
 >
   <a
     href={`/s/${slug}/`}
-    class="flex items-center justify-center w-full h-full"
+    class="block w-full h-full"
   >
-    <img
+    <ZoomIsland
+      client:visible
       src={imageUrl}
       alt={imageAlt || title}
-      loading="lazy"
-      decoding="async"
-      class="max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+      focalX={focalX}
+      focalY={focalY}
     />
   </a>
 
