@@ -1,2 +1,29 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+@theme {
+  /* DaisyUI theme customization via Tailwind 4 */
+  --color-base-100: #fafaf9;
+  --color-base-200: #f0efed;
+  --color-base-300: #e2e0dc;
+  --color-base-content: #1c1917;
+  --color-neutral: #292524;
+  --color-neutral-content: #fafaf9;
+  --color-primary: #1c1917;
+  --color-primary-content: #fafaf9;
+
+  /* Custom spacing scale */
+  --space-grid-gap: 0.75rem;
+}
+
+@layer base {
+  /* Use system monospace for metadata labels — utilitarian feel */
+  [data-label] {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}

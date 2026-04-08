@@ -1,0 +1,94 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description = "A curated gallery of empty state UI designs",
+  image,
+} = Astro.props;
+
+const siteTitle = "emptystat.es";
+const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? "https://emptystat.es");
+
+const deviceTypes = [
+  { label: "All", href: "/" },
+  { label: "Mobile", href: "/?device=mobile" },
+  { label: "Desktop", href: "/?device=desktop" },
+  { label: "Tablet", href: "/?device=tablet" },
+  { label: "TV", href: "/?device=tv" },
+  { label: "Watch", href: "/?device=watch" },
+  { label: "Game", href: "/?device=game" },
+];
+
+const currentDevice = Astro.url.searchParams.get("device");
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+
+  <body class="bg-base-100 text-base-content min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-base-300 sticky top-0 z-50 bg-base-100/95 backdrop-blur-sm">
+      <div class="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+        <!-- Logo -->
+        <a href="/" class="font-mono text-sm font-bold tracking-tight hover:opacity-70 transition-opacity">
+          emptystat.es
+        </a>
+
+        <!-- Search slot (filled by pages that need it) -->
+        <div id="search-mount" class="flex-1 max-w-xs hidden sm:block"></div>
+
+        <!-- Device nav -->
+        <nav aria-label="Filter by device" class="flex gap-1 flex-wrap">
+          {deviceTypes.map(({ label, href }) => {
+            const paramValue = new URL(href, "https://emptystat.es").searchParams.get("device");
+            const isActive = paramValue === currentDevice || (!paramValue && !currentDevice);
+            return (
+              <a
+                href={href}
+                class:list={[
+                  "btn btn-xs btn-ghost font-mono",
+                  isActive && "btn-active",
+                ]}
+              >
+                {label}
+              </a>
+            );
+          })}
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-6">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-base-300 py-6 px-4 text-center">
+      <p class="text-xs text-base-content/50 font-mono">
+        A curated collection of empty state designs
+      </p>
+    </footer>
+  </body>
+</html>
