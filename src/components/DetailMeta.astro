@@ -1,0 +1,32 @@
+---
+interface Props {
+  appName?: string;
+  appUrl?: string;
+  deviceType: string;
+  platform?: string;
+  tags?: string[];
+  capturedAt?: string;
+}
+
+const { appName, appUrl, deviceType, platform, tags, capturedAt } = Astro.props;
+
+const formattedDate = capturedAt
+  ? new Date(capturedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  : null;
+---
+
+<div class="flex flex-wrap items-center gap-2 text-sm">
+  {appName && (
+    <span class="font-medium">
+      {appUrl ? <a href={appUrl} class="link link-hover" target="_blank" rel="noopener">{appName}</a> : appName}
+    </span>
+  )}
+  <span class="badge badge-sm badge-outline font-mono" data-label>{deviceType}</span>
+  {platform && <span class="badge badge-sm badge-outline font-mono" data-label>{platform}</span>}
+  {tags?.map((tag) => <span class="badge badge-sm badge-ghost font-mono" data-label>{tag}</span>)}
+  {formattedDate && <span class="text-xs text-base-content/50 font-mono">{formattedDate}</span>}
+</div>

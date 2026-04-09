@@ -1,0 +1,53 @@
+---
+import Layout from "../../layouts/Base.astro";
+import DetailMeta from "../../components/DetailMeta.astro";
+import { getEmDashEntry } from "emdash:content";
+
+const { slug } = Astro.params;
+const { entry } = await getEmDashEntry("states", slug!);
+
+if (!entry) {
+  return Astro.redirect("/404");
+}
+
+const d = entry.data;
+---
+
+<Layout title={d.title} image={d.screenshot?.url}>
+  <article class="max-w-4xl mx-auto">
+    <!-- Back link -->
+    <a href="/" class="btn btn-sm btn-ghost font-mono mb-4">&larr; Back</a>
+
+    <h1 class="text-xl font-bold mb-3">{d.title}</h1>
+
+    <DetailMeta
+      appName={d.app_name}
+      appUrl={d.app_url}
+      deviceType={d.device_type}
+      platform={d.platform}
+      tags={d.tags}
+      capturedAt={d.captured_at}
+    />
+
+    <!-- Full-size image -->
+    <div class="mt-6 bg-base-200 rounded-lg overflow-hidden flex items-center justify-center p-4">
+      <img
+        src={d.screenshot?.url}
+        alt={d.screenshot?.alt || d.title}
+        width={d.screenshot?.width}
+        height={d.screenshot?.height}
+        class="max-w-full h-auto"
+      />
+    </div>
+
+    <!-- OCR text -->
+    {d.ocr_text && (
+      <details class="mt-6 collapse collapse-arrow bg-base-200 rounded-lg">
+        <summary class="collapse-title text-sm font-mono">Extracted text from screenshot</summary>
+        <div class="collapse-content">
+          <pre class="text-xs text-base-content/60 whitespace-pre-wrap break-words font-mono">{d.ocr_text}</pre>
+        </div>
+      </details>
+    )}
+  </article>
+</Layout>
