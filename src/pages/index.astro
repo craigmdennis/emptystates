@@ -4,6 +4,8 @@ import Gallery from "../components/Gallery.astro";
 import GalleryCard from "../components/GalleryCard.astro";
 import Pagination from "../components/Pagination.astro";
 import { getEmDashCollection } from "emdash:content";
+import FilterBar from "../components/FilterBar.astro";
+import FocusModeToggle from "../components/FocusModeToggle.tsx";
 
 const ITEMS_PER_PAGE = 60;
 
@@ -11,6 +13,7 @@ const url = Astro.url;
 const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
 const deviceFilter = url.searchParams.get("device") ?? undefined;
 const platformFilter = url.searchParams.get("platform") ?? undefined;
+const tagsFilter = url.searchParams.getAll("tags");
 
 // Build query filters
 const where: Record<string, string> = { status: "published" };
@@ -36,6 +39,14 @@ const title = filterLabel ? `${filterLabel} Empty States` : "emptystat.es";
 <Layout title={title}>
   {entries.length > 0 ? (
     <>
+      <FilterBar
+        activeDevice={deviceFilter}
+        activePlatform={platformFilter}
+        activeTags={tagsFilter}
+      />
+      <div class="flex justify-end mb-3">
+        <FocusModeToggle client:idle />
+      </div>
       <Gallery>
         {entries.map((entry) => (
           <GalleryCard
