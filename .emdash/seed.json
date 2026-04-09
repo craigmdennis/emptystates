@@ -17,14 +17,7 @@
           "required": true,
           "validation": { "maxLength": 200 }
         },
-        {
-          "slug": "slug",
-          "label": "URL Slug",
-          "type": "slug",
-          "required": true,
-          "unique": true
-        },
-        {
+{
           "slug": "screenshot",
           "label": "Screenshot",
           "type": "image",

@@ -15,16 +15,19 @@ const deviceFilter = url.searchParams.get("device") ?? undefined;
 const platformFilter = url.searchParams.get("platform") ?? undefined;
 const tagsFilter = url.searchParams.getAll("tags");
 
-// Build query filters
-const where: Record<string, string> = { status: "published" };
-if (deviceFilter) where.device_type = deviceFilter;
-if (platformFilter) where.platform = platformFilter;
-
-// Fetch one extra to detect next page
-const { entries: allEntries } = await getEmDashCollection("states", {
-  where,
-  limit: ITEMS_PER_PAGE + 1,
-});
+// Fetch entries
+let allEntries: any[] = [];
+try {
+  const result = await getEmDashCollection("states");
+  console.log("[DEBUG] getEmDashCollection result:", JSON.stringify({
+    entriesCount: result.entries?.length ?? 0,
+    error: result.error?.message ?? null,
+    keys: Object.keys(result),
+  }));
+  allEntries = result.entries ?? [];
+} catch (e: any) {
+  console.error("[DEBUG] getEmDashCollection threw:", e?.message ?? e);
+}
 
 const hasNextPage = allEntries.length > ITEMS_PER_PAGE;
 const entries = allEntries.slice(0, ITEMS_PER_PAGE);
