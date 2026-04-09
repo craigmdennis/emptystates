@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getEmDashCollection } from "emdash:content";
+import { getEmDashCollection } from "emdash";
 
 export const GET: APIRoute = async () => {
   const { entries } = await getEmDashCollection("states", {

@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Base.astro";
 import DetailMeta from "../../components/DetailMeta.astro";
-import { getEmDashEntry } from "emdash:content";
+import { getEmDashEntry } from "emdash";
 
 const { slug } = Astro.params;
 const { entry } = await getEmDashEntry("states", slug!);
