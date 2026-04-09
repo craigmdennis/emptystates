@@ -10,7 +10,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "clean": "astro clean"
+    "clean": "astro clean",
+    "ocr": "npx tsx scripts/ocr.ts",
+    "migrate": "npx tsx scripts/migrate.ts",
+    "thumbnails": "npx tsx scripts/thumbnails.ts"
   },
   "repository": {
     "type": "git",
@@ -33,9 +36,14 @@
     "astro": "^6.1.5",
     "daisyui": "^5.5.19",
     "emdash": "^0.1.0",
+    "glob": "^13.0.6",
+    "gray-matter": "^4.0.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "tailwindcss": "^4.2.2"
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.2",
+    "tesseract.js": "^7.0.0",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "wrangler": "^4.81.0"
