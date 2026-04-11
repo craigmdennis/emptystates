@@ -2,3 +2,9 @@ node_modules/
 dist/
 .wrangler/
 .astro/
+.cache/
+.DS_Store
+uploads/
+data.db
+*.db-journal
+.env
