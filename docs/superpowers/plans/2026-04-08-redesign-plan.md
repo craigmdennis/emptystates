@@ -6,7 +6,7 @@
 
 **Architecture:** EMDash (Astro-based CMS) on Cloudflare Workers with D1 for metadata and R2 for image storage. The theme is a standard Astro project with interactive islands for search, filtering, and hover zoom. A migration script imports the existing 235 markdown entries.
 
-**Tech Stack:** EMDash, Astro 6, Cloudflare Workers/D1/R2, Tesseract.js, TypeScript, CSS (no framework)
+**Tech Stack:** EMDash, Astro 6, Cloudflare Workers/D1/R2, Tesseract.js, TypeScript, Tailwind CSS 4 + DaisyUI (pre-built component classes)
 
 ---
 
