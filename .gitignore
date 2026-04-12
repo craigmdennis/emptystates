@@ -8,3 +8,4 @@ uploads/
 data.db
 *.db-journal
 .env
+prod-dump.sql
