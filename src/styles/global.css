@@ -27,11 +27,17 @@
     text-transform: uppercase;
   }
 
-  /* Focus mode: crop wide cards to focal point instead of showing full image */
-  [data-focus-mode="on"] .col-span-2 img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
+  /* Focus mode: crop cards to focal point instead of showing full image */
+  [data-focus-mode="on"] .group img {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
     object-position: var(--focal-x) var(--focal-y);
+  }
+
+  [data-focus-mode="on"] .group .cursor-zoom-in {
+    cursor: pointer !important;
   }
 }
