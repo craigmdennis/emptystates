@@ -3,16 +3,17 @@ interface Props {
   activeDevice?: string;
   activePlatform?: string;
   activeTags?: string[];
+  platforms?: string[];
+  tags?: string[];
 }
 
-const { activeDevice, activePlatform, activeTags = [] } = Astro.props;
-
-const platforms = ["ios", "android", "web", "macos", "windows"];
-const tags = [
-  "onboarding", "error", "no-results", "no-content", "first-run",
-  "permissions", "location", "illustration", "text-only", "success",
-  "upgrade", "connection", "search", "notification", "empty-cart", "empty-inbox",
-];
+const {
+  activeDevice,
+  activePlatform,
+  activeTags = [],
+  platforms = [],
+  tags = [],
+} = Astro.props;
 
 function buildUrl(params: Record<string, string | string[] | undefined>): string {
   const url = new URL("/", "https://emptystat.es");
