@@ -15,14 +15,41 @@ const deviceFilter = url.searchParams.get("device") ?? undefined;
 const platformFilter = url.searchParams.get("platform") ?? undefined;
 const tagsFilter = url.searchParams.getAll("tags");
 
-// Fetch entries
-const { entries: allEntries = [] } = await getEmDashCollection("states", {
+// Fetch all published entries (235 total — fine to load at once)
+const { entries: allPublished = [] } = await getEmDashCollection("states", {
   status: "published",
-  limit: ITEMS_PER_PAGE + 1,
+  limit: 1000,
 });
 
-const hasNextPage = allEntries.length > ITEMS_PER_PAGE;
-const entries = allEntries.slice(0, ITEMS_PER_PAGE);
+// Filter in-memory (EMDash where clause only supports taxonomy fields)
+const hasFilters = deviceFilter || platformFilter || tagsFilter.length > 0;
+const filtered = hasFilters
+  ? allPublished.filter((entry) => {
+      if (deviceFilter && entry.data.device_type !== deviceFilter) return false;
+      if (platformFilter && entry.data.platform !== platformFilter) return false;
+      if (tagsFilter.length > 0) {
+        const entryTags: string[] = entry.data.tags ?? [];
+        if (!tagsFilter.some((t) => entryTags.includes(t))) return false;
+      }
+      return true;
+    })
+  : allPublished;
+
+// Split by device category
+const wideTypes = new Set(["desktop", "tv", "game"]);
+
+// Paginate
+const start = (page - 1) * ITEMS_PER_PAGE;
+const hasNextPage = filtered.length > start + ITEMS_PER_PAGE;
+const entries = filtered.slice(start, start + ITEMS_PER_PAGE);
+
+// Split paginated entries into sections
+const paginatedMobile = entries.filter((e) => !wideTypes.has(e.data.device_type));
+const paginatedDesktop = entries.filter((e) => wideTypes.has(e.data.device_type));
+
+// Derive available platforms and tags from actual data
+const availablePlatforms = [...new Set(allPublished.map((e) => e.data.platform).filter(Boolean))].sort();
+const availableTags = [...new Set(allPublished.flatMap((e) => e.data.tags ?? []))].sort();
 
 // Page title
 const filterLabel = deviceFilter
@@ -32,29 +59,60 @@ const title = filterLabel ? `${filterLabel} Empty States` : "emptystat.es";
 ---
 
 <Layout title={title}>
+  <FilterBar
+    activeDevice={deviceFilter}
+    activePlatform={platformFilter}
+    activeTags={tagsFilter}
+    platforms={availablePlatforms}
+    tags={availableTags}
+  />
+
   {entries.length > 0 ? (
     <>
-      <FilterBar
-        activeDevice={deviceFilter}
-        activePlatform={platformFilter}
-        activeTags={tagsFilter}
-      />
       <div class="flex justify-end mb-3">
         <FocusModeToggle client:idle />
       </div>
-      <Gallery>
-        {entries.map((entry) => (
-          <GalleryCard
-            slug={entry.data.slug}
-            title={entry.data.title}
-            imageUrl={entry.data.screenshot?.url ?? ""}
-            imageAlt={entry.data.screenshot?.alt}
-            deviceType={entry.data.device_type}
-            focalX={entry.data.focal_x}
-            focalY={entry.data.focal_y}
-          />
-        ))}
-      </Gallery>
+      {paginatedMobile.length > 0 && (
+        <section>
+          {paginatedDesktop.length > 0 && (
+            <h2 class="text-xs font-mono text-base-content/40 uppercase tracking-wider mb-3" data-label>Mobile</h2>
+          )}
+          <Gallery>
+            {paginatedMobile.map((entry) => (
+              <GalleryCard
+                slug={entry.data.slug}
+                title={entry.data.title}
+                imageUrl={entry.data.screenshot?.url ?? ""}
+                imageAlt={entry.data.screenshot?.alt}
+                deviceType={entry.data.device_type}
+                focalX={entry.data.focal_x}
+                focalY={entry.data.focal_y}
+              />
+            ))}
+          </Gallery>
+        </section>
+      )}
+
+      {paginatedDesktop.length > 0 && (
+        <section class={paginatedMobile.length > 0 ? "mt-10" : ""}>
+          {paginatedMobile.length > 0 && (
+            <h2 class="text-xs font-mono text-base-content/40 uppercase tracking-wider mb-3" data-label>Desktop</h2>
+          )}
+          <Gallery>
+            {paginatedDesktop.map((entry) => (
+              <GalleryCard
+                slug={entry.data.slug}
+                title={entry.data.title}
+                imageUrl={entry.data.screenshot?.url ?? ""}
+                imageAlt={entry.data.screenshot?.alt}
+                deviceType={entry.data.device_type}
+                focalX={entry.data.focal_x}
+                focalY={entry.data.focal_y}
+              />
+            ))}
+          </Gallery>
+        </section>
+      )}
 
       <Pagination
         currentPage={page}
@@ -65,9 +123,6 @@ const title = filterLabel ? `${filterLabel} Empty States` : "emptystat.es";
   ) : (
     <div class="flex flex-col items-center justify-center py-24 text-center">
       <p class="text-base-content/40 text-sm font-mono">No states found</p>
-      {(deviceFilter || platformFilter) && (
-        <a href="/" class="btn btn-sm btn-ghost font-mono mt-4">Clear filters</a>
-      )}
     </div>
   )}
 </Layout>
