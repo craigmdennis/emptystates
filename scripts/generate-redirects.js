@@ -4,12 +4,12 @@
  *
  * gatsby-node.js calls createRedirect() for entries carrying a `redirect`
  * field, but createRedirect is inert without a plugin that writes the
- * redirects to disk. On Netlify that was handled by the auto-installed
- * Essential Gatsby build plugin, which is why no such plugin appears in
- * package.json. Hosting elsewhere means generating the file ourselves.
+ * redirects to disk. The previous host injected such a plugin at build time,
+ * which is why no equivalent appears in package.json -- and why these
+ * redirects would have vanished silently when the site moved.
  *
- * Cloudflare parses the same _redirects format Netlify originated, so the
- * output here is what Netlify has been producing all along.
+ * Output is a plain text file of `from to 301` lines, which Cloudflare parses
+ * directly.
  *
  * Run after `gatsby build`, so it writes into an existing public/.
  */

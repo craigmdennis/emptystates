@@ -35,12 +35,13 @@ break the one thing that still works.
 
 `gatsby-node.js` calls `createRedirect()` for entries with a `redirect`
 frontmatter field, but that call is inert without a plugin that writes the
-redirects to disk. Netlify's auto-installed Essential Gatsby plugin used to do
-this, which is why no such plugin appears in `package.json`.
+redirects to disk. The previous host injected such a plugin at build time, which
+is why no equivalent appears in `package.json` — and why the redirects would
+have vanished silently when the site moved.
 
-`scripts/generate-redirects.js` now writes `public/_redirects` instead, and runs
-as part of `npm run build`. Cloudflare parses the same `_redirects` format
-Netlify originated.
+`scripts/generate-redirects.js` now writes `public/_redirects`, and runs as part
+of `npm run build`. Its output is a plain text file of `from to 301` lines that
+Cloudflare parses directly.
 
 ### Caching
 
@@ -62,11 +63,13 @@ fires even though `www` is attached to the Worker.
 
 ### Rollback
 
-The Netlify site still serves its last successful deploy at
-`emptystates.netlify.app`, so rolling back is a DNS change rather than a code
-change: delete the Custom Domain records and point the zone back at Netlify.
+Every deploy creates a new Worker version, and previous versions stay available.
+To roll back without rebuilding:
 
-`netlify.toml` has been removed, which does not affect that last deploy. It
-does mean a fresh Netlify build would need its publish directory (`public`)
-and the Gatsby cache plugin configured in the Netlify dashboard, since nothing
-in the repo declares them any more.
+```bash
+npx wrangler@latest deployments list   # find the version to return to
+npx wrangler@latest rollback [<version-id>]
+```
+
+This is faster and more reliable than rebuilding, which matters here because a
+rebuild needs Node 14 and a full `npm ci`.
