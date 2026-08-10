@@ -49,6 +49,17 @@ Netlify originated.
 filenames but not the page-data JSON that client-side navigation fetches, so
 caching those breaks navigation for returning visitors after a deploy.
 
+### Hostnames
+
+`emptystat.es` and `www.emptystat.es` are both attached to the Worker as
+Custom Domains (see `routes` in `wrangler.jsonc`).
+
+`www` then 301s to the apex via a redirect rule created from Cloudflare's
+www-to-root template. That rule lives in the Cloudflare dashboard, **not** in
+this repo — if the redirect ever stops working, look there rather than here.
+Redirect rules run before Workers in the request pipeline, which is why it
+fires even though `www` is attached to the Worker.
+
 ### Rollback
 
 `netlify.toml` is retained, and the Netlify site still builds at
