@@ -123,7 +123,12 @@ been generating.
 | `/sw.js` | `no-cache` | not content-hashed |
 | `/app-data.json` | `no-cache` | not content-hashed |
 | `/static/*` | `max-age=31536000, immutable` | content-hashed |
-| `*.js`, `*.css` | `max-age=31536000, immutable` | content-hashed |
+
+Deliberately **no** blanket `*.js` / `*.css` immutable rule. Gatsby's hashed bundles sit at
+the root, but so does `sw.js`, which must not be cached — and whether a later `_headers` rule
+overrides an earlier match is not something worth making load-bearing. Cloudflare already
+applies automatic etag-based caching to static assets, which is correct for hashed
+filenames, so the blanket rule buys little and risks pinning a stale service worker.
 
 This is the part that fails quietly if skipped. Gatsby hashes its JS and CSS filenames but
 not the `page-data.json` files that client-side navigation fetches. Cache those and a
