@@ -62,5 +62,11 @@ fires even though `www` is attached to the Worker.
 
 ### Rollback
 
-`netlify.toml` is retained, and the Netlify site still builds at
-`emptystates.netlify.app`. Rolling back is a DNS change, not a code change.
+The Netlify site still serves its last successful deploy at
+`emptystates.netlify.app`, so rolling back is a DNS change rather than a code
+change: delete the Custom Domain records and point the zone back at Netlify.
+
+`netlify.toml` has been removed, which does not affect that last deploy. It
+does mean a fresh Netlify build would need its publish directory (`public`)
+and the Gatsby cache plugin configured in the Netlify dashboard, since nothing
+in the repo declares them any more.
