@@ -11,6 +11,22 @@
   // builds. Deploy with `npx wrangler@latest deploy` on modern Node instead.
   "name": "emptystates-site",
   "compatibility_date": "2026-08-10",
+
+  // Keep the workers.dev URL alive. Declaring `routes` without this silently
+  // disables it, which would leave no working URL if a custom domain attach
+  // fails.
+  "workers_dev": true,
+
+  // Custom domains, commented out until the stale A records for emptystat.es
+  // and www.emptystat.es are deleted from the zone. Cloudflare refuses to
+  // attach a custom domain over externally managed DNS records (error 100117).
+  //
+  // Once those records are gone, uncomment and redeploy:
+  //
+  // "routes": [
+  //   { "pattern": "emptystat.es", "custom_domain": true },
+  //   { "pattern": "www.emptystat.es", "custom_domain": true }
+  // ],
   "assets": {
     "directory": "./public",
 
