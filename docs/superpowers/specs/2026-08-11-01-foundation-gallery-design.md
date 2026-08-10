@@ -226,10 +226,73 @@ property gives enough signal without it.
 
 ## 5. Detail page — `/s/<slug>`
 
-Full-resolution image from `originals/`. Metadata: app name linked to `app_url`,
-device, OS, tags as links, capture date, submitter attribution when present.
-Previous/next by `published_at`. Screen text in a `<details>` block once 02
-populates it — collapsed, and doubling as an accessibility aid.
+### The image fills the viewport
+
+The screenshot is the page. It occupies the full viewport height less the header,
+contained rather than cropped, so the whole screen is visible without scrolling
+whatever its aspect ratio.
+
+```css
+.detail-figure {
+  height: calc(100dvh - var(--hdr-detail));
+  display: grid;
+  place-items: center;
+}
+.detail-figure img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;         /* contain, without object-fit letterboxing the box itself */
+}
+```
+
+`--hdr-detail` is the detail page's own header, which is **not** the gallery
+header — no facet bar, no view toggle, no search. Back link, wordmark, and the
+original link. Roughly 56px against the gallery's 118px, and every pixel saved is
+given to the image.
+
+Sizing via `max-width`/`max-height` with `width: auto` rather than `object-fit`
+matters here: the `<img>` box shrinks to the image, so the caption and any focus
+ring track the actual picture rather than an invisible container that is wider than
+what is displayed.
+
+**Which variant.** `w1280` at 1× covers a viewport-fit desktop screenshot and a 2×
+phone screenshot. `w2560` is served via `srcset` for large or high-density displays,
+generated in 02 only when the original is at least that wide. The original is never
+the display image — it can be several megabytes, and this is a page people open
+repeatedly while browsing.
+
+### Open the original
+
+A link beside the image, opening in a new tab:
+
+```html
+<a href="https://img.emptystat.es/originals/<id>.<ext>"
+   target="_blank" rel="noopener noreferrer">
+  Open original — 1170 × 2532, 1.4 MB
+</a>
+```
+
+Dimensions and file size are shown because they are the reason someone follows the
+link. A designer opening the original wants to inspect at pixel level or download a
+reference, and both decisions depend on knowing what arrives. An unlabelled "view
+full size" on a 6 MB PNG over mobile data is a small hostile act.
+
+`rel="noopener noreferrer"` is required, not decoration — R2 serves on a different
+subdomain, and `target="_blank"` without it hands the opened page a reference back to
+this one.
+
+### Below the fold
+
+Because the image takes the viewport, metadata sits below it. That is the intended
+trade, but it must be *discoverable*: leave the metadata strip's top edge visible at
+the bottom of the viewport rather than starting it exactly at the fold. A page that
+ends precisely at the viewport edge reads as finished, and people do not scroll it.
+
+Below: app name linked to `app_url`, device, OS, tags as links, capture date,
+submitter attribution when present, previous/next by `published_at`, and — once 02
+populates it — screen text in a collapsed `<details>` block, which doubles as an
+accessibility aid.
 
 Legacy `/tags/<tag>` URLs are preserved as pre-filtered gallery views.
 
@@ -277,6 +340,13 @@ Opt-out sets a `localStorage` flag suppressing **both** the Plausible script and
 - [ ] Both view modes render at 360px, 768px, 1280px, 2560px
 - [ ] No cumulative layout shift on gallery load — verify in DevTools, do not assume
 - [ ] View preference survives reload with no flash of the wrong layout
+- [ ] Detail page image fits the viewport without scrolling, at 0.47 and 1.78
+      aspect ratios, on a 390px phone and a 2560px display
+- [ ] Metadata strip peeks above the fold rather than starting exactly at it
+- [ ] "Open original" opens in a new tab, carries `rel="noopener noreferrer"`,
+      and states the real dimensions and file size
+- [ ] Detail page serves `w1280`/`w2560`, never the original as display image —
+      confirm in the network trace
 - [ ] `/api/view-pref` increments D1 **and** Plausible shows the event without
       `x-plausible-dropped`
 - [ ] Opt-out suppresses both the script and the endpoint

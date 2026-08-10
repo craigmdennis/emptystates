@@ -42,9 +42,17 @@ atomic, so a message can arrive marginally early. Retry handles it.
 `size`. These are the *authoritative* values. Anything a client claimed is
 discarded — rules depend on these, so they are re-derived from the bytes.
 
-**3. Generate variants.** WebP at 640px and 1280px wide, quality 82, written to
-`w640/` and `w1280/`. Never upscale: an image narrower than 1280 gets only `w640`,
-and the card falls back. Originals are never modified.
+**3. Generate variants.** WebP at 640px, 1280px and 2560px wide, quality 82, written
+to `w640/`, `w1280/` and `w2560/`. **Never upscale** — a variant is written only when
+the original is at least that wide, and `srcset` falls back to the largest that
+exists.
+
+`w2560` exists for the detail page (01), where the image fills the viewport and a
+desktop screenshot on a high-density display needs more than 1280px to stay sharp.
+It is the largest variant, not the original: originals can run to several megabytes
+and are reached only through the explicit "open original" link.
+
+Originals are never modified.
 
 **4. Extract colour.** Section 2.
 

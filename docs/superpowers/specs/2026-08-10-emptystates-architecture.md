@@ -206,12 +206,12 @@ building it.
 
 ### Variable, at three scales
 
-Assumes ~2 MB per original plus ~0.4 MB of WebP variants, and one vision call per
-new entry.
+Assumes ~2 MB per original plus ~0.9 MB of WebP variants across the three widths,
+and one vision call per new entry.
 
 | | 500 entries | 2,000 entries | 10,000 entries |
 |---|---|---|---|
-| R2 storage | 1.2 GB — free | 4.8 GB — free | 24 GB → $0.21 |
+| R2 storage | 1.5 GB — free | 5.8 GB — free | 29 GB → $0.29 |
 | R2 ops | free tier | free tier | free tier |
 | D1 storage | < 20 MB — included | < 80 MB — included | < 400 MB — included |
 | Requests | well inside 10M | well inside 10M | well inside 10M |
@@ -460,8 +460,11 @@ Plausible was never going to. No IP, no user agent, no session identifier.
 
 ```
 originals/<state_id>.<ext>          # exactly as submitted, never modified
+                                    # reached only via the detail page's explicit
+                                    # "open original" link, never as a display image
 w640/<state_id>.webp                # gallery, phone viewports
-w1280/<state_id>.webp               # gallery desktop, and detail page
+w1280/<state_id>.webp               # gallery desktop, detail page at 1x
+w2560/<state_id>.webp               # detail page on large or high-density displays
 submissions/<submission_id>.<ext>   # pending; moved to originals/ on approval
 ```
 
