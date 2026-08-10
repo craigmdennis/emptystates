@@ -10,3 +10,4 @@ data.db
 .env
 prod-dump.sql
 .worktrees/
+.superpowers/
