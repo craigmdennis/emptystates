@@ -223,11 +223,19 @@ R2's 10 GB free allowance is the line that eventually moves, and it moves slowly
 roughly 4,000 entries before it binds, at $0.015/GB-month after that. At 10,000
 entries the entire Cloudflare bill is still under $6.
 
-**The Workers AI figure needs measuring, not estimating.** Neuron cost per vision
-call depends on model and image size, and I will not invent a number. Budget it as
-"free below roughly 40–50 new entries per day, single-digit dollars above". Ingest
-is one call per *new* entry, so cost tracks submission rate, not traffic — a viral
-day costs nothing extra. Measure on the first hundred and revise this table.
+**Workers AI, computed from published unit pricing (2026-08-11).**
+`@cf/moondream/moondream3.1-9B-A2B` is $0.30/M input and $1.00/M output tokens. At
+roughly 1,500 image tokens plus 200 prompt and 400 output, that is **~$0.0009 per
+image** — about **110 free calls per day** against the 10,000-Neuron allowance, and
+~$0.21 for the whole 229-entry backfill.
+
+One assumption remains: the image token count, which varies with the model's tiling.
+Read it from the `usage` field on the first real call and correct these figures.
+
+Ingest is one call per *new* entry, so cost tracks submission rate, not traffic — a
+viral day costs nothing extra. **This line was previously flagged as the main
+financial risk; at a tenth of a cent per call it is not.** R2 storage is the real
+variable cost.
 
 **Plausible tier.** Business is already in place for other sites, so custom
 properties, the Stats API (600 requests/hour) and five-year retention are all
@@ -309,6 +317,7 @@ CREATE TABLE states (
   width            INTEGER NOT NULL,
   height           INTEGER NOT NULL,
   aspect_ratio     REAL NOT NULL,             -- denormalised: layout needs it per row
+  byte_size        INTEGER NOT NULL,          -- original's size, shown on the detail link
 
   screen_text      TEXT,                      -- Workers AI vision
   description      TEXT,                      -- Workers AI vision

@@ -117,10 +117,29 @@ blue. Rank 1 still drives sort order.
 
 One Workers AI call per image, returning several fields at once.
 
-**Model:** `@cf/moondream/moondream3.1-9B-A2B` — a vision-language model with a 32K
-context, built for structured output on real-world vision tasks. Fallback
+**Model:** `@cf/moondream/moondream3.1-9B-A2B` — a 9B mixture-of-experts
+vision-language model (2B active), built for OCR and structured output. Fallback
 `@cf/google/gemma-4-26b-a4b-it`, which Cloudflare's own markdown conversion uses for
 image description.
+
+**Do not reach for `@cf/google/gemma-3-12b-it`** — it is deprecated as of
+2026-05-30 and appears in older documentation and blog posts.
+
+Published unit pricing, checked 2026-08-11:
+
+| Model | Input | Output | Est. per image¹ |
+|---|---|---|---|
+| `moondream3.1-9B-A2B` | $0.30/M tokens | $1.00/M tokens | **~$0.0009** |
+| `kimi-k2.6` (vision) | $0.95/M | $4.00/M | ~$0.0032 |
+
+¹ Assuming ~1,500 image tokens, ~200 prompt, ~400 output. **The image-token count is
+the only assumed figure** — read it from the `usage` field on the first real call and
+correct this table.
+
+At $0.011 per 1,000 Neurons that is roughly **110 free vision calls per day**, the
+229-entry backfill costs about **$0.21 one-off**, and 10,000 entries would total
+around $9 ever. Moondream is both the cheaper option and the one purpose-built for
+this task, so there is no cost-versus-quality trade to manage here.
 
 Requested as JSON:
 
