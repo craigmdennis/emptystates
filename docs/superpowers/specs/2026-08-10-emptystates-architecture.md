@@ -4,48 +4,49 @@
 **Status:** approved, ready for sub-specs
 **Supersedes:** `2026-04-08-redesign-design.md` (EMDash approach, abandoned)
 
-This is the umbrella document. It fixes the stack, the data model, the shared
-conventions and the free-tier budget. Four sub-specs sit beneath it and inherit
-everything here:
+Umbrella document. Fixes the stack, the data model, the compute model, the cost
+model and the shared conventions. Sub-specs inherit everything here.
 
-| # | Spec | Depends on |
-|---|---|---|
-| 01 | Foundation + gallery | — |
-| 02 | Search + ingest | 01 |
-| 03 | Submissions | 01, 02 |
-| 04 | Admin + agent | 01, 02, 03 |
+| # | Spec | Depends on | Phase |
+|---|---|---|---|
+| 01 | Foundation + gallery | — | 1 |
+| 02 | Ingest + search | 01 | 1 |
+| 03 | Submissions | 01, 02 | 1 |
+| 04 | Admin + agent | 01, 02, 03 | 1–2 |
+| 05 | MCP server | 02 | 2–3 |
 
 ---
 
 ## Problem
 
-`emptystat.es` is a curated gallery of 235+ empty-state screenshots. Three things
-are missing and one is wrong.
+`emptystat.es` curates 235+ empty-state screenshots. Three things are missing and
+one is wrong.
 
 Missing: a public submission route, an admin area optimised for review, and search
-across the dimensions that actually matter — tags, screen text, app name, colour,
-date, screen size, OS.
+across the dimensions that matter — tags, screen text, app name, colour, date,
+screen size, OS.
 
-Wrong: the layout. The library spans a 7× range of aspect ratios, from 0.47 phone
-portraits to 3.27 wide crops, and no grid built so far handles that mix without
-either letterboxing the 77% of entries that are phones or burying the desktop
-entries that most need the space.
+Wrong: the layout. The library spans a 7× range of aspect ratios and no grid so far
+handles the mix without either letterboxing the 77% of entries that are phones or
+burying the desktop entries that most need the space.
 
 ## Goals
 
-- One grid that presents phone, tablet and desktop honestly in a single view.
-- Search across all six dimensions from a single free-text field, with facets on top.
+- One grid presenting phone, tablet and desktop honestly in a single view.
+- Search across all dimensions from one free-text field, with facets on top.
 - A public submission flow with enforceable content rules.
 - An admin area optimised for mobile review and one-tap publishing.
-- Everything inside Cloudflare's free tier.
+- Predictable, small running costs.
 
 ## Non-goals
 
-- Migrating the legacy Gatsby site's hosting. That shipped separately — see
+- **Monetisation.** This site does one thing and is not a business. No paywall, no
+  accounts, no upsell. This constrains later decisions and is recorded deliberately.
+- Migrating the legacy Gatsby hosting — shipped separately, see
   `2026-08-10-gatsby-cloudflare-migration-design.md`.
-- Submitter accounts, logins, or profiles.
+- Submitter accounts or logins.
 - Email notification to submitters. Deferred past v1.
-- Auto-publishing without human review. See spec 04 for why this is phase two.
+- Auto-publishing without human review. See spec 04.
 
 ---
 
@@ -54,136 +55,230 @@ entries that most need the space.
 | Layer | Choice |
 |---|---|
 | Framework | Astro 6, `output: "server"`, `@astrojs/cloudflare` |
-| Runtime | Cloudflare Workers |
-| Database | Cloudflare D1 (SQLite), including FTS5 |
+| Runtime | Cloudflare Workers (**Paid plan**) |
+| Database | Cloudflare D1, including FTS5 |
 | Object storage | Cloudflare R2, public bucket on `img.emptystat.es` |
+| Async work | Cloudflare Queues |
 | Interactive UI | React 19 islands |
 | Styling | Tailwind 4 |
 | Admin auth | Cloudflare Access (Zero Trust) |
 | Bot defence | Cloudflare Turnstile |
-| Inference | Workers AI |
-| Analytics | First-party endpoint → Plausible, mirrored to D1 |
+| Inference | Workers AI (vision) |
+| Analytics | Plausible, standard script + one first-party event |
 
 ### EMDash is dropped
 
-The April spec built on EMDash 0.1.0. That is abandoned, for reasons that got
-stronger as this brief grew:
+The April spec built on EMDash 0.1.0. Abandoned, for reasons that strengthened as
+the brief grew:
 
-- The admin area is now a **product with its own requirements** — a mobile review
+- The admin area is now **a product with its own requirements** — mobile review
   queue, one-tap publishing, agent triage. A generic CMS admin is worst at exactly
-  this, and every feature in specs 03 and 04 would be a workaround.
-- A public submission queue is not a CMS concept. It has no home in EMDash's model.
-- EMDash 0.1.0's documentation is unreliable (see the project's own gotchas note:
-  wrong import paths, a required `src/live.config.ts` that fails silently when
-  absent, reserved field collisions, an admin API that resists CLI auth).
+  this, and specs 03 and 04 would be workarounds throughout.
+- A public submission queue is not a CMS concept and has no home in EMDash's model.
+- EMDash 0.1.0's documentation is unreliable: wrong import paths, a required
+  `src/live.config.ts` that fails silently when absent, reserved field collisions,
+  an admin API that resists CLI auth.
 
-The cost of leaving is low **by prior design**. The April spec's "Escape Hatch"
-clause put data in D1 + R2 independent of the CMS and noted that EMDash themes are
-plain Astro projects. Both hold. No data migration is required — only the removal
-of the `emdash` integration and the replacement of `getEmDashCollection` calls with
-direct D1 queries.
+Leaving is cheap **by prior design** — the April spec's "Escape Hatch" put data in
+D1 + R2 independent of the CMS, and noted EMDash themes are plain Astro projects.
+Both hold. No data migration; only removal of the integration and replacement of
+`getEmDashCollection` calls with direct D1 queries.
 
-**Work to remove:** `emdash` and `@emdash-cms/cloudflare` from `package.json`, the
+**To remove:** `emdash` and `@emdash-cms/cloudflare` from `package.json`, the
 `emdash()` integration from `astro.config.mjs`, `src/live.config.ts`,
-`emdash-env.d.ts`, and `.emdash/seed.json` (whose field definitions are carried
-into the schema below).
-
----
+`emdash-env.d.ts`, `.emdash/seed.json`.
 
 ### Inherited and rejected
 
-The April 2026 spec and `.emdash/seed.json` are prior art, not precedent. Each
-element was re-examined against what the platform offers now, and several did not
-survive. Recording them here so they are not silently reintroduced.
+Prior art is not precedent. Each element of the April spec was re-tested against
+what the platform offers now. Recording the rejections so they are not silently
+reintroduced.
 
-**Focal points (`focal_x`, `focal_y`) — dropped.** They existed to drive a
-crop-to-focal thumbnail and a hover-zoom pan. Neither view mode crops: justified
-rows render each image at its true aspect ratio, and square mode contains the whole
-image inside a padded cell. A focal point with nothing to focus is two columns of
-maintenance and a curation chore across 235 entries, buying nothing. If a
-crop-based view is ever added, this comes back — with the field, not before it.
+**Focal points (`focal_x`, `focal_y`) — dropped.** They drove a crop-to-focal
+thumbnail and hover-zoom pan. Neither view mode crops: justified rows render true
+aspect ratios, square mode contains the whole image in a padded cell. A focal point
+with nothing to focus is two columns and a 235-entry curation chore buying nothing.
+If a crop-based view is ever added, this returns with it — not before.
 
 **Tesseract — replaced by Workers AI vision.** The April plan ran `tesseract.js` at
-build time because that was the reasonable choice then. It is no longer: Workers AI
-now hosts vision-language models (`@cf/moondream/moondream3.1-9B-A2B`,
-`@cf/google/gemma-4-26b-a4b-it`) that read UI screenshots far more accurately than
-classical OCR, handle low-contrast and anti-aliased type that Tesseract mangles, and
-run as a subrequest rather than consuming CPU. The field is renamed `screen_text`
-accordingly — it is no longer OCR output, and calling it `ocr_text` would misdescribe
-both its provenance and its quality.
+build time, reasonable then, not now. Workers AI hosts vision-language models
+(`@cf/moondream/moondream3.1-9B-A2B`, `@cf/google/gemma-4-26b-a4b-it`) that read UI
+screenshots far more accurately than classical OCR — particularly the low-contrast,
+anti-aliased type that is most app UI, and precisely what Tesseract mangles. The
+field is renamed `screen_text`: calling it `ocr_text` would misdescribe both its
+provenance and its quality.
 
-The same call returns more than text. One vision request per submission can produce
-screen text, a description, suggested tags, and the OS inferred from UI chrome —
-replacing what would otherwise be several separate pipelines. Spec 02 details this;
-spec 04 reuses the same call for triage.
+One vision call returns more than text — screen text, a description, suggested tags,
+and OS inferred from UI chrome. That collapses what would have been four pipelines,
+and means spec 04's agent needs no separate "look at this image" step because ingest
+already looked.
 
-**`device_type` values `tv`, `watch` and `game` — dropped.** They appear in the
-April spec's enum and in `seed.json`. They appear **nowhere in the 729 content
-files**. Tag counts across the real corpus: `mobile` 392, `desktop` 72, `browser`
-50, and no television, watch or console entry at all. A `CHECK` constraint listing
-values that have never existed is a form of fiction that makes the submission form
-longer and the facet bar wider for no one. `phone | tablet | desktop` is what the
-data supports; adding a value later is one migration.
-
-**Build-time processing — dropped.** The April design assumed a static build with a
-build-time OCR pass and a build-time search index. The site is
-`output: "server"` on Workers, so there is no build to hang work off, and
-submissions arrive continuously rather than at deploy time. Ingest happens at
-upload; nothing waits for a deploy.
+**Build-time processing — dropped.** The April design hung OCR and index-building
+off a static build. There is no build: the site is `output: "server"`, and
+submissions arrive continuously rather than at deploy time.
 
 **Client-side JSON search index — dropped.** It cannot rank, and shipping the whole
-corpus including screen text to every visitor gets worse with every entry added.
+corpus including screen text to every visitor degrades with every entry added.
 Superseded by D1 + FTS5.
 
-**Kept, and why:** D1 + R2 (the right primitives, and already provisioned); Astro
-with React islands (current, and the existing gallery components port directly);
-`/s/<slug>` URLs (breaking them would cost the site its inbound links); ULIDs via
-`ulidx` (already a dependency, and time-sortable).
+**Kept:** D1 + R2 (right primitives, already provisioned); Astro with React islands
+(current, existing gallery components port directly); `/s/<slug>` URLs (breaking them
+costs inbound links); ULIDs via `ulidx` (already a dependency, time-sortable).
 
-## The 10ms CPU constraint
+---
 
-This is the single most consequential platform limit for this project.
+## Compute model
 
-Workers free plan allows **10ms of CPU per invocation**, and that applies to Cron
-Triggers as well as HTTP requests. Not wall time — CPU time.
+The project runs on **Workers Paid**. This is a deliberate purchase, not a default,
+and it is worth being explicit about what it buys.
 
-| Work | CPU cost | Where it runs |
+| Limit | Free | Paid |
 |---|---|---|
-| Render a gallery page | < 1ms | Worker |
-| D1 query, including FTS5 | I/O, not CPU | Worker |
-| Workers AI inference | I/O, not CPU | Worker |
-| R2 read/write | I/O, not CPU | Worker |
-| **Screen-text extraction** | I/O, not CPU | **Worker, via Workers AI** |
-| **Colour quantisation** | 100–400ms | **Browser at upload** |
-| **Thumbnail generation** | 50–300ms | **Browser at upload** |
+| CPU per invocation | 10 ms | 5 min (30 s default) |
+| CPU per Cron Trigger | 10 ms | 15 min |
+| Requests | 100,000/day | 10M/month included |
+| Subrequests per invocation | 50 external | 10,000 |
+| Queues | unavailable | available |
 
-The distinction that matters: **Workers AI inference is a subrequest, not
-computation**. It does not touch the 10ms CPU budget, so anything a vision model can
-do stays server-side. Only work requiring raw pixel access in JavaScript has to move
-to the client.
+On the free plan, colour quantisation (100–400 ms CPU) and thumbnail generation
+(50–300 ms) could not run in a Worker at all, which forced them into the browser and
+forced backfill into local scripts holding account credentials. Three ingest paths
+that had to agree with each other, for the sake of one number.
 
-That leaves colour quantisation and thumbnail generation. The submitter's browser
-downscales to a 64×64 bitmap on a canvas, runs k-means for the dominant palette,
-converts to CIELAB, and generates the WebP variants — then posts them alongside the
-original. Cost to the platform: zero CPU. It scales with submitters rather than with
-budget.
+Paid removes that entirely. **There is one ingest pipeline**, server-side, used
+identically by public submissions, admin uploads and legacy backfill.
 
-Legacy backfill runs as a local Node script, the pattern the repo already uses
-(`npm run thumbnails`).
+### The ingest pipeline
 
-**Trust boundary:** client-derived data is *descriptive*, never *authoritative*.
-Dimensions, alpha channel and file size are re-checked server-side from the image
-bytes because rules depend on them (spec 03). Colours are accepted as given — a
-submitter who falsifies them only degrades their own entry's discoverability, and
-they are re-derivable offline at any time.
+```
+        ┌── POST /api/submit ────┐
+        │   (public form)        │
+        ├── POST /api/admin/capture ─┤       ┌─────────────────┐
+        │   (your phone)         │   ──────▶│  INGEST queue   │
+        ├── POST /api/admin/backfill ┤       └────────┬────────┘
+        │   (legacy, batched)    │                    │
+        └────────────────────────┘                    ▼
+                                          ┌───────────────────────┐
+                                          │ 1. read bytes from R2 │
+                                          │ 2. decode + dimensions│
+                                          │ 3. alpha / size checks│
+                                          │ 4. WebP variants      │
+                                          │ 5. k-means → CIELAB   │
+                                          │ 6. Workers AI vision  │
+                                          │ 7. write D1 + FTS row │
+                                          └───────────────────────┘
+```
+
+A Queue consumer, not a request handler, because:
+
+- **Retries are free.** A Workers AI timeout retries the message rather than losing
+  the submission.
+- **The submitter is not waiting.** The upload returns as soon as bytes are in R2.
+- **Backfill is the same code.** 235 legacy entries are 235 queue messages. No
+  separate script, no separate code path to drift.
+
+Steps 2–5 need raw pixel access in JS and consume real CPU — hundreds of
+milliseconds, comfortably inside the 15-minute consumer budget. Step 6 is a
+subrequest and consumes none.
+
+**No local scripts.** The one-time legacy migration is triggered by an authenticated
+admin endpoint that enqueues messages. Nothing on a laptop ever holds account
+credentials or talks to D1 directly.
+
+---
+
+## Cost model
+
+Conservative, and deliberately pessimistic on the two variable lines.
+
+### Fixed monthly
+
+| Item | Cost | Note |
+|---|---|---|
+| Workers Paid | **$5.00** | Includes 10M requests, 30M CPU-ms, D1 (25B rows read, 50M written, 5 GB), Queues |
+| Plausible | **$9.00** | Starter tier — see the plan note below |
+| **Fixed total** | **$14.00/mo** | |
+
+### Variable, at three scales
+
+Assumes ~2 MB per original plus ~0.4 MB of WebP variants, and one vision call per
+new entry.
+
+| | 500 entries | 2,000 entries | 10,000 entries |
+|---|---|---|---|
+| R2 storage | 1.2 GB — free | 4.8 GB — free | 24 GB → $0.21 |
+| R2 ops | free tier | free tier | free tier |
+| D1 storage | < 20 MB — included | < 80 MB — included | < 400 MB — included |
+| Requests | well inside 10M | well inside 10M | well inside 10M |
+| Workers AI | free allocation | free allocation | ~$1–3 |
+| **Variable total** | **$0.00** | **$0.00** | **~$1–3** |
+| **All-in** | **$14/mo** | **$14/mo** | **~$15–17/mo** |
+
+R2's 10 GB free allowance is the line that eventually moves, and it moves slowly —
+roughly 4,000 entries before it binds, at $0.015/GB-month after that. At 10,000
+entries the entire Cloudflare bill is still under $6.
+
+**The Workers AI figure needs measuring, not estimating.** Neuron cost per vision
+call depends on model and image size, and I will not invent a number. Budget it as
+"free below roughly 40–50 new entries per day, single-digit dollars above". Ingest
+is one call per *new* entry, so cost tracks submission rate, not traffic — a viral
+day costs nothing extra. Measure on the first hundred and revise this table.
+
+**Plausible tier.** Custom properties require the Business tier at $19/month. With
+analytics reduced to Plausible defaults plus one custom event (below), properties
+are no longer needed — the grid selection encodes as two distinct event names,
+`View: Justified` and `View: Grid`, which works from Starter at $9. **This reverses
+the earlier decision to assume Business**, and saves $10/month for no capability
+that is actually used. Revisit only if a future need genuinely requires breakdown by
+property.
+
+### What would change the picture
+
+- Traffic growth alone does not move the bill. Requests, D1 reads and R2 egress all
+  have wide headroom, and images bypass the Worker via the public bucket.
+- Submission volume is the real cost driver, through Workers AI and R2 storage.
+- If Workers AI proves expensive per call, the fallback is running vision only on
+  submissions that pass deterministic checks — cutting spend by whatever share of
+  submissions are junk.
 
 ---
 
 ## Data model
 
-All tables live in the existing `emptystates-db` D1 database.
+### `device_types` — extensible, not an enum
 
-### `states` — a published entry
+```sql
+CREATE TABLE device_types (
+  slug         TEXT PRIMARY KEY,   -- phone, tablet, desktop, tv, console, watch
+  label        TEXT NOT NULL,
+  sort_order   INTEGER NOT NULL,
+  is_active    INTEGER NOT NULL DEFAULT 1,
+  min_ratio    REAL,               -- expected aspect range, for validation + inference
+  max_ratio    REAL,
+  created_at   TEXT NOT NULL
+);
+```
+
+Seeded with `phone`, `tablet`, `desktop`, `tv`, `console`, `watch`.
+
+A **table, not a `CHECK` constraint**. The earlier draft dropped `tv`, `watch` and
+`console` on the grounds that none appear in the 729 existing content files. That
+reasoning was wrong: the corpus records what has been collected, not what is worth
+collecting, and the curator's intent is the authority on the latter. Adding a device
+type must not require a schema migration.
+
+`min_ratio` / `max_ratio` let the pipeline sanity-check a claimed device against the
+image's actual shape, and flag mismatches for review rather than rejecting them.
+
+**Submitting an unlisted device type.** The submission form offers the active types
+plus an "Other" option with a free-text field, captured as
+`submissions.device_type_other`. It never creates a row directly — a public form that
+writes to a taxonomy table is a taxonomy that fills with typos and duplicates. The
+admin review screen shows the proposed text and offers "map to existing type" or
+"create new device type", which is the one-tap promotion path. New types appear in
+the facet bar automatically once created.
+
+### `states`
 
 ```sql
 CREATE TABLE states (
@@ -193,22 +288,21 @@ CREATE TABLE states (
   app_name         TEXT NOT NULL,
   app_url          TEXT,
 
-  device_type      TEXT NOT NULL CHECK (device_type IN
-                     ('phone','tablet','desktop')),
-  os               TEXT NOT NULL CHECK (os IN
-                     ('ios','android','web','macos','windows')),
+  device_type      TEXT NOT NULL REFERENCES device_types(slug),
+  os               TEXT NOT NULL REFERENCES operating_systems(slug),
 
   r2_key           TEXT NOT NULL,
   width            INTEGER NOT NULL,
   height           INTEGER NOT NULL,
-  aspect_ratio     REAL NOT NULL,             -- width/height, denormalised for layout
+  aspect_ratio     REAL NOT NULL,             -- denormalised: layout needs it per row
 
-  screen_text      TEXT,
-  color_names      TEXT,                      -- 'navy blue dark cool' — for FTS
+  screen_text      TEXT,                      -- Workers AI vision
+  description      TEXT,                      -- Workers AI vision
+  color_names      TEXT,                      -- 'navy blue dark cool', for FTS
 
   status           TEXT NOT NULL DEFAULT 'published'
                      CHECK (status IN ('published','draft')),
-  is_legacy        INTEGER NOT NULL DEFAULT 0,  -- predates the submission rules
+  is_legacy        INTEGER NOT NULL DEFAULT 0,
   submitter_name   TEXT,
   submitter_handle TEXT,
 
@@ -217,20 +311,20 @@ CREATE TABLE states (
   created_at       TEXT NOT NULL
 );
 
-CREATE INDEX idx_states_browse  ON states (status, published_at DESC);
-CREATE INDEX idx_states_device  ON states (status, device_type);
-CREATE INDEX idx_states_os      ON states (status, os);
-CREATE INDEX idx_states_aspect  ON states (status, aspect_ratio);
+CREATE INDEX idx_states_browse ON states (status, published_at DESC);
+CREATE INDEX idx_states_device ON states (status, device_type);
+CREATE INDEX idx_states_os     ON states (status, os);
+CREATE INDEX idx_states_aspect ON states (status, aspect_ratio);
 ```
 
-`aspect_ratio` is stored rather than computed because the layout needs it on every
-row of every gallery query, and because it is a search facet ("screen size").
+`operating_systems` mirrors `device_types` — same shape, same extensibility, same
+promotion path. Seeded with `ios`, `android`, `web`, `macos`, `windows`, `linux`.
 
-`is_legacy` marks the 235 imported entries that predate the submission rules. They
-break those rules — alpha channels, crops, missing OCR — and must not be judged
-against them. It also lets the admin area surface a backlog of entries to clean up.
+`is_legacy` marks the 235 imported entries predating the submission rules. They
+break those rules and must not be judged against them; it also gives the admin area
+a curation backlog.
 
-### `tags` and `state_tags`
+### `tags`, `state_tags`, `state_colors`
 
 ```sql
 CREATE TABLE tags (
@@ -244,19 +338,11 @@ CREATE TABLE state_tags (
   tag_id   INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
   PRIMARY KEY (state_id, tag_id)
 );
-
 CREATE INDEX idx_state_tags_tag ON state_tags (tag_id, state_id);
-```
 
-A join table rather than the comma-separated column EMDash used, because tag
-filtering is a primary facet and needs an index.
-
-### `state_colors`
-
-```sql
 CREATE TABLE state_colors (
   state_id TEXT NOT NULL REFERENCES states(id) ON DELETE CASCADE,
-  rank     INTEGER NOT NULL,        -- 1..5, by descending coverage
+  rank     INTEGER NOT NULL,        -- 1..5 by descending coverage
   hex      TEXT NOT NULL,
   l        REAL NOT NULL,           -- CIELAB
   a        REAL NOT NULL,
@@ -265,98 +351,73 @@ CREATE TABLE state_colors (
   bucket   TEXT NOT NULL,           -- named bucket, e.g. 'blue'
   PRIMARY KEY (state_id, rank)
 );
-
 CREATE INDEX idx_colors_bucket ON state_colors (bucket, state_id);
 ```
 
-Colour is stored twice on purpose. `bucket` is a name, indexed for the swatch
-filter and copied into `states.color_names` for the text index — so typing "blue"
+Colour is stored twice on purpose. `bucket` is a name — indexed for the swatch
+filter and copied into `states.color_names` for the text index, so typing "blue"
 works. `l`/`a`/`b` are perceptual coordinates for distance ranking, because RGB
-distance judges colour badly and CIELAB is built to approximate how eyes compare it.
+distance judges colour badly and CIELAB approximates how eyes compare it.
 
 ### `states_fts`
 
 ```sql
 CREATE VIRTUAL TABLE states_fts USING fts5(
-  title,
-  app_name,
-  tags,
-  colors,
-  screen_text,
+  title, app_name, tags, colors, screen_text, description,
   state_id UNINDEXED,
   tokenize = 'porter unicode61'
 );
 ```
 
-A **standalone** FTS5 table, not `content=`-backed. External-content FTS5 requires
-every indexed column to exist on the content table, and `tags` and `colors` live in
-join tables. The application rewrites the row on every write to `states`,
-`state_tags` or `state_colors`.
+**Standalone**, not `content=`-backed: external-content FTS5 requires every indexed
+column on the content table, and tags and colours live in join tables. The
+application rewrites the row on any write to `states`, `state_tags` or
+`state_colors`, in the same transaction.
 
-`porter` stemming means "loading" matches "load". Query-time weighting via
-`bm25(states_fts, 10.0, 8.0, 6.0, 4.0, 1.0)` puts title an order of magnitude above
-screen text — the thing that stops forty screenshots with a "Search" placeholder
+`porter` stemming makes "loading" match "load". Query-time
+`bm25(states_fts, 10.0, 8.0, 6.0, 4.0, 1.0, 2.0)` puts title an order of magnitude
+above screen text — what stops forty screenshots containing a "Search" placeholder
 drowning the six entries actually about search.
 
 ### `submissions`
 
-Detailed in spec 03. Summary shape:
+Detailed in spec 03. Shape:
 
 ```sql
 CREATE TABLE submissions (
-  id                 TEXT PRIMARY KEY,
-  status             TEXT NOT NULL       -- pending | auto_rejected | approved | rejected
-                       CHECK (status IN ('pending','auto_rejected','approved','rejected')),
-  source             TEXT NOT NULL       -- public | admin
-                       CHECK (source IN ('public','admin')),
+  id                  TEXT PRIMARY KEY,
+  status              TEXT NOT NULL
+                        CHECK (status IN ('queued','pending','auto_rejected','approved','rejected')),
+  source              TEXT NOT NULL CHECK (source IN ('public','admin','backfill')),
 
-  r2_key             TEXT NOT NULL,
-  width              INTEGER NOT NULL,
-  height             INTEGER NOT NULL,
-  aspect_ratio       REAL NOT NULL,
-  has_alpha          INTEGER NOT NULL,
-  byte_size          INTEGER NOT NULL,
+  r2_key              TEXT NOT NULL,
+  width               INTEGER, height INTEGER, aspect_ratio REAL,
+  has_alpha           INTEGER, byte_size INTEGER,
 
-  title              TEXT NOT NULL,
-  app_name           TEXT NOT NULL,
-  app_url            TEXT,
-  device_type        TEXT NOT NULL,
-  os                 TEXT NOT NULL,
-  tags_json          TEXT NOT NULL,
+  title               TEXT, app_name TEXT, app_url TEXT,
+  device_type         TEXT, device_type_other TEXT,
+  os                  TEXT, os_other TEXT,
+  tags_json           TEXT,
 
-  screen_text        TEXT,
-  colors_json        TEXT,
+  screen_text         TEXT, description TEXT, colors_json TEXT,
+  suggested_tags_json TEXT,
 
-  submitter_name     TEXT,
-  submitter_handle   TEXT,
+  submitter_name      TEXT, submitter_handle TEXT,
 
-  checks_json        TEXT NOT NULL,      -- per-rule pass/fail, see spec 03
-  agent_verdict      TEXT,               -- reject | review
-  agent_reason       TEXT,
-  agent_confidence   REAL,
-  duplicate_of       TEXT REFERENCES states(id),
+  checks_json         TEXT,
+  agent_verdict       TEXT, agent_reason TEXT, agent_confidence REAL,
+  duplicate_of        TEXT REFERENCES states(id),
 
-  created_at         TEXT NOT NULL,
-  reviewed_at        TEXT,
-  published_state_id TEXT REFERENCES states(id)
+  created_at          TEXT NOT NULL,
+  reviewed_at         TEXT,
+  published_state_id  TEXT REFERENCES states(id)
 );
-
 CREATE INDEX idx_submissions_queue ON submissions (status, created_at DESC);
 ```
 
-### `events` and `search_log`
+### `search_log` and `layout_prefs`
 
 ```sql
-CREATE TABLE events (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  name       TEXT NOT NULL,
-  props_json TEXT,
-  path       TEXT,
-  created_at TEXT NOT NULL
-);
-
-CREATE INDEX idx_events_name ON events (name, created_at DESC);
-
 CREATE TABLE search_log (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   query       TEXT NOT NULL,
@@ -364,24 +425,20 @@ CREATE TABLE search_log (
   facets_json TEXT,
   created_at  TEXT NOT NULL
 );
-
 CREATE INDEX idx_search_zero ON search_log (results, created_at DESC);
-```
 
-No IP, no user agent, no session identifier is ever written to D1. Those exist only
-in memory for the duration of the Plausible forward.
-
-### `layout_prefs`
-
-```sql
 CREATE TABLE layout_prefs (
-  view TEXT PRIMARY KEY,   -- justified | square
-  n    INTEGER NOT NULL DEFAULT 0
+  view       TEXT NOT NULL,        -- justified | square
+  day        TEXT NOT NULL,        -- YYYY-MM-DD
+  n          INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (view, day)
 );
 ```
 
-A counter, not an event log, so a toggle costs one `UPDATE` rather than one
-`INSERT`. The per-event detail lives in Plausible.
+`search_log` is a **curation tool, not analytics** — the zero-result list is the
+content roadmap, telling you which empty states people look for and you do not have.
+It survives the reduction to Plausible defaults because it answers a question
+Plausible was never going to. No IP, no user agent, no session identifier.
 
 ---
 
@@ -390,171 +447,169 @@ A counter, not an event log, so a toggle costs one `UPDATE` rather than one
 ```
 originals/<state_id>.<ext>          # exactly as submitted, never modified
 w640/<state_id>.webp                # gallery, phone viewports
-w1280/<state_id>.webp               # gallery, desktop viewports and detail page
+w1280/<state_id>.webp               # gallery desktop, and detail page
 submissions/<submission_id>.<ext>   # pending; moved to originals/ on approval
 ```
 
-Served from a public bucket on `img.emptystat.es`. **Requests to R2 via a public
-bucket do not invoke the Worker**, so images do not consume the 100,000/day request
-allowance — which matters, because a single gallery page loads dozens of them.
+Public bucket on `img.emptystat.es`. **R2 public-bucket requests do not invoke the
+Worker**, so images never consume the request allowance — which matters when one
+gallery page loads dozens.
 
-Cloudflare Image Resizing is a paid feature and is not used. Variants are generated
-at ingest, in the browser (spec 03) or by local script (spec 02).
+Cloudflare Image Resizing is a paid add-on and is not used; variants are generated
+once in the ingest pipeline.
 
 ---
 
 ## URL structure
 
-Existing `/s/<slug>` URLs are preserved. The legacy site's 34 `redirect` frontmatter
-entries are already handled by the Gatsby deployment and carry over.
+`/s/<slug>` is preserved. The legacy site's 34 `redirect` frontmatter entries are
+handled by the existing Gatsby deployment and carry over.
 
 | Route | Purpose |
 |---|---|
 | `/` | Gallery, paginated |
 | `/s/<slug>` | Entry detail |
-| `/tags/<tag>` | Pre-filtered gallery, preserved from the legacy site |
+| `/tags/<tag>` | Pre-filtered gallery, preserved |
 | `/submit` | Submission form |
 | `/guidelines` | Submission rules |
+| `/privacy` | **Analytics disclosure and opt-out** |
 | `/admin/*` | Behind Cloudflare Access |
-| `/api/search` | Search endpoint |
-| `/api/e` | First-party analytics ingest |
+| `/api/search` | Search |
+| `/api/view-pref` | Grid selection capture |
 | `/api/submit` | Submission ingest |
+| `/mcp` | Phase 2–3, see below |
 
-Filter state lives in query parameters so any view is shareable:
+Filter state lives in query parameters, so any view is shareable:
 `/?q=no+results&device=phone&os=ios&tag=onboarding&color=blue&view=square`
 
 ---
 
 ## Analytics
 
-A first-party endpoint, `POST /api/e`, on the site's own origin. The browser never
-contacts `plausible.io`, so there is no third-party domain and no known script name
-for a blocker to match. This captures every visitor rather than the fraction that
-survives blocking, which was the point of building it rather than using the script.
+**Plausible does its standard job.** The normal script, standard pageviews, standard
+referrers. No custom event taxonomy, no D1 event mirror. Plausible is already
+cookieless and privacy-preserving, and reimplementing it in a first-party endpoint
+buys accuracy that this site does not need for ordinary traffic.
 
-The Worker does two things with one request:
+**One exception: the grid selection.** Which layout people choose is the question
+this whole design hangs on, and it must be answered across as close to every visitor
+as possible — including those running blockers, who are disproportionately likely to
+be the designers and developers this site serves. That single event goes to
+`POST /api/view-pref` on the site's own origin, where the Worker:
 
-**Forwards to Plausible** inside `ctx.waitUntil()`, so the visitor's response is not
-held up. This must carry:
+1. Increments the `layout_prefs` counter for that view and day — a counter, not an
+   event log, so a toggle costs one `UPDATE` rather than one `INSERT`.
+2. Forwards to Plausible inside `ctx.waitUntil()` as event name `View: Justified` or
+   `View: Grid`, so it surfaces in the dashboard already being checked.
 
-- `User-Agent` — the *visitor's* raw UA from the incoming request
-- `X-Forwarded-For` — **`CF-Connecting-IP`, not the Worker's egress IP**
-- `Content-Type: application/json`
+Forwarding must carry the **visitor's** `User-Agent` and `X-Forwarded-For` set from
+`CF-Connecting-IP` — never the Worker's egress IP. Plausible derives its visitor
+hash from UA + IP; forward a CDN address and bot filtering silently drops the event
+while still returning `202 Accepted`. The only signal is an `x-plausible-dropped: 1`
+response header. Check it and log failures, or a misconfiguration reads as low
+traffic rather than as a bug.
 
-Plausible derives `user_id` by hashing UA + IP. Forward a CDN or server IP and bot
-filtering silently drops the event; you still get `202 Accepted`, and the only
-signal is an `x-plausible-dropped: 1` response header. Check it, and log failures.
+The bar for adding any further first-party event is high, and this one clears it
+only because the design decision depends on it.
 
-**Writes to D1** — anonymised, in the same handler. This is the queryable copy, and
-it answers what Plausible's dashboard cannot: which filter combinations co-occur,
-whether square-mode visitors open more entries than justified-mode ones, and which
-searches return nothing.
+### Opt-out
 
-### Event taxonomy
+`/privacy` states plainly what is collected — Plausible's cookieless aggregate
+analytics, the grid selection, and search queries with no identifier attached — and
+offers a working opt-out.
 
-Custom properties are used, which requires Plausible's **Business plan**. Maximum 30
-props per event; property names up to 300 characters, values up to 2,000.
-
-| Event | Props | Purpose |
-|---|---|---|
-| `pageview` | — | Standard |
-| `View Mode` | `view`, `viewport` | Settles justified vs square with data |
-| `Search` | `results`, `zero` | Query text goes to D1 only |
-| `Zero Results` | `query` | The content roadmap |
-| `Filter` | `facet`, `value` | Which of the six dimensions get used |
-| `Entry Open` | `slug`, `from_view` | Does layout affect engagement |
-| `Submission Completed` | `device`, `os` | Funnel |
-
-**`Search` fires on debounced commit, never per keystroke.** Every event counts
-against the monthly Plausible quota; a per-keystroke implementation would burn a
-month's allowance in a day. Same reasoning applies to D1's 100,000 writes/day.
-
-Set `interactive: false` on events that are not visitor-initiated, so they do not
-distort bounce rate.
+The opt-out sets a `localStorage` flag that suppresses **both** the Plausible script
+and the grid-selection call. Honouring `navigator.doNotTrack` and
+`Sec-GPC` as automatic opt-outs is the correct default and costs nothing. The page
+must also state that opting out is honoured for the first-party endpoint — a site
+that builds a blocker-proof channel and does not say so has done something worse
+than the tracking it replaced.
 
 ---
 
-## Free-tier budget
+## Roadmap beyond v1
 
-| Resource | Free allowance | Expected use | Headroom |
-|---|---|---|---|
-| Worker requests | 100,000/day | ~2,000/day | Wide. Images bypass the Worker entirely |
-| Worker CPU | 10ms/invocation | < 1ms rendering | Tight by design — see the constraint section |
-| D1 rows read | 5,000,000/day | ~60,000/day | Wide |
-| D1 rows written | 100,000/day | ~2,000/day | Adequate. Analytics is the growth risk |
-| D1 storage | 5 GB | < 50 MB | Wide |
-| R2 storage | 10 GB | ~2 GB at 1,000 entries | Adequate |
-| R2 Class A ops | 1M/month | ~100/month | Wide |
-| R2 Class B ops | 10M/month | ~200,000/month | Wide |
-| Workers AI | 10,000 Neurons/day | ~50/day | Wide at submission volumes |
-| Turnstile | Unlimited | — | — |
+### Phase 2–3: MCP server (spec 05)
 
-**The two things that could break the budget**, both in analytics: an un-debounced
-search event, and one row per event rather than aggregate counters where counters
-suffice. Both are designed against above.
+Expose the gallery as tools to Claude and other AI clients, so someone can ask an
+assistant to find empty states and get real results rather than a search-page link.
 
-Cloudflare Access seat allowance on the Zero Trust free plan should be confirmed at
-setup. This project needs one seat.
+Cloudflare hosts remote MCP servers natively on Workers via the Agents SDK
+(`createMcpHandler`, or `McpAgent` for stateful servers), with Streamable HTTP
+transport, deployed to the same account and reading the same D1. Clients connect
+directly, or through the `mcp-remote` proxy for those without remote transport.
+
+**Authless is the right posture here.** The catalogue is public, there is nothing to
+meter, and monetisation is an explicit non-goal — so OAuth would add a login to a
+public reference for no benefit to anyone.
+
+Tools would be thin wrappers over spec 02's query layer:
+
+| Tool | Returns |
+|---|---|
+| `search_empty_states` | Ranked entries for a query plus facets |
+| `get_empty_state` | Full detail for one slug, including screen text |
+| `list_facets` | Available devices, OSes, tags, colours with counts |
+
+The design constraint worth stating now: **spec 02's search must be a callable
+function, not logic embedded in an Astro route.** If `/api/search` and the MCP tool
+call the same function, they cannot disagree. If the MCP server reimplements
+search, they will. That is the only thing phase 1 needs to get right for phase 3 to
+be cheap.
+
+Deferred deliberately — it is worth building after the corpus is clean and search is
+proven, not before.
 
 ---
 
 ## Cross-cutting conventions
 
-- **IDs are ULIDs.** `ulidx` is already a dependency. They sort by creation time,
-  which makes `ORDER BY id` a valid recency sort and removes a column from most
-  queries.
-- **Timestamps are ISO 8601 strings in UTC.** SQLite has no date type. Note that
-  `gray-matter` returns `Date` objects during legacy migration, so `String()` them
-  before binding.
-- **`slug` is generated from title + app name**, deduplicated with a numeric suffix.
-- **Every write that touches `states`, `state_tags` or `state_colors` rewrites the
-  matching `states_fts` row**, in the same transaction. Drift here is the most
-  likely source of "the tag says 12 but search says 9".
-- **Client-derived data is descriptive, not authoritative.** Re-derive anything a
-  rule depends on.
+- **IDs are ULIDs** (`ulidx`, already a dependency). Time-sortable, so `ORDER BY id`
+  is a valid recency sort.
+- **Timestamps are ISO 8601 UTC strings.** SQLite has no date type. `gray-matter`
+  returns `Date` objects during legacy migration — `String()` them before binding.
+- **`slug` derives from title + app name**, deduplicated with a numeric suffix.
+- **Any write to `states`, `state_tags` or `state_colors` rewrites the `states_fts`
+  row in the same transaction.** Drift here is the likeliest source of "the tag says
+  12 but search says 9".
+- **Taxonomies are tables, never enums.** Device types, operating systems and tags
+  all grow without a migration.
+- **Search is a function first, a route second.** See the MCP note above.
 
 ---
 
 ## Risks
 
-**Analytics write volume.** D1's 100,000 rows/day is the tightest allowance in the
-budget, and events are the only unbounded writer. Mitigation: counters over logs
-where possible, debounced search, and a monitor on the daily figure. If it ever
-binds, batch events in a Durable Object and flush periodically.
+**Workers AI cost is unmeasured.** The one line in the cost model resting on
+assumption rather than published pricing. Measure neuron consumption on the first
+hundred ingests and revise. Fallback if it disappoints: run vision only after
+deterministic checks pass.
 
-**Client-side colour extraction varies by device.** Canvas k-means on a 64×64
-bitmap is cheap, but an old phone on a slow connection is still the worst case, and
-the whole point of the admin capture flow is uploading from a phone. The upload must
-not block on it — post the image first, post derived data second, and accept its
-absence. A missing palette costs colour search on that one entry until backfill,
-which is a far better failure than a stalled upload.
+**The legacy tag field is not clean data.** The existing `tags` array conflates three
+dimensions — device (`mobile` 392, `desktop` 72), OS (`ios` 64, `android` 64,
+`macOS` 12, `macos` 8, `windows` 2) and genuine semantic tags (`permissions`,
+`onboarding`, `location`) — and contains junk: entry titles that landed in the tags
+array during a past migration ("No downloads in Bitbucket" appears six times *as a
+tag*), empty strings, and case-variant duplicates.
 
-Moving screen text to Workers AI removed the larger version of this risk, since
-inference no longer depends on the submitter's hardware at all.
-
-**Plausible attribution is silent when it fails.** The API returns `202` whether the
-event landed or was dropped. Without checking `x-plausible-dropped`, a wrong
-`X-Forwarded-For` would look like low traffic rather than a bug.
+The new schema separates these, so migration is a mapping and cleaning pass, not a
+copy: an explicit classification table, case normalisation, junk rejection, and a
+report of anything unmapped for manual triage. **The most underestimated task in
+spec 01.**
 
 **Legacy entries break the new rules.** 235 imported entries have alpha channels,
-crops outside device ratios, and no extracted text. `is_legacy` keeps them out of
-rule enforcement, but they will look inconsistent in the grid until curated.
-Accepted for v1; the admin area surfaces them as a backlog.
-
-**The legacy tag field is not clean data.** In the existing content, one `tags`
-array conflates three separate dimensions — device (`mobile` 392, `desktop` 72),
-OS (`ios` 64, `android` 64, `macOS` 12, `macos` 8, `windows` 2) and genuine semantic
-tags (`permissions`, `onboarding`, `location`). It also contains junk: entry titles
-that landed in the tags array during a previous migration ("No downloads in
-Bitbucket" appears six times as a *tag*), empty strings, and case-variant duplicates
-of the same OS.
-
-The new schema separates these into `device_type`, `os` and `state_tags`, so
-migration is a mapping and cleaning pass, not a copy. It needs an explicit
-device/OS/tag classification table, case normalisation, junk rejection, and a
-report of anything unmapped for manual triage. Budget real time for this — it is
-the single most underestimated task in spec 01.
+crops outside device ratios, no extracted text. `is_legacy` exempts them from rule
+enforcement, but they will look inconsistent until curated. Accepted for v1.
 
 **Two view modes are two layouts to maintain.** Justified and square must agree on
 pagination, hover behaviour and keyboard navigation. Mitigation: one card component,
-two container components, and the tracking that tells us when one can be retired.
+two containers, and the tracking that eventually tells us one can be retired.
+
+**Plausible attribution fails silently.** `202` is returned whether the event landed
+or was dropped. Without checking `x-plausible-dropped`, a wrong `X-Forwarded-For`
+looks like low traffic.
+
+**Paying changes the failure mode.** On the free plan, exceeding a limit stops the
+site. On Paid, it produces a bill. Set Cloudflare billing alerts before launch, and
+a Queue consumer `max_retries` low enough that a poisoned message cannot loop
+expensively against Workers AI.
