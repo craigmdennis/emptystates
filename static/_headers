@@ -1,0 +1,22 @@
+# Cache rules for Cloudflare Workers Static Assets.
+# Files in static/ are copied verbatim into public/ by Gatsby.
+#
+# Gatsby content-hashes its JS and CSS bundle filenames, but NOT the
+# page-data JSON that client-side navigation fetches. Caching those means a
+# returning visitor gets a fresh HTML shell requesting page data the CDN
+# still answers from the previous build -- navigation breaks silently, and
+# only for people who visited before the deploy.
+#
+# There is deliberately no blanket /*.js rule: sw.js lives at the root
+# alongside the hashed bundles, and must not be cached. Cloudflare already
+# applies etag-based caching to static assets, which is correct for hashed
+# filenames.
+
+/page-data/*
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+
+/static/*
+  Cache-Control: public, max-age=31536000, immutable

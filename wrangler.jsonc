@@ -1,0 +1,26 @@
+{
+  // Assets-only Worker: no `main`, no `binding`. Cloudflare serves public/
+  // straight from the edge without invoking any Worker code.
+  //
+  // The name intentionally differs from "emptystates", which the redesign
+  // branch's wrangler.jsonc claims. Two Workers sharing a name on one
+  // account are the same Worker, and the last deploy wins.
+  //
+  // No $schema reference: wrangler is deliberately not a dependency here.
+  // Installing it would mean touching a Node 14 lockfile that currently
+  // builds. Deploy with `npx wrangler@latest deploy` on modern Node instead.
+  "name": "emptystates-site",
+  "compatibility_date": "2026-08-10",
+  "assets": {
+    "directory": "./public",
+
+    // Gatsby emits public/s/<slug>/index.html. auto-trailing-slash is what
+    // makes /s/<slug> resolve and canonicalise to /s/<slug>/, preserving
+    // every existing URL. It is wrangler's default, set explicitly because
+    // it is load-bearing here.
+    "html_handling": "auto-trailing-slash",
+
+    // Serve Gatsby's built 404.html rather than a bare Cloudflare 404.
+    "not_found_handling": "404-page"
+  }
+}
