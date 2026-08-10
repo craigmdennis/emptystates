@@ -196,8 +196,13 @@ Conservative, and deliberately pessimistic on the two variable lines.
 | Item | Cost | Note |
 |---|---|---|
 | Workers Paid | **$5.00** | Includes 10M requests, 30M CPU-ms, D1 (25B rows read, 50M written, 5 GB), Queues |
-| Plausible | **$9.00** | Starter tier — see the plan note below |
-| **Fixed total** | **$14.00/mo** | |
+| Plausible Business | **$0.00** | Already subscribed for multiple sites — this site is an additional site within the existing plan, not a new bill |
+| **Fixed marginal total** | **$5.00/mo** | |
+
+Plausible Business covers up to 10 sites, so adding `emptystat.es` costs nothing
+beyond what is already being paid. The figures below are therefore the *marginal*
+cost of this project, which is the number that matters for a decision about
+building it.
 
 ### Variable, at three scales
 
@@ -212,7 +217,7 @@ new entry.
 | Requests | well inside 10M | well inside 10M | well inside 10M |
 | Workers AI | free allocation | free allocation | ~$1–3 |
 | **Variable total** | **$0.00** | **$0.00** | **~$1–3** |
-| **All-in** | **$14/mo** | **$14/mo** | **~$15–17/mo** |
+| **All-in, marginal** | **$5/mo** | **$5/mo** | **~$6–8/mo** |
 
 R2's 10 GB free allowance is the line that eventually moves, and it moves slowly —
 roughly 4,000 entries before it binds, at $0.015/GB-month after that. At 10,000
@@ -224,13 +229,22 @@ call depends on model and image size, and I will not invent a number. Budget it 
 is one call per *new* entry, so cost tracks submission rate, not traffic — a viral
 day costs nothing extra. Measure on the first hundred and revise this table.
 
-**Plausible tier.** Custom properties require the Business tier at $19/month. With
-analytics reduced to Plausible defaults plus one custom event (below), properties
-are no longer needed — the grid selection encodes as two distinct event names,
-`View: Justified` and `View: Grid`, which works from Starter at $9. **This reverses
-the earlier decision to assume Business**, and saves $10/month for no capability
-that is actually used. Revisit only if a future need genuinely requires breakdown by
-property.
+**Plausible tier.** Business is already in place for other sites, so custom
+properties, the Stats API (600 requests/hour) and five-year retention are all
+available at no marginal cost.
+
+That does **not** reinstate the full event taxonomy — reducing to Plausible defaults
+was a scope decision about what is worth measuring, not a cost workaround, and it
+stands. What it does change is the shape of the one custom event: the grid selection
+becomes a single `View Mode` event with `view` and `viewport` properties, rather
+than two separate event names. One goal to configure, breakdown by property in the
+dashboard, and viewport width comes along for free — which matters, because the
+justified-versus-square question may well have different answers on a phone than on
+a 27-inch display.
+
+The Stats API also opens a phase-2 option worth noting but not building yet: the
+admin dashboard could pull Plausible figures in, so the review queue and the traffic
+it generates sit on one screen.
 
 ### What would change the picture
 
@@ -499,8 +513,9 @@ be the designers and developers this site serves. That single event goes to
 
 1. Increments the `layout_prefs` counter for that view and day — a counter, not an
    event log, so a toggle costs one `UPDATE` rather than one `INSERT`.
-2. Forwards to Plausible inside `ctx.waitUntil()` as event name `View: Justified` or
-   `View: Grid`, so it surfaces in the dashboard already being checked.
+2. Forwards to Plausible inside `ctx.waitUntil()` as a `View Mode` event with
+   properties `{ view: "justified" | "square", viewport: <breakpoint> }`, so it
+   surfaces in the dashboard already being checked.
 
 Forwarding must carry the **visitor's** `User-Agent` and `X-Forwarded-For` set from
 `CF-Connecting-IP` — never the Worker's egress IP. Plausible derives its visitor
