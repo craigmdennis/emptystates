@@ -11,6 +11,39 @@
 **Spec:** `docs/superpowers/specs/2026-08-11-01-foundation-gallery-design.md`
 **Parent:** `docs/superpowers/specs/2026-08-10-emptystates-architecture.md`
 
+## Status
+
+**Tasks 1–4 complete** (2026-08-11). Next: Task 5, the query layer. 62 tests passing.
+
+Four things the plan got wrong, found by reading the real corpus rather than
+trusting the spec. Each is implemented as described here, not as written below.
+
+1. **Task 4's test design could not build.** `test/import.test.ts` imports the
+   importer inside the `cloudflare:test` Workers pool, but the module it imports
+   uses `fs`, `glob` and `sharp` — a native addon workerd cannot load. Split
+   into `read.ts` (Node), `import.ts` (runtime-agnostic), `dedupe.ts` (pure),
+   and `types.ts` (the seam, no imports). `scripts/migrate-legacy.ts` joins them
+   with `getPlatformProxy()`. Tasks 5–12 are unaffected.
+
+2. **The corpus is 252 entries, not 229.** 235 published, plus 17 directories
+   holding only a `.png` with no frontmatter, imported as drafts. Every entry
+   exists twice — `<slug>.md` and `<slug>/index.md` — and the pairs are
+   byte-identical, so the dedup step is safe. Frontmatter uses `product`, not
+   `app_name`, and carries `redirect` (34), `related` (18) and `referral` (3).
+
+3. **`redirect` had nowhere to go** — added `migrations/0007_redirects.sql`.
+   The legacy directory name is the live URL, since Gatsby derived `/s/<name>/`
+   from it with `createFilePath`. 197 of those names are raw filenames, so they
+   get a generated slug plus a `state_redirects` row for the retired path.
+   This makes Task 11's fixture check meaningful rather than a mass 404.
+
+4. **`os` is nullable and no longer defaults to `web`.** 153 entries carry no
+   OS tag and 134 of those are phones. Task 5's `listFacets` and spec 02's
+   search must both treat a null `os` as unknown, not as a filter value.
+
+Read `migration-report.md` for what the migration decided and what it refused
+to decide.
+
 ## Global Constraints
 
 - **Taxonomies are tables, never `CHECK` enums.** `device_types` and `operating_systems` must grow without a migration.
@@ -64,7 +97,7 @@
 - Consumes: nothing
 - Produces: a working `npm test`; `env.DB` and `env.MEDIA` bindings available in tests
 
-- [ ] **Step 1: Export the current D1 as a rollback**
+- [x] **Step 1: Export the current D1 as a rollback**
 
 ```bash
 npx wrangler d1 export emptystates-db --remote --output=./prod-dump-preflight.sql
@@ -73,7 +106,7 @@ ls -la prod-dump-preflight.sql
 
 Expected: a non-empty file. `prod-dump.sql` is already gitignored; add `prod-dump-preflight.sql` to `.gitignore` too.
 
-- [ ] **Step 2: Remove EMDash packages and files**
+- [x] **Step 2: Remove EMDash packages and files**
 
 ```bash
 npm uninstall emdash @emdash-cms/cloudflare tesseract.js
@@ -83,7 +116,7 @@ rm -rf .emdash
 
 `tesseract.js` goes too — spec 02 replaces it with Workers AI vision.
 
-- [ ] **Step 3: Rewrite `astro.config.mjs`**
+- [x] **Step 3: Rewrite `astro.config.mjs`**
 
 ```js
 import { defineConfig } from "astro/config";
@@ -99,7 +132,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: Add the queue bindings to `wrangler.jsonc`**
+- [x] **Step 4: Add the queue bindings to `wrangler.jsonc`**
 
 Declared now so config is stable; unused until spec 02.
 
@@ -124,13 +157,13 @@ Declared now so config is stable; unused until spec 02.
 }
 ```
 
-- [ ] **Step 5: Install the test harness**
+- [x] **Step 5: Install the test harness**
 
 ```bash
 npm install -D vitest @cloudflare/vitest-pool-workers
 ```
 
-- [ ] **Step 6: Create `vitest.config.ts`**
+- [x] **Step 6: Create `vitest.config.ts`**
 
 ```ts
 import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
@@ -147,14 +180,14 @@ export default defineWorkersConfig({
 });
 ```
 
-- [ ] **Step 7: Add the test script to `package.json`**
+- [x] **Step 7: Add the test script to `package.json`**
 
 ```json
 "test": "vitest run",
 "test:watch": "vitest"
 ```
 
-- [ ] **Step 8: Write a failing harness test**
+- [x] **Step 8: Write a failing harness test**
 
 `test/setup.test.ts`:
 
@@ -170,12 +203,12 @@ it("exposes the D1 and R2 bindings to tests", async () => {
 });
 ```
 
-- [ ] **Step 9: Run it**
+- [x] **Step 9: Run it**
 
 Run: `npm test`
 Expected: PASS. If it fails on the `emdash` import, a reference survived step 2 — `grep -rn emdash src/ astro.config.mjs` and remove it.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -193,7 +226,7 @@ git commit -m "chore: remove EMDash, add Vitest workers harness"
 **Interfaces:**
 - Produces: tables `device_types`, `operating_systems`, `tags`, `states`, `state_tags`, `state_colors`, `states_fts`, `submissions`, `search_log`, `layout_prefs`
 
-- [ ] **Step 1: Write the failing schema test**
+- [x] **Step 1: Write the failing schema test**
 
 `test/schema.test.ts`:
 
@@ -238,12 +271,12 @@ it("accepts a new device type without a migration", async () => {
 Add the migrations binding to `vitest.config.ts` `miniflare.bindings`:
 `TEST_MIGRATIONS: await readD1Migrations("./migrations")` (import `readD1Migrations` from `@cloudflare/vitest-pool-workers/config`).
 
-- [ ] **Step 2: Run it to confirm failure**
+- [x] **Step 2: Run it to confirm failure**
 
 Run: `npm test -- schema`
 Expected: FAIL — no such table `device_types`.
 
-- [ ] **Step 3: Write `migrations/0001_taxonomies.sql`**
+- [x] **Step 3: Write `migrations/0001_taxonomies.sql`**
 
 ```sql
 CREATE TABLE device_types (
@@ -287,27 +320,27 @@ CREATE TABLE tags (
 );
 ```
 
-- [ ] **Step 4: Write `migrations/0002_states.sql`**
+- [x] **Step 4: Write `migrations/0002_states.sql`**
 
 Copy the `states` DDL and its four indexes verbatim from the architecture spec's "Data model" section. `device_type` and `os` are `REFERENCES`, not `CHECK`.
 
-- [ ] **Step 5: Write `migrations/0003_relations.sql`, `0004_fts.sql`, `0005_submissions.sql`, `0006_analytics.sql`**
+- [x] **Step 5: Write `migrations/0003_relations.sql`, `0004_fts.sql`, `0005_submissions.sql`, `0006_analytics.sql`**
 
 Copy `state_tags`, `state_colors`, `states_fts`, `submissions`, `search_log` and `layout_prefs` verbatim from the architecture spec.
 
-- [ ] **Step 6: Run the tests**
+- [x] **Step 6: Run the tests**
 
 Run: `npm test -- schema`
 Expected: PASS, all three.
 
-- [ ] **Step 7: Apply locally, then remotely**
+- [x] **Step 7: Apply locally, then remotely**
 
 ```bash
 npx wrangler d1 migrations apply emptystates-db --local
 npx wrangler d1 migrations apply emptystates-db --remote
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add migrations/ vitest.config.ts test/schema.test.ts
@@ -336,7 +369,7 @@ export type TagVerdict =
   | { kind: "unmapped"; raw: string };
 ```
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `test/classify.test.ts` — cases drawn from the real corpus:
 
@@ -380,12 +413,12 @@ it("reports unknown short tags as unmapped rather than guessing", () => {
 });
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `npm test -- classify`
 Expected: FAIL — cannot find module `classify`.
 
-- [ ] **Step 3: Implement `src/migrate/classify.ts`**
+- [x] **Step 3: Implement `src/migrate/classify.ts`**
 
 ```ts
 export type TagVerdict =
@@ -435,12 +468,12 @@ export function classifyTag(raw: string, entryTitle: string): TagVerdict {
 }
 ```
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `npm test -- classify`
 Expected: PASS. Note `classifyTag("android")` returns `os`, and the importer separately derives `device_type` from aspect ratio — the ordering comment explains why.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/migrate/classify.ts test/classify.test.ts
@@ -459,7 +492,7 @@ git commit -m "feat: add pure tag classifier for legacy migration"
 - Consumes: `classifyTag` from Task 3
 - Produces: `slugify(title: string, appName: string): string`, `dedupeSlug(base: string, taken: Set<string>): string`, `importLegacy(opts): Promise<MigrationReport>`
 
-- [ ] **Step 1: Write the failing slug test**
+- [x] **Step 1: Write the failing slug test**
 
 `test/slug.test.ts`:
 
@@ -481,12 +514,12 @@ it("appends a numeric suffix on collision", () => {
 });
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `npm test -- slug`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement `src/lib/slug.ts`**
+- [x] **Step 3: Implement `src/lib/slug.ts`**
 
 ```ts
 export function slugify(title: string, appName: string): string {
@@ -506,12 +539,12 @@ export function dedupeSlug(base: string, taken: Set<string>): string {
 }
 ```
 
-- [ ] **Step 4: Run the slug tests**
+- [x] **Step 4: Run the slug tests**
 
 Run: `npm test -- slug`
 Expected: PASS.
 
-- [ ] **Step 5: Write the failing importer test**
+- [x] **Step 5: Write the failing importer test**
 
 `test/import.test.ts` — uses a fixture directory, not the real corpus:
 
@@ -557,12 +590,12 @@ Create `test/fixtures/states/no-content-in-plex/index.md` with frontmatter
 `title`, `date`, `image`, and `tags: [mobile, android, no-content, plex, ""]`,
 plus a small real PNG beside it.
 
-- [ ] **Step 6: Run to confirm failure**
+- [x] **Step 6: Run to confirm failure**
 
 Run: `npm test -- import`
 Expected: FAIL — module not found.
 
-- [ ] **Step 7: Implement `src/migrate/import.ts`**
+- [x] **Step 7: Implement `src/migrate/import.ts`**
 
 Algorithm, in order:
 
@@ -580,7 +613,7 @@ Algorithm, in order:
 
 `dryRun: true` performs every step except the R2 and D1 writes.
 
-- [ ] **Step 8: Implement `src/migrate/report.ts`**
+- [x] **Step 8: Implement `src/migrate/report.ts`**
 
 ```ts
 export type MigrationReport = {
@@ -596,12 +629,12 @@ export type MigrationReport = {
 export function formatReport(r: MigrationReport): string { /* markdown table per section */ }
 ```
 
-- [ ] **Step 9: Run the importer tests**
+- [x] **Step 9: Run the importer tests**
 
 Run: `npm test -- import`
 Expected: PASS both.
 
-- [ ] **Step 10: Dry-run against the real corpus and read the report**
+- [x] **Step 10: Dry-run against the real corpus and read the report**
 
 ```bash
 npx tsx scripts/migrate-legacy.ts --dry-run > migration-report.md
@@ -611,7 +644,7 @@ npx tsx scripts/migrate-legacy.ts --dry-run > migration-report.md
 
 **Read `migration-report.md` before continuing.** Every unmapped tag must be either added to `TAGS`/`DEVICE`/`OS` in Task 3 or consciously dropped. This is the step whose whole purpose is to make the decisions visible; skipping it silently defaults them.
 
-- [ ] **Step 11: Run for real, locally**
+- [x] **Step 11: Run for real, locally**
 
 ```bash
 npx tsx scripts/migrate-legacy.ts
@@ -621,7 +654,7 @@ npx wrangler d1 execute emptystates-db --local \
 
 Expected: `n` equals unique markdown entries; `no_device` and `no_os` both 0.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add src/migrate/ src/lib/slug.ts test/ scripts/migrate-legacy.ts
