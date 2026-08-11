@@ -2,7 +2,11 @@ CREATE TABLE states (
   id               TEXT PRIMARY KEY,          -- ULID, sorts by creation time
   slug             TEXT NOT NULL UNIQUE,
   title            TEXT NOT NULL,
-  app_name         TEXT NOT NULL,
+  -- Nullable on purpose. Only 57 of 235 legacy entries carry a `product`
+  -- field, and titles do not rescue the rest. "App name is required" is a
+  -- submission rule enforced in application code, not a fact about every row
+  -- that has ever existed. Backfilled later by the vision model.
+  app_name         TEXT,
   app_url          TEXT,
 
   device_type      TEXT NOT NULL REFERENCES device_types(slug),

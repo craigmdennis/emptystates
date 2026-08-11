@@ -307,7 +307,7 @@ CREATE TABLE states (
   id               TEXT PRIMARY KEY,          -- ULID, sorts by creation time
   slug             TEXT NOT NULL UNIQUE,
   title            TEXT NOT NULL,
-  app_name         TEXT NOT NULL,
+  app_name         TEXT,                     -- nullable; see note below
   app_url          TEXT,
 
   device_type      TEXT NOT NULL REFERENCES device_types(slug),
@@ -346,6 +346,34 @@ promotion path. Seeded with `ios`, `android`, `web`, `macos`, `windows`, `linux`
 `is_legacy` marks the 235 imported entries predating the submission rules. They
 break those rules and must not be judged against them; it also gives the admin area
 a curation backlog.
+
+**`app_name` is nullable, deliberately.** Only 57 of the 235 legacy entries carry a
+`product` field, and titles do not rescue the rest — 66 contain " in ", and parsing
+those yields "Outlook for Android" rather than "Outlook". "App name is required" is a
+*submission rule*, enforced in application code on the form; hardening it into a
+`NOT NULL` constraint would make the existing corpus unrepresentable. Submission
+rules and schema constraints are not the same thing. Spec 02's vision pass backfills
+where it can.
+
+### `state_relations`
+
+```sql
+CREATE TABLE state_relations (
+  state_id         TEXT NOT NULL REFERENCES states(id) ON DELETE CASCADE,
+  related_state_id TEXT NOT NULL REFERENCES states(id) ON DELETE CASCADE,
+  PRIMARY KEY (state_id, related_state_id),
+  CHECK (state_id <> related_state_id)
+);
+CREATE INDEX idx_relations_related ON state_relations (related_state_id);
+```
+
+Eighteen legacy entries carry a hand-curated `related` frontmatter list naming other
+empty states. That is manual curation work and is preserved rather than discarded.
+
+Values are *titles*, so import resolves them to ids in a second pass once every row
+exists; anything that fails to resolve is reported, never guessed. Directed rather
+than symmetric, because A listing B did not always mean B listed A. Surfaced on the
+detail page.
 
 ### `tags`, `state_tags`, `state_colors`
 
@@ -623,6 +651,13 @@ The new schema separates these, so migration is a mapping and cleaning pass, not
 copy: an explicit classification table, case normalisation, junk rejection, and a
 report of anything unmapped for manual triage. **The most underestimated task in
 spec 01.**
+
+**Correction, 2026-08-11.** An earlier draft of this section claimed entry titles had
+leaked into the `tags` array. They had not. Those strings live under a separate
+`related` key and are legitimate curated data — see `state_relations` above. The tags
+array does contain the three conflated dimensions and typos (`browswer`, `mobil`,
+`emai`) described here, and the classifier now resolves all 764 tag values across the
+corpus with zero unmapped, but nothing was ever corrupt in it.
 
 **Legacy entries break the new rules.** 235 imported entries have alpha channels,
 crops outside device ratios, no extracted text. `is_legacy` exempts them from rule

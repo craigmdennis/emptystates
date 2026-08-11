@@ -18,6 +18,7 @@ it("creates every table", async () => {
     "states",
     "state_tags",
     "state_colors",
+    "state_relations",
     "submissions",
     "search_log",
     "layout_prefs",
@@ -76,6 +77,41 @@ it("stores byte_size on states so the detail link can state it", async () => {
   expect(cols).toContain("is_legacy");
   // Focal points were dropped: neither view mode crops.
   expect(cols).not.toContain("focal_x");
+});
+
+it("allows a state with no app name, since 178 legacy entries have none", async () => {
+  await env.DB.prepare(
+    `INSERT INTO states (id,slug,title,device_type,os,r2_key,width,height,
+       aspect_ratio,byte_size,published_at,created_at)
+     VALUES ('01','t','Untitled','phone','ios','originals/01.png',1170,2532,
+       0.4621,1400000,'2026-08-11T00:00:00Z','2026-08-11T00:00:00Z')`,
+  ).run();
+  const row = await env.DB.prepare(
+    "SELECT app_name FROM states WHERE id='01'",
+  ).first<{ app_name: string | null }>();
+  expect(row?.app_name).toBeNull();
+});
+
+it("stores curated relations and refuses self-links", async () => {
+  await env.DB.prepare(
+    `INSERT INTO states (id,slug,title,device_type,os,r2_key,width,height,
+       aspect_ratio,byte_size,published_at,created_at)
+     VALUES ('02','u','Other','phone','ios','originals/02.png',1170,2532,
+       0.4621,1400000,'2026-08-11T00:00:00Z','2026-08-11T00:00:00Z')`,
+  ).run();
+  await env.DB.prepare(
+    "INSERT INTO state_relations (state_id, related_state_id) VALUES ('01','02')",
+  ).run();
+  const row = await env.DB.prepare(
+    "SELECT related_state_id FROM state_relations WHERE state_id='01'",
+  ).first<{ related_state_id: string }>();
+  expect(row?.related_state_id).toBe("02");
+
+  await expect(
+    env.DB.prepare(
+      "INSERT INTO state_relations (state_id, related_state_id) VALUES ('01','01')",
+    ).run(),
+  ).rejects.toThrow();
 });
 
 it("indexes the full-text table over all six searchable columns", async () => {
