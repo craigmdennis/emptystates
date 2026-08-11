@@ -8,7 +8,12 @@ it("exposes the D1 and R2 bindings to tests", async () => {
   expect(results[0].ok).toBe(1);
 });
 
+// Asserts the binding is wired, not how many migrations exist — a hardcoded
+// count fails on every future migration while proving nothing about this one.
 it("exposes the migrations binding", () => {
   expect(Array.isArray(env.TEST_MIGRATIONS)).toBe(true);
-  expect(env.TEST_MIGRATIONS.length).toBe(6);
+  expect(env.TEST_MIGRATIONS.length).toBeGreaterThan(0);
+  expect(env.TEST_MIGRATIONS.map((m) => m.name)).toContain(
+    "0001_taxonomies.sql",
+  );
 });

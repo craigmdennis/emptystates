@@ -10,7 +10,13 @@ CREATE TABLE states (
   app_url          TEXT,
 
   device_type      TEXT NOT NULL REFERENCES device_types(slug),
-  os               TEXT NOT NULL REFERENCES operating_systems(slug),
+  -- Nullable for the same reason as app_name. 153 of the 252 legacy entries
+  -- carry no OS tag, and 134 of those are phones -- defaulting them to 'web'
+  -- would put 134 wrong answers behind the OS filter and in search on day one.
+  -- Device type survives being NOT NULL because aspect ratio always recovers
+  -- it; nothing in a screenshot's dimensions recovers its OS. Backfilled later
+  -- by the vision model, and required of new submissions in application code.
+  os               TEXT REFERENCES operating_systems(slug),
 
   r2_key           TEXT NOT NULL,
   width            INTEGER NOT NULL,

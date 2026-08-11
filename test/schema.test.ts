@@ -19,6 +19,7 @@ it("creates every table", async () => {
     "state_tags",
     "state_colors",
     "state_relations",
+    "state_redirects",
     "submissions",
     "search_log",
     "layout_prefs",
@@ -92,6 +93,35 @@ it("allows a state with no app name, since 178 legacy entries have none", async 
   expect(row?.app_name).toBeNull();
 });
 
+// 134 legacy phone entries carry no OS tag. Blank is the honest value; 'web'
+// would be a wrong answer sitting behind the OS filter until vision fixes it.
+it("allows a state with no OS", async () => {
+  await env.DB.prepare(
+    `INSERT INTO states (id,slug,title,device_type,r2_key,width,height,
+       aspect_ratio,byte_size,published_at,created_at)
+     VALUES ('03','v','No OS','phone','originals/03.png',1080,2160,
+       0.5,900,'2026-08-11T00:00:00Z','2026-08-11T00:00:00Z')`,
+  ).run();
+  const row = await env.DB.prepare(
+    "SELECT os FROM states WHERE id='03'",
+  ).first<{ os: string | null }>();
+  expect(row?.os).toBeNull();
+});
+
+it("still refuses an OS that is not in the taxonomy", async () => {
+  await env.DB.prepare("PRAGMA foreign_keys = ON").run();
+  await expect(
+    env.DB
+      .prepare(
+        `INSERT INTO states (id,slug,title,device_type,os,r2_key,width,height,
+           aspect_ratio,byte_size,published_at,created_at)
+         VALUES ('04','w','Bad OS','phone','symbian','originals/04.png',1080,2160,
+           0.5,900,'2026-08-11T00:00:00Z','2026-08-11T00:00:00Z')`,
+      )
+      .run(),
+  ).rejects.toThrow();
+});
+
 it("stores curated relations and refuses self-links", async () => {
   await env.DB.prepare(
     `INSERT INTO states (id,slug,title,device_type,os,r2_key,width,height,
@@ -110,6 +140,29 @@ it("stores curated relations and refuses self-links", async () => {
   await expect(
     env.DB.prepare(
       "INSERT INTO state_relations (state_id, related_state_id) VALUES ('01','01')",
+    ).run(),
+  ).rejects.toThrow();
+});
+
+// 34 legacy entries carry a `redirect` frontmatter path that Gatsby serves
+// today. Without somewhere to put them the migration silently breaks 34 live
+// URLs, which is the one failure class the plan says costs real users.
+it("stores legacy redirect paths pointing at a state", async () => {
+  await env.DB.prepare(
+    `INSERT INTO state_redirects (from_path, state_id, created_at)
+     VALUES ('/post/162083631161/no-assignments','01','2026-08-11T00:00:00Z')`,
+  ).run();
+  const row = await env.DB.prepare(
+    "SELECT state_id FROM state_redirects WHERE from_path='/post/162083631161/no-assignments'",
+  ).first<{ state_id: string }>();
+  expect(row?.state_id).toBe("01");
+});
+
+it("refuses to point one path at two states", async () => {
+  await expect(
+    env.DB.prepare(
+      `INSERT INTO state_redirects (from_path, state_id, created_at)
+       VALUES ('/post/162083631161/no-assignments','02','2026-08-11T00:00:00Z')`,
     ).run(),
   ).rejects.toThrow();
 });
