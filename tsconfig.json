@@ -3,7 +3,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": ["@cloudflare/vitest-pool-workers"]
+    "types": ["@cloudflare/vitest-pool-workers/types", "node"]
   },
   "include": [".astro/types.d.ts", "**/*", "test/**/*"],
   "exclude": ["dist"]

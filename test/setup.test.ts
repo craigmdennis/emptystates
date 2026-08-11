@@ -1,4 +1,4 @@
-import { env } from "cloudflare:test";
+import { env } from "cloudflare:workers";
 import { it, expect } from "vitest";
 
 it("exposes the D1 and R2 bindings to tests", async () => {
@@ -10,4 +10,5 @@ it("exposes the D1 and R2 bindings to tests", async () => {
 
 it("exposes the migrations binding", () => {
   expect(Array.isArray(env.TEST_MIGRATIONS)).toBe(true);
+  expect(env.TEST_MIGRATIONS.length).toBe(6);
 });
