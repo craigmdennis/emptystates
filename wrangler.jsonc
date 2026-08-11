@@ -1,13 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "emptystates",
-  "compatibility_date": "2025-01-15",
+  "compatibility_date": "2026-08-04",
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "emptystates-db",
-      "database_id": "a695d0d3-a878-4ada-be03-380fd207c773"
+      "database_id": "a695d0d3-a878-4ada-be03-380fd207c773",
+      "migrations_dir": "migrations"
     }
   ],
   "r2_buckets": [
@@ -15,5 +16,16 @@
       "binding": "MEDIA",
       "bucket_name": "emptystates-media"
     }
-  ]
+  ],
+  "queues": {
+    "producers": [{ "queue": "ingest", "binding": "INGEST" }],
+    "consumers": [
+      {
+        "queue": "ingest",
+        "max_batch_size": 5,
+        "max_retries": 3,
+        "dead_letter_queue": "ingest-dlq"
+      }
+    ]
+  }
 }

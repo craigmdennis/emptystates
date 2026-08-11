@@ -2,6 +2,9 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
-  }
+    "jsxImportSource": "react",
+    "types": ["@cloudflare/vitest-pool-workers"]
+  },
+  "include": [".astro/types.d.ts", "**/*", "test/**/*"],
+  "exclude": ["dist"]
 }

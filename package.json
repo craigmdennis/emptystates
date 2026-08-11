@@ -1,19 +1,16 @@
 {
   "name": "emptystates",
-  "version": "1.0.0",
-  "description": "[![Netlify Status](https://api.netlify.com/api/v1/badges/a9e4ab87-7ebd-4aaf-93ea-cbdaad5fcc7d/deploy-status)](https://app.netlify.com/sites/emptystates/deploys)",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "version": "2.0.0",
+  "description": "A curated gallery of empty state UI designs",
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "clean": "astro clean",
-    "ocr": "npx tsx scripts/ocr.ts",
-    "migrate": "npx tsx scripts/migrate.ts",
-    "thumbnails": "npx tsx scripts/thumbnails.ts"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate:legacy": "tsx scripts/migrate-legacy.ts"
   },
   "repository": {
     "type": "git",
@@ -29,25 +26,36 @@
   "dependencies": {
     "@astrojs/cloudflare": "^13.1.8",
     "@astrojs/react": "^5.0.3",
-    "@emdash-cms/cloudflare": "^0.1.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^6.1.5",
-    "better-sqlite3": "^12.8.0",
     "daisyui": "^5.5.19",
-    "emdash": "^0.1.0",
     "glob": "^13.0.6",
     "gray-matter": "^4.0.3",
+    "justified-layout": "^4.1.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.2",
-    "tesseract.js": "^7.0.0",
     "tsx": "^4.21.0",
     "ulidx": "^2.4.1"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.21.0",
+    "@types/node": "^26.2.0",
+    "vitest": "^4.1.0",
     "wrangler": "^4.81.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.4": true,
+    "esbuild@0.27.7": true,
+    "esbuild@0.28.2": true,
+    "esbuild@0.28.1": true,
+    "sharp@0.33.5": true,
+    "sharp@0.35.2": true,
+    "sharp@0.34.5": true,
+    "workerd@1.20251011.0": true,
+    "workerd@1.20260804.1": true
   }
 }
