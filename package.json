@@ -10,7 +10,10 @@
     "clean": "astro clean",
     "test": "vitest run",
     "test:watch": "vitest",
-    "migrate:legacy": "tsx scripts/migrate-legacy.ts"
+    "migrate:legacy": "tsx scripts/migrate-legacy.ts",
+    "review:shapes": "tsx scripts/review-device-shapes.ts",
+    "triage": "tsx scripts/build-device-triage.ts",
+    "triage:apply": "tsx scripts/apply-decisions.ts"
   },
   "repository": {
     "type": "git",
