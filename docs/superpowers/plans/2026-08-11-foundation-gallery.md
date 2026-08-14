@@ -13,9 +13,10 @@
 
 ## Status
 
-**Tasks 1–4 complete** (2026-08-11). Next: Task 5, the query layer. 62 tests passing.
+**Tasks 1–5 complete** (Task 5 on 2026-08-14). Next: Task 6, the card component
+and design tokens. 85 tests passing.
 
-Four things the plan got wrong, found by reading the real corpus rather than
+Six things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
 
 1. **Task 4's test design could not build.** `test/import.test.ts` imports the
@@ -41,8 +42,31 @@ trusting the spec. Each is implemented as described here, not as written below.
    OS tag and 134 of those are phones. Task 5's `listFacets` and spec 02's
    search must both treat a null `os` as unknown, not as a filter value.
 
+5. **`writeFtsRow` takes a row, not a state id.** Task 5 specifies
+   `writeFtsRow(db, stateId)`, which would have to read the state back to know
+   what to index. It shipped with the importer in Task 4 as
+   `writeFtsRow(db, row: FtsRow)`, built from values the caller already holds.
+
+6. **`StateRow` carries `byte_size` and `description`.** Task 10's link states
+   the original's size, which the plan's own self-review notes and its
+   `StateRow` list then omits. Both are selected by the query layer.
+
 Read `migration-report.md` for what the migration decided and what it refused
 to decide.
+
+## Corpus decisions
+
+The corpus is **235 entries**, down from the 252 the importer first read.
+Recovering entries from git history took it to 254; a triage pass then removed
+19 and retagged 14 after looking at each screenshot. Every entry whose image
+shape disagreed with its device now carries an explicit frontmatter `device`,
+so that report section is empty and stays empty across re-imports. Facets in
+D1: phone 187, desktop 45, tablet 3; ios 32, android 33, web 26, macos 7, with
+137 entries carrying no OS.
+
+Rebuild the review page with `npm run triage`; `npm run triage:apply` writes a
+session back to the corpus. `docs/device-decisions.json` and
+`docs/device-approvals.json` record what was judged.
 
 ## Global Constraints
 
@@ -680,7 +704,7 @@ git commit -m "feat: add legacy importer with tag classification and report"
 
 `StateRow` includes `id, slug, title, app_name, app_url, device_type, os, r2_key, width, height, aspect_ratio, published_at, submitter_name, submitter_handle`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 it("lists published states newest first with a total", async () => {
@@ -701,23 +725,23 @@ it("facet counts never include a zero-count option", async () => {
 });
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `npm test -- states`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the four modules**
+- [x] **Step 3: Implement the four modules**
 
 `listStates` filters on `status = 'published'`, orders by `published_at DESC`, and uses `LIMIT`/`OFFSET`. `listFacets` counts via `GROUP BY` joined to the taxonomy tables, returning only rows with a count above zero.
 
 `writeFtsRow` returns prepared statements rather than executing, so callers can include them in the same `db.batch()` as their own writes — which is how "same transaction" is enforced rather than merely requested.
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `npm test -- states`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/db/ test/states.test.ts
