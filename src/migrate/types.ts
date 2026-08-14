@@ -28,6 +28,15 @@ export type LegacyEntry = {
   appUrl: string | null;
   /** Unclassified legacy `tags`, passed to `classifyTag` by the importer. */
   rawTags: string[];
+  /**
+   * Frontmatter `device`, absent from the legacy corpus and written back by
+   * `scripts/apply-decisions.ts` when someone settles a case the migration
+   * flagged. It beats the device any tag implies, and it exists as its own
+   * field because several legacy tags name a device and an OS at once —
+   * `iphone` is both — so retagging to change one would silently change the
+   * other.
+   */
+  deviceOverride: string | null;
   /** Legacy `related`, holding titles rather than slugs. Resolved in pass two. */
   relatedTitles: string[];
   /** Legacy `redirect`, an inbound path that must keep resolving. */

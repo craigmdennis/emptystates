@@ -28,6 +28,20 @@ export type MigrationReport = {
   derivedDeviceFrom: { slug: string; ratio: number; chose: string }[];
   /** Ratio matched no configured device range; a fallback was used. */
   aspectOutsideAllRanges: { slug: string; ratio: number; fellBackTo: string }[];
+  /**
+   * A tag named the device, and the image's shape falls outside that device's
+   * range. Reported, never overridden: the ranges describe single-screen
+   * captures, and a legacy `mobile` entry is often a composite of several.
+   */
+  deviceShapeDisagrees: {
+    slug: string;
+    device: string;
+    ratio: number;
+    min: number;
+    max: number;
+  }[];
+  /** Frontmatter `device` settled the case, so no tag or ratio was consulted. */
+  deviceSetByHand: { slug: string; device: string }[];
   /** No tag supplied an OS. Left null for the vision backfill, never guessed. */
   osLeftBlank: string[];
 
@@ -54,6 +68,8 @@ export function emptyReport(): MigrationReport {
     droppedTags: [],
     derivedDeviceFrom: [],
     aspectOutsideAllRanges: [],
+    deviceShapeDisagrees: [],
+    deviceSetByHand: [],
     osLeftBlank: [],
     slugChanged: [],
     redirectsWritten: 0,
@@ -69,6 +85,11 @@ function table(headers: string[], rows: string[][]): string {
   const rule = `| ${headers.map(() => "---").join(" | ")} |`;
   const body = rows.map((r) => `| ${r.join(" | ")} |`).join("\n");
   return `${head}\n${rule}\n${body}\n`;
+}
+
+/** How far outside its device's range a ratio sits. Always positive here. */
+function outsideBy(d: { ratio: number; min: number; max: number }): number {
+  return d.ratio > d.max ? d.ratio - d.max : d.min - d.ratio;
 }
 
 function list(items: string[]): string {
@@ -128,6 +149,34 @@ export function formatReport(r: MigrationReport, dryRun: boolean): string {
     ),
   );
 
+  out.push(
+    `### Tagged device the image shape contradicts (${r.deviceShapeDisagrees.length})`,
+  );
+  out.push("");
+  out.push(
+    "A legacy tag named the device; the picture is a shape that device does not " +
+      "produce. Nothing was changed — each entry is imported and displayed under " +
+      "the device it claims, so the call can be made by looking at it. A wide " +
+      "`phone` is usually several screenshots side by side, which is still a " +
+      "phone entry. Retag the entry, or widen the range in `device_types`.",
+  );
+  out.push("");
+  out.push(
+    table(
+      ["Slug", "Claims", "Ratio", "Range for that device"],
+      // Worst disagreement first: the top of this table is where a look at the
+      // picture is most likely to change something.
+      [...r.deviceShapeDisagrees]
+        .sort((a, b) => outsideBy(b) - outsideBy(a))
+        .map((d) => [
+          `\`${d.slug}\``,
+          d.device,
+          d.ratio.toFixed(3),
+          `${d.min.toFixed(2)}–${d.max.toFixed(2)}`,
+        ]),
+    ),
+  );
+
   out.push("### Relations that resolved to nothing");
   out.push("");
   out.push(
@@ -173,6 +222,21 @@ export function formatReport(r: MigrationReport, dryRun: boolean): string {
         d.ratio.toFixed(3),
         d.chose,
       ]),
+    ),
+  );
+
+  out.push(`### Device set by hand (${r.deviceSetByHand.length})`);
+  out.push("");
+  out.push(
+    "Frontmatter `device`, written by `scripts/apply-decisions.ts` from a triage " +
+      "session. No tag or ratio was consulted, and these are excluded from the " +
+      "shape-disagreement list above.",
+  );
+  out.push("");
+  out.push(
+    table(
+      ["Slug", "Device"],
+      r.deviceSetByHand.map((d) => [`\`${d.slug}\``, d.device]),
     ),
   );
 

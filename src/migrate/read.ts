@@ -148,6 +148,7 @@ export async function readEntry(
       appName: null,
       appUrl: null,
       rawTags: [],
+      deviceOverride: null,
       relatedTitles: [],
       redirectPath: null,
       bodyText: null,
@@ -169,6 +170,8 @@ export async function readEntry(
     appName: optionalString(data.product),
     appUrl: optionalString(data.referral),
     rawTags: Array.isArray(data.tags) ? data.tags.map((t) => String(t)) : [],
+    // Absent from the legacy corpus. Written by scripts/apply-decisions.ts.
+    deviceOverride: optionalString(data.device),
     relatedTitles: Array.isArray(data.related)
       ? data.related.map((t) => String(t).trim()).filter(Boolean)
       : [],

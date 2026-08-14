@@ -71,9 +71,18 @@ export async function importEntries(
     const id = newId();
 
     // --- Classify the legacy tag soup into its three real dimensions --------
-    let device: string | null = null;
+    // A frontmatter `device` is somebody's answer to a case this report raised,
+    // so it is seeded here and every later step reads as already settled: the
+    // tag loop's `??=` leaves it alone, the ratio is never consulted, and the
+    // shape check below has nothing to flag.
+    const setByHand = entry.deviceOverride;
+    let device: string | null = setByHand;
     let os: string | null = null;
     const tagSlugs: string[] = [];
+
+    if (setByHand) {
+      report.deviceSetByHand.push({ slug: entry.legacySlug, device: setByHand });
+    }
 
     for (const raw of entry.rawTags) {
       const verdict = classifyTag(raw, entry.title);
@@ -123,6 +132,25 @@ export async function importEntries(
           slug: entry.legacySlug,
           ratio,
           fellBackTo: device,
+        });
+      }
+    } else if (!setByHand) {
+      // A tag named the device, so it stands. The ranges still get consulted,
+      // because that is what the seed comment in 0001 promises they are for:
+      // flag a claim the picture contradicts, never reject it. The entry is
+      // imported and displayed under the device it claims either way.
+      const claimed = ranges.find((r) => r.slug === device);
+      if (
+        claimed?.min_ratio != null &&
+        claimed.max_ratio != null &&
+        (ratio < claimed.min_ratio || ratio > claimed.max_ratio)
+      ) {
+        report.deviceShapeDisagrees.push({
+          slug: entry.legacySlug,
+          device,
+          ratio,
+          min: claimed.min_ratio,
+          max: claimed.max_ratio,
         });
       }
     }

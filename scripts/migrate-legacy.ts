@@ -81,6 +81,7 @@ try {
   console.log(`  slugs changed       ${report.slugChanged.length}`);
   console.log(`  device derived      ${report.derivedDeviceFrom.length}`);
   console.log(`  ratio unmatched     ${report.aspectOutsideAllRanges.length}`);
+  console.log(`  shape disagrees     ${report.deviceShapeDisagrees.length}`);
   console.log(`  os left blank       ${report.osLeftBlank.length}`);
   console.log(`  redirects           ${report.redirectsWritten}`);
   console.log(`  relations           ${report.relationsWritten}`);

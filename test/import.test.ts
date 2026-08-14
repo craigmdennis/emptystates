@@ -35,6 +35,7 @@ function entry(over: Partial<LegacyEntry> = {}): LegacyEntry {
     appName: "Plex",
     appUrl: null,
     rawTags: ["mobile", "android", "no-content", "widget", ""],
+    deviceOverride: null,
     relatedTitles: [],
     redirectPath: null,
     bodyText: null,
@@ -226,6 +227,66 @@ it("reports a ratio matching no device range rather than failing silently", asyn
     device_type: string;
   }>();
   expect(row?.device_type).toBe("desktop");
+});
+
+// The ranges in `device_types` exist to flag a claimed device that disagrees
+// with the picture's actual shape. The tag still wins — a 3:1 image tagged
+// `mobile` is usually three phone screenshots side by side, which is a real
+// phone entry with a composite screenshot, not a desktop one.
+it("reports a tagged device the image shape contradicts, without overriding it", async () => {
+  const report = await run([
+    entry({
+      rawTags: ["mobile", "no-content"],
+      image: { ...entry().image, width: 3274, height: 1054 },
+    }),
+  ]);
+
+  const row = await env.DB.prepare("SELECT device_type FROM states").first<{
+    device_type: string;
+  }>();
+  expect(row?.device_type).toBe("phone");
+
+  expect(report.deviceShapeDisagrees).toHaveLength(1);
+  const [d] = report.deviceShapeDisagrees;
+  expect(d.slug).toBe("no-content-in-plex");
+  expect(d.device).toBe("phone");
+  expect(d.ratio).toBeCloseTo(3274 / 1054, 5);
+  expect(d.min).toBe(0.4);
+  expect(d.max).toBe(0.65);
+});
+
+it("says nothing when the tagged device and the image shape agree", async () => {
+  const report = await run([entry()]);
+  expect(report.deviceShapeDisagrees).toEqual([]);
+});
+
+// `device` in frontmatter is a person's answer to the report above, written
+// back by scripts/apply-decisions.ts. It beats anything a tag implies.
+it("prefers an explicit device over the one a tag implies", async () => {
+  const report = await run([entry({ deviceOverride: "tablet" })]);
+  const row = await env.DB.prepare("SELECT device_type FROM states").first<{
+    device_type: string;
+  }>();
+  expect(row?.device_type).toBe("tablet");
+  expect(report.deviceSetByHand).toEqual([
+    { slug: "no-content-in-plex", device: "tablet" },
+  ]);
+});
+
+// The flag means "no one has looked at this yet". Re-raising it against a
+// decision someone already made would never let the triage list reach empty.
+it("stops flagging a shape disagreement once the device is set by hand", async () => {
+  const report = await run([
+    entry({
+      deviceOverride: "phone",
+      image: { ...entry().image, width: 3274, height: 1054 },
+    }),
+  ]);
+  expect(report.deviceShapeDisagrees).toEqual([]);
+  const row = await env.DB.prepare("SELECT device_type FROM states").first<{
+    device_type: string;
+  }>();
+  expect(row?.device_type).toBe("phone");
 });
 
 // 134 legacy phones have no OS tag. Blank is missing; 'web' would be wrong.
