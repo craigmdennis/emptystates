@@ -7,6 +7,13 @@ dist/
 uploads/
 data.db
 *.db-journal
+*.db-shm
+*.db-wal
+
+# Review pages generated from the migrated D1 by scripts/. Regenerate with
+# `npm run triage`; the decisions they export are committed, the pages are not.
+docs/device-triage.html
+docs/device-shape-review.html
 .env
 prod-dump.sql
 .worktrees/
