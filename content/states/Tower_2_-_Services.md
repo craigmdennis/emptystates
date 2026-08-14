@@ -7,6 +7,5 @@ tags:
   - macos
 product: Tower
 related:
-  - No account selected in Tower 2
   - No repositories in Tower 2 for Mac
 ---
