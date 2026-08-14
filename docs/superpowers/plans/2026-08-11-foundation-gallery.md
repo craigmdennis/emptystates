@@ -13,12 +13,12 @@
 
 ## Status
 
-**Tasks 1–5 complete** (Task 5 on 2026-08-14). Next: Task 5A, which clears the
-EMDash-era components Task 1 left behind, then Task 6. 85 tests passing.
+**Tasks 1–5A complete** (2026-08-14). Next: Task 6, the card component and
+design tokens. 85 tests passing.
 
-`npm run build` fails until Task 5A runs. Task 1 uninstalled `emdash` and left
-eight components and two pages calling it, and Tasks 6–10 write their
-replacements under new names without deleting the originals.
+`npm run build` and `npx tsc --noEmit` both run clean as of Task 5A. `/` and
+`/s/<slug>` read D1 through `src/db/` and render text; Tasks 7 and 10 replace
+them with the real gallery and detail page.
 
 Six things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
@@ -781,7 +781,7 @@ pointing at the same task.
 - Consumes: `getDb` from Task 5, `listStates` and `getStateBySlug` from Task 5
 - Produces: a green `npm run build`; two routes reading D1, which Tasks 7 and 10 rewrite
 
-- [ ] **Step 1: Confirm what still depends on what**
+- [x] **Step 1: Confirm what still depends on what**
 
 ```bash
 grep -rn "emdash" src/
@@ -796,7 +796,7 @@ only through `index.astro` or `s/[slug].astro`.
 stylesheet as design tokens, and search returns in spec 02 as a query against
 `states_fts`, which Task 4 already populates.
 
-- [ ] **Step 2: Delete the eight components**
+- [x] **Step 2: Delete the eight components**
 
 ```bash
 git rm src/components/DetailMeta.astro src/components/FilterBar.astro \
@@ -808,12 +808,17 @@ git rm src/components/DetailMeta.astro src/components/FilterBar.astro \
 `SearchIsland.tsx` is also the only file `npx tsc --noEmit` reports an error in,
 so the typecheck goes clean with it.
 
-- [ ] **Step 3: Drop the search island from `Base.astro`**
+- [x] **Step 3: Drop the search island from `Base.astro`**
 
 Remove the `SearchIsland` import and the element that mounts it. Keep the
 `global.css` import, the document shell and the header.
 
-- [ ] **Step 4: Point both routes at the query layer**
+The header's device nav linked to `?device=mobile` and `?device=game`, matching
+no slug in `device_types`, so both returned an empty gallery. They are `phone`
+and `console`. Task 6 rebuilds the bar from `listFacets`, which can only offer
+a device something published carries.
+
+- [x] **Step 4: Point both routes at the query layer**
 
 Neither page is the real thing — Task 7 writes the gallery and Task 10 the
 detail page. Each renders text off `src/db/` so the build compiles and the
@@ -845,7 +850,7 @@ const { rows, total } = await listStates(getDb(Astro.locals), {
 `s/[slug].astro` calls `getStateBySlug` and returns a 404 response when it
 resolves to null.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 ```bash
 npm run build
@@ -857,7 +862,7 @@ npm test
 Expected: the build completes, the typecheck is silent, the grep finds nothing,
 and the test count is unchanged — no test covers these files.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A src/
