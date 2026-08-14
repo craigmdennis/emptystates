@@ -1,128 +1,68 @@
 ---
+/**
+ * Placeholder gallery. Task 7 replaces it with the justified-rows layout.
+ *
+ * Text only: R2 serves originals from a public host that does not resolve
+ * locally, and the w640/w1280/w2560 derivatives every display path is supposed
+ * to use are not generated until spec 02. Listing titles proves the query layer
+ * answers a real request without pretending to be the gallery.
+ */
 import Layout from "../layouts/Base.astro";
-import Gallery from "../components/Gallery.astro";
-import GalleryCard from "../components/GalleryCard.astro";
-import Pagination from "../components/Pagination.astro";
-import { getEmDashCollection } from "emdash";
-import FilterBar from "../components/FilterBar.astro";
-import FocusModeToggle from "../components/FocusModeToggle.tsx";
+import { getDb } from "../db/client";
+import { listStates } from "../db/states";
+import { listFacets } from "../db/taxonomies";
 
-const ITEMS_PER_PAGE = 60;
+const PER_PAGE = 60;
 
+const db = getDb(Astro.locals);
 const url = Astro.url;
-const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
-const deviceFilter = url.searchParams.get("device") ?? undefined;
-const platformFilter = url.searchParams.get("platform") ?? undefined;
-const tagsFilter = url.searchParams.getAll("tags");
+const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1);
+const device = url.searchParams.get("device") ?? undefined;
+const os = url.searchParams.get("os") ?? undefined;
+const tag = url.searchParams.get("tag") ?? undefined;
 
-// Fetch all published entries (235 total — fine to load at once)
-const { entries: allPublished = [] } = await getEmDashCollection("states", {
-  status: "published",
-  limit: 1000,
-});
+const [{ rows, total }, facets] = await Promise.all([
+  listStates(db, { page, perPage: PER_PAGE, device, os, tag }),
+  listFacets(db),
+]);
 
-// Filter in-memory (EMDash where clause only supports taxonomy fields)
-const hasFilters = deviceFilter || platformFilter || tagsFilter.length > 0;
-const filtered = hasFilters
-  ? allPublished.filter((entry) => {
-      if (deviceFilter && entry.data.device_type !== deviceFilter) return false;
-      if (platformFilter && entry.data.platform !== platformFilter) return false;
-      if (tagsFilter.length > 0) {
-        const entryTags: string[] = entry.data.tags ?? [];
-        if (!tagsFilter.some((t) => entryTags.includes(t))) return false;
-      }
-      return true;
-    })
-  : allPublished;
+const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
 
-// Split by device category
-const wideTypes = new Set(["desktop", "tv", "game"]);
-
-// Paginate
-const start = (page - 1) * ITEMS_PER_PAGE;
-const hasNextPage = filtered.length > start + ITEMS_PER_PAGE;
-const entries = filtered.slice(start, start + ITEMS_PER_PAGE);
-
-// Split paginated entries into sections
-const paginatedMobile = entries.filter((e) => !wideTypes.has(e.data.device_type));
-const paginatedDesktop = entries.filter((e) => wideTypes.has(e.data.device_type));
-
-// Derive available platforms and tags from actual data
-const availablePlatforms = [...new Set(allPublished.map((e) => e.data.platform).filter(Boolean))].sort();
-const availableTags = [...new Set(allPublished.flatMap((e) => e.data.tags ?? []))].sort();
-
-// Page title
-const filterLabel = deviceFilter
-  ? deviceFilter.charAt(0).toUpperCase() + deviceFilter.slice(1)
-  : null;
-const title = filterLabel ? `${filterLabel} Empty States` : "emptystat.es";
+function pageHref(n: number): string {
+  const next = new URL(url);
+  next.searchParams.set("page", String(n));
+  return `${next.pathname}${next.search}`;
+}
 ---
 
-<Layout title={title}>
-  <FilterBar
-    activeDevice={deviceFilter}
-    activePlatform={platformFilter}
-    activeTags={tagsFilter}
-    platforms={availablePlatforms}
-    tags={availableTags}
-  />
+<Layout title="EmptyStates">
+  <p class="font-mono text-xs text-base-content/60 mb-4">
+    {total} states — page {page} of {lastPage}
+    {device && ` — device: ${device}`}
+    {os && ` — os: ${os}`}
+    {tag && ` — tag: ${tag}`}
+  </p>
 
-  {entries.length > 0 ? (
-    <>
-      <div class="flex justify-end mb-3">
-        <FocusModeToggle client:idle />
-      </div>
-      {paginatedMobile.length > 0 && (
-        <section>
-          {paginatedDesktop.length > 0 && (
-            <h2 class="text-xs font-mono text-base-content/40 uppercase tracking-wider mb-3" data-label>Mobile</h2>
-          )}
-          <Gallery>
-            {paginatedMobile.map((entry) => (
-              <GalleryCard
-                slug={entry.data.slug}
-                title={entry.data.title}
-                imageUrl={entry.data.screenshot?.url ?? ""}
-                imageAlt={entry.data.screenshot?.alt}
-                deviceType={entry.data.device_type}
-                focalX={entry.data.focal_x}
-                focalY={entry.data.focal_y}
-              />
-            ))}
-          </Gallery>
-        </section>
-      )}
+  <ul class="mb-8 grid gap-1">
+    {rows.map((s) => (
+      <li class="font-mono text-sm">
+        <a href={`/s/${s.slug}`} class="hover:underline">{s.title}</a>
+        <span class="text-base-content/50">
+          {" — "}{s.device_type}{s.os ? ` / ${s.os}` : ""}
+          {" — "}{s.width}&times;{s.height}
+        </span>
+      </li>
+    ))}
+  </ul>
 
-      {paginatedDesktop.length > 0 && (
-        <section class={paginatedMobile.length > 0 ? "mt-10" : ""}>
-          {paginatedMobile.length > 0 && (
-            <h2 class="text-xs font-mono text-base-content/40 uppercase tracking-wider mb-3" data-label>Desktop</h2>
-          )}
-          <Gallery>
-            {paginatedDesktop.map((entry) => (
-              <GalleryCard
-                slug={entry.data.slug}
-                title={entry.data.title}
-                imageUrl={entry.data.screenshot?.url ?? ""}
-                imageAlt={entry.data.screenshot?.alt}
-                deviceType={entry.data.device_type}
-                focalX={entry.data.focal_x}
-                focalY={entry.data.focal_y}
-              />
-            ))}
-          </Gallery>
-        </section>
-      )}
+  <nav class="flex gap-3 font-mono text-xs mb-8" aria-label="Pagination">
+    {page > 1 && <a href={pageHref(page - 1)} class="hover:underline">Previous</a>}
+    {page < lastPage && <a href={pageHref(page + 1)} class="hover:underline">Next</a>}
+  </nav>
 
-      <Pagination
-        currentPage={page}
-        hasNextPage={hasNextPage}
-        baseUrl={url}
-      />
-    </>
-  ) : (
-    <div class="flex flex-col items-center justify-center py-24 text-center">
-      <p class="text-base-content/40 text-sm font-mono">No states found</p>
-    </div>
-  )}
+  <p class="font-mono text-xs text-base-content/50">
+    {facets.devices.map((d) => `${d.slug} ${d.count}`).join("  ")}
+    {" | "}
+    {facets.oses.map((o) => `${o.slug} ${o.count}`).join("  ")}
+  </p>
 </Layout>

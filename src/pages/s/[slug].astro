@@ -1,53 +1,46 @@
 ---
+/**
+ * Placeholder detail page. Task 10 replaces it with the viewport-filling one.
+ *
+ * Text only, for the reason given in index.astro: no display derivative of the
+ * original exists yet.
+ */
 import Layout from "../../layouts/Base.astro";
-import DetailMeta from "../../components/DetailMeta.astro";
-import { getEmDashEntry } from "emdash";
+import { getDb } from "../../db/client";
+import { getAdjacent, getStateBySlug } from "../../db/states";
 
 const { slug } = Astro.params;
-const { entry } = await getEmDashEntry("states", slug!);
+const db = getDb(Astro.locals);
+const state = slug ? await getStateBySlug(db, slug) : null;
 
-if (!entry) {
-  return Astro.redirect("/404");
+if (!state) {
+  return new Response("Not found", { status: 404 });
 }
 
-const d = entry.data;
+const { prev, next } = await getAdjacent(db, state.published_at);
 ---
 
-<Layout title={d.title} image={d.screenshot?.url}>
-  <article class="max-w-4xl mx-auto">
-    <!-- Back link -->
-    <a href="/" class="btn btn-sm btn-ghost font-mono mb-4">&larr; Back</a>
-
-    <h1 class="text-xl font-bold mb-3">{d.title}</h1>
-
-    <DetailMeta
-      appName={d.app_name}
-      appUrl={d.app_url}
-      deviceType={d.device_type}
-      platform={d.platform}
-      tags={d.tags}
-      capturedAt={d.captured_at}
-    />
-
-    <!-- Full-size image -->
-    <div class="mt-6 bg-base-200 rounded-lg overflow-hidden flex items-center justify-center p-4">
-      <img
-        src={d.screenshot?.url}
-        alt={d.screenshot?.alt || d.title}
-        width={d.screenshot?.width}
-        height={d.screenshot?.height}
-        class="max-w-full h-auto"
-      />
-    </div>
-
-    <!-- OCR text -->
-    {d.ocr_text && (
-      <details class="mt-6 collapse collapse-arrow bg-base-200 rounded-lg">
-        <summary class="collapse-title text-sm font-mono">Extracted text from screenshot</summary>
-        <div class="collapse-content">
-          <pre class="text-xs text-base-content/60 whitespace-pre-wrap break-words font-mono">{d.ocr_text}</pre>
-        </div>
-      </details>
-    )}
+<Layout title={state.title} description={state.description ?? undefined}>
+  <article class="font-mono text-sm grid gap-2">
+    <h1 class="text-lg font-bold">{state.title}</h1>
+    <dl class="grid grid-cols-[8rem_1fr] gap-x-4">
+      <dt class="text-base-content/50">App</dt>
+      <dd>{state.app_name ?? "unknown"}</dd>
+      <dt class="text-base-content/50">Device</dt>
+      <dd>{state.device_type}</dd>
+      <dt class="text-base-content/50">OS</dt>
+      <dd>{state.os ?? "unknown"}</dd>
+      <dt class="text-base-content/50">Size</dt>
+      <dd>{state.width}&times;{state.height} — ratio {state.aspect_ratio.toFixed(3)}</dd>
+      <dt class="text-base-content/50">Original</dt>
+      <dd>{state.r2_key} — {Math.round(state.byte_size / 1024)} KB</dd>
+      <dt class="text-base-content/50">Published</dt>
+      <dd>{state.published_at.slice(0, 10)}</dd>
+    </dl>
   </article>
+
+  <nav class="flex gap-3 font-mono text-xs mt-8" aria-label="Adjacent states">
+    {prev && <a href={`/s/${prev.slug}`} class="hover:underline">← {prev.title}</a>}
+    {next && <a href={`/s/${next.slug}`} class="hover:underline">{next.title} →</a>}
+  </nav>
 </Layout>

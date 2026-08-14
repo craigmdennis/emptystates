@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import SearchIsland from "../components/SearchIsland.tsx";
 
 interface Props {
   title: string;
@@ -18,14 +17,18 @@ const siteTitle = "emptystat.es";
 const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? "https://emptystat.es");
 
+// Slugs, not display words: `device_types` seeds `phone` and `console`, so the
+// older `mobile` and `game` links returned an empty gallery. Task 6 replaces
+// this with a bar built from listFacets, which can only offer a device
+// something published actually carries.
 const deviceTypes = [
   { label: "All", href: "/" },
-  { label: "Mobile", href: "/?device=mobile" },
+  { label: "Phone", href: "/?device=phone" },
   { label: "Desktop", href: "/?device=desktop" },
   { label: "Tablet", href: "/?device=tablet" },
   { label: "TV", href: "/?device=tv" },
   { label: "Watch", href: "/?device=watch" },
-  { label: "Game", href: "/?device=game" },
+  { label: "Console", href: "/?device=console" },
 ];
 
 const currentDevice = Astro.url.searchParams.get("device");
@@ -55,11 +58,6 @@ const currentDevice = Astro.url.searchParams.get("device");
         <a href="/" class="font-mono text-sm font-bold tracking-tight hover:opacity-70 transition-opacity">
           emptystat.es
         </a>
-
-        <!-- Search -->
-        <div class="flex-1 max-w-xs hidden sm:block">
-          <SearchIsland client:idle />
-        </div>
 
         <!-- Device nav -->
         <nav aria-label="Filter by device" class="flex gap-1 flex-wrap">
