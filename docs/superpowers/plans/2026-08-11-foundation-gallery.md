@@ -13,8 +13,12 @@
 
 ## Status
 
-**Tasks 1–5 complete** (Task 5 on 2026-08-14). Next: Task 6, the card component
-and design tokens. 85 tests passing.
+**Tasks 1–5 complete** (Task 5 on 2026-08-14). Next: Task 5A, which clears the
+EMDash-era components Task 1 left behind, then Task 6. 85 tests passing.
+
+`npm run build` fails until Task 5A runs. Task 1 uninstalled `emdash` and left
+eight components and two pages calling it, and Tasks 6–10 write their
+replacements under new names without deleting the originals.
 
 Six things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
@@ -93,6 +97,7 @@ session back to the corpus. `docs/device-decisions.json` and
 | `src/db/taxonomies.ts` | Device types, OSes, tags with counts |
 | `src/db/fts.ts` | `writeFtsRow()` — the single writer all mutations call |
 | `src/lib/slug.ts` | Slug generation and dedup |
+| `src/layouts/Base.astro` | Document shell and header; survives Task 5A |
 | `src/migrate/classify.ts` | **Pure** tag classifier — device / OS / tag / drop |
 | `src/migrate/import.ts` | Reads `content/states/`, writes D1 + R2 |
 | `src/migrate/report.ts` | Migration report writer |
@@ -750,6 +755,117 @@ git commit -m "feat: add D1 query layer and FTS row writer"
 
 ---
 
+## Task 5A: Remove the EMDash-era components
+
+Task 1 removed the `emdash` package but left the components that called it, so
+`npm run build` has failed since then:
+
+```
+[vite]: Rollup failed to resolve import "emdash" from "src/pages/s/[slug].astro"
+```
+
+Tasks 6–10 write replacements under different names, so nothing later in this
+plan deletes the old files or notices they are still there. Until the build
+runs, no task from 6 onward can be verified in a browser, and Task 11's fixture
+check cannot run at all.
+
+Numbered 5A so that every "Task N" reference elsewhere in this plan keeps
+pointing at the same task.
+
+**Files:**
+- Delete: `src/components/{DetailMeta,FilterBar,Gallery,GalleryCard,Pagination}.astro`, `src/components/{FocusModeToggle,SearchIsland,ZoomIsland}.tsx`
+- Modify: `src/layouts/Base.astro`
+- Replace: `src/pages/index.astro`, `src/pages/s/[slug].astro`
+
+**Interfaces:**
+- Consumes: `getDb` from Task 5, `listStates` and `getStateBySlug` from Task 5
+- Produces: a green `npm run build`; two routes reading D1, which Tasks 7 and 10 rewrite
+
+- [ ] **Step 1: Confirm what still depends on what**
+
+```bash
+grep -rn "emdash" src/
+grep -rn "SearchIsland\|ZoomIsland\|GalleryCard\|FilterBar\|Pagination\|DetailMeta\|FocusModeToggle" src/
+```
+
+Expected: `emdash` in the two pages only. `Base.astro` imports `SearchIsland`,
+and `GalleryCard.astro` imports `ZoomIsland`; every other component is reached
+only through `index.astro` or `s/[slug].astro`.
+
+`Base.astro` and `src/styles/global.css` both survive. Task 6 rewrites the
+stylesheet as design tokens, and search returns in spec 02 as a query against
+`states_fts`, which Task 4 already populates.
+
+- [ ] **Step 2: Delete the eight components**
+
+```bash
+git rm src/components/DetailMeta.astro src/components/FilterBar.astro \
+       src/components/Gallery.astro src/components/GalleryCard.astro \
+       src/components/Pagination.astro src/components/FocusModeToggle.tsx \
+       src/components/SearchIsland.tsx src/components/ZoomIsland.tsx
+```
+
+`SearchIsland.tsx` is also the only file `npx tsc --noEmit` reports an error in,
+so the typecheck goes clean with it.
+
+- [ ] **Step 3: Drop the search island from `Base.astro`**
+
+Remove the `SearchIsland` import and the element that mounts it. Keep the
+`global.css` import, the document shell and the header.
+
+- [ ] **Step 4: Point both routes at the query layer**
+
+Neither page is the real thing — Task 7 writes the gallery and Task 10 the
+detail page. Each renders text off `src/db/` so the build compiles and the
+query layer is exercised through a real request. Images are left out on
+purpose: R2 serves them from a public host that does not resolve locally, and
+the `w640`/`w1280`/`w2560` derivatives do not exist until spec 02.
+
+```astro
+---
+// src/pages/index.astro
+import Layout from "../layouts/Base.astro";
+import { getDb } from "../db/client";
+import { listStates } from "../db/states";
+
+const page = Number(Astro.url.searchParams.get("page") ?? 1);
+const { rows, total } = await listStates(getDb(Astro.locals), {
+  page,
+  perPage: 60,
+});
+---
+<Layout title="EmptyStates">
+  <p>{total} states</p>
+  <ul>{rows.map((s) => (
+    <li><a href={`/s/${s.slug}`}>{s.title}</a> — {s.device_type}</li>
+  ))}</ul>
+</Layout>
+```
+
+`s/[slug].astro` calls `getStateBySlug` and returns a 404 response when it
+resolves to null.
+
+- [ ] **Step 5: Verify**
+
+```bash
+npm run build
+npx tsc --noEmit
+grep -rn "emdash" src/ || echo "no emdash references remain"
+npm test
+```
+
+Expected: the build completes, the typecheck is silent, the grep finds nothing,
+and the test count is unchanged — no test covers these files.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add -A src/
+git commit -m "refactor: remove the EMDash-era components, read routes from D1"
+```
+
+---
+
 ## Task 6: Card component and design tokens
 
 **Files:**
@@ -1258,11 +1374,21 @@ Point `scripts/migrate-legacy.ts` at `--remote` and run. Confirm counts match th
 npm run build && npx wrangler deploy
 ```
 
-- [ ] **Step 4: Walk the spec's verification checklist**
+- [ ] **Step 4: Confirm no EMDash reference survived**
+
+```bash
+grep -rn "emdash\|EmDash\|EMDash" src/ astro.config.mjs wrangler.jsonc package.json \
+  || echo "clean"
+```
+
+Expected: `clean`. Task 1 removed the package and Task 5A removed the
+components that called it; this catches anything reintroduced since.
+
+- [ ] **Step 5: Walk the spec's verification checklist**
 
 Open `docs/superpowers/specs/2026-08-11-01-foundation-gallery-design.md` §7 and tick every box against the deployed site, not against localhost. Items needing the real deployment: R2 URLs resolving over `img.emptystat.es`, Plausible receiving the event without `x-plausible-dropped`, and every legacy URL resolving.
 
-- [ ] **Step 5: Commit and tag**
+- [ ] **Step 6: Commit and tag**
 
 ```bash
 git add -A && git commit -m "chore: deploy foundation and gallery"
@@ -1273,7 +1399,12 @@ git tag foundation-complete
 
 ## Self-Review
 
-**Spec coverage.** §1 remove EMDash → Task 1. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Task 10. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
+**Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Task 10. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
+
+**Gap found and closed.** §1's "remove EMDash" was mapped to Task 1 alone, which
+uninstalls the package. Eight components and two pages import it, and Tasks
+6–10 write replacements under new names without deleting them, so the build
+would have stayed broken through every remaining task. Task 5A removes them.
 
 **Gap found and closed.** The spec's §4 mentions `--rows` as a responsive token but never fixes its values; Task 6 sets 2 / 2 / 1.5 across the three breakpoints, with the reasoning for the half-row.
 
