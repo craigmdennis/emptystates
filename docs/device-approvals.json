@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "source": "tacit approval of everything left flagged",
+  "decisions": [
+    {
+      "slug": "no-deals-yet",
+      "dir": "tumblr_mggrayiCsC1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "no-nearby-friends-in-foursquare-for-ios",
+      "dir": "tumblr_mgtxzlIyuD1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "no-notifications-in-github",
+      "dir": "tumblr_mh9d0ac2bD1rdf37to1_1280",
+      "action": "device",
+      "device": "desktop",
+      "was": "desktop"
+    },
+    {
+      "slug": "no-notifications-in-timehop-for-ios",
+      "dir": "tumblr_mg5zp7EefY1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "no-photos-yet",
+      "dir": "tumblr_mh7egzSdDl1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "no-results-in-sailica-app-for-macos",
+      "dir": "no-results-in-sailica-app-for-macos",
+      "action": "device",
+      "device": "desktop",
+      "was": "desktop"
+    },
+    {
+      "slug": "tumblr-mg5wsthgda1rdf37to1-1280",
+      "dir": "tumblr_mg5wstHgDa1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mg5zrwonup1rdf37to1-1280",
+      "dir": "tumblr_mg5zrwONUP1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mg5zzmfzns1rdf37to1-1280",
+      "dir": "tumblr_mg5zzmFZns1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mg9zduwuqo1rdf37to1-1280",
+      "dir": "tumblr_mg9zduwUqO1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mg9zlnuawl1rdf37to1-1280",
+      "dir": "tumblr_mg9zlnUAWL1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mga4pl1nde1rdf37to1-1280",
+      "dir": "tumblr_mga4pl1ndE1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mga4ywdrln1rdf37to1-1280",
+      "dir": "tumblr_mga4ywdRlN1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mga5m0vztn1rdf37to1-1280",
+      "dir": "tumblr_mga5m0vZTn1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mgdozmf88c1rdf37to1-1280",
+      "dir": "tumblr_mgdozmf88c1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mgs0cuknev1rdf37to1-1280",
+      "dir": "tumblr_mgs0cuKnEV1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mh5i406unf1rdf37to1-1280",
+      "dir": "tumblr_mh5i406uNF1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mh6ys2xuyr1rdf37to1-1280",
+      "dir": "tumblr_mh6ys2XuYR1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mh6yt8xsjv1rdf37to1-1280",
+      "dir": "tumblr_mh6yt8XsjV1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhaflffrka1rdf37to1-400",
+      "dir": "tumblr_mhaflffRKA1rdf37to1_400",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhcpbfsnk71rdf37to1-1280",
+      "dir": "tumblr_mhcpbfsnK71rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhcph3vf7c1rdf37to1-1280",
+      "dir": "tumblr_mhcph3vf7C1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhk5hznu1b1rdf37to1-1280",
+      "dir": "tumblr_mhk5hznU1B1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhmbkby2721rdf37to1-1280",
+      "dir": "tumblr_mhmbkby2721rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhmc97famz1rdf37to1-1280",
+      "dir": "tumblr_mhmc97fAMZ1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhmchsbfkz1rdf37to1-1280",
+      "dir": "tumblr_mhmchsBFkz1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhox3qvies1rdf37to1-1280",
+      "dir": "tumblr_mhox3qVIes1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mht6mfrqhl1rdf37to1-400",
+      "dir": "tumblr_mht6mfrqHL1rdf37to1_400",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mhvgoj3hfq1rdf37to1-400",
+      "dir": "tumblr_mhvgoj3Hfq1rdf37to1_400",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mi309bohx61rdf37to1-1280",
+      "dir": "tumblr_mi309bohx61rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mi99cyd08u1rdf37to1-1280",
+      "dir": "tumblr_mi99cyD08u1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mi9chncumd1rdf37to2-r1-500",
+      "dir": "tumblr_mi9chncuMd1rdf37to2_r1_500",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mjcufjcmbr1rdf37to1-1280",
+      "dir": "tumblr_mjcufjCMBr1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mk7u00qtra1rdf37to1-1280",
+      "dir": "tumblr_mk7u00QtRa1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mlcoqkzmtx1rdf37to1-1280",
+      "dir": "tumblr_mlcoqkZMTx1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mnsl8gqcuj1rdf37to1-1280",
+      "dir": "tumblr_mnsl8gqcuJ1rdf37to1_1280",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mq4feqgtgs1rdf37to1-400",
+      "dir": "tumblr_mq4feqgtgS1rdf37to1_400",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    },
+    {
+      "slug": "tumblr-mq4fhfjrbc1rdf37to1-400",
+      "dir": "tumblr_mq4fhfjrBC1rdf37to1_400",
+      "action": "device",
+      "device": "phone",
+      "was": "phone"
+    }
+  ]
+}

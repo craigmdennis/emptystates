@@ -6,4 +6,5 @@ tags:
   - desktop
   - browser
 product: GitHub
+device: desktop
 ---

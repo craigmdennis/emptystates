@@ -5,4 +5,5 @@ image: ./tookapic.png
 tags:
   - desktop
   - browser
+device: tablet
 ---

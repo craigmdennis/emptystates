@@ -1,6 +1,6 @@
 # Legacy migration report
 
-**252 entries** — 235 published, 17 drafts. 230 redirects, 22 curated relations.
+**235 entries** — 235 published, 0 drafts. 213 redirects, 25 curated relations.
 
 ## Decisions that need a human
 
@@ -29,20 +29,16 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_mga4pl1ndE1rdf37to1_1280` | `tumblr-mga4pl1nde1rdf37to1-1280` |
 | `tumblr_mga4ywdRlN1rdf37to1_1280` | `tumblr-mga4ywdrln1rdf37to1-1280` |
 | `tumblr_mga5m0vZTn1rdf37to1_1280` | `tumblr-mga5m0vztn1rdf37to1-1280` |
-| `tumblr_mga7lykLiE1rdf37to1_1280` | `tumblr-mga7lyklie1rdf37to1-1280` |
 | `tumblr_mgbxptW6cA1rdf37to1_1280` | `unable-to-connect-to-youtube-website` |
 | `tumblr_mgda3rCVpn1rdf37to1_1280` | `tumblr-mgda3rcvpn1rdf37to1-1280` |
-| `tumblr_mgdopiPf2A1rdf37to1_1280` | `tumblr-mgdopipf2a1rdf37to1-1280` |
 | `tumblr_mgdozmf88c1rdf37to1_1280` | `tumblr-mgdozmf88c1rdf37to1-1280` |
 | `tumblr_mggrayiCsC1rdf37to1_1280` | `no-deals-yet` |
-| `tumblr_mggzbrxUhV1rdf37to1_1280` | `user-is-private-in-instagram-website` |
 | `tumblr_mgivk9PAJE1rdf37to1_1280` | `no-photos-yet-in-flickr-for-ios` |
 | `tumblr_mgpv705GqW1rdf37to1_r1_1280` | `no-timesheets-in-harvest` |
 | `tumblr_mgs0cuKnEV1rdf37to1_1280` | `tumblr-mgs0cuknev1rdf37to1-1280` |
 | `tumblr_mgtxzlIyuD1rdf37to1_1280` | `no-nearby-friends-in-foursquare-for-ios` |
 | `tumblr_mh4i95WQA61rdf37to1_1280` | `no-items-in-the-pekool-shopping-cart` |
 | `tumblr_mh5i406uNF1rdf37to1_1280` | `tumblr-mh5i406unf1rdf37to1-1280` |
-| `tumblr_mh5iv6T19s1rdf37to1_1280` | `tumblr-mh5iv6t19s1rdf37to1-1280` |
 | `tumblr_mh6ys2XuYR1rdf37to1_1280` | `tumblr-mh6ys2xuyr1rdf37to1-1280` |
 | `tumblr_mh6yt8XsjV1rdf37to1_1280` | `tumblr-mh6yt8xsjv1rdf37to1-1280` |
 | `tumblr_mh7egzSdDl1rdf37to1_1280` | `no-photos-yet` |
@@ -60,7 +56,6 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_mhox3qVIes1rdf37to1_1280` | `tumblr-mhox3qvies1rdf37to1-1280` |
 | `tumblr_mhp2dpWHD11rdf37to1_1280` | `tumblr-mhp2dpwhd11rdf37to1-1280` |
 | `tumblr_mhpncgBtBP1rdf37to1_1280` | `tumblr-mhpncgbtbp1rdf37to1-1280` |
-| `tumblr_mhpzfw7qkv1rdf37to1_1280` | `tumblr-mhpzfw7qkv1rdf37to1-1280` |
 | `tumblr_mhqrdkW1fd1rdf37to1_1280` | `tumblr-mhqrdkw1fd1rdf37to1-1280` |
 | `tumblr_mhr5i9qjTg1rdf37to1_1280` | `tumblr-mhr5i9qjtg1rdf37to1-1280` |
 | `tumblr_mhr79gbraw1rdf37to1_1280` | `tumblr-mhr79gbraw1rdf37to1-1280` |
@@ -129,16 +124,12 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_mmg717cdwy1rdf37to1_1280` | `tumblr-mmg717cdwy1rdf37to1-1280` |
 | `tumblr_mmg7248hzQ1rdf37to1_1280` | `tumblr-mmg7248hzq1rdf37to1-1280` |
 | `tumblr_mmra3g1F3F1rdf37to1_1280` | `tumblr-mmra3g1f3f1rdf37to1-1280` |
-| `tumblr_mniebhlbB71rdf37to1_1280` | `tumblr-mniebhlbb71rdf37to1-1280` |
 | `tumblr_mnk7uenoAv1rdf37to1_1280` | `tumblr-mnk7uenoav1rdf37to1-1280` |
 | `tumblr_mnky9zY2391rdf37to1_1280` | `tumblr-mnky9zy2391rdf37to1-1280` |
 | `tumblr_mnsl8gqcuJ1rdf37to1_1280` | `tumblr-mnsl8gqcuj1rdf37to1-1280` |
 | `tumblr_mo6loj4Mwn1rdf37to1_1280` | `tumblr-mo6loj4mwn1rdf37to1-1280` |
 | `tumblr_mo6r1aYBto1rdf37to1_1280` | `tumblr-mo6r1aybto1rdf37to1-1280` |
-| `tumblr_moiu2y7o7N1rdf37to1_1280` | `tumblr-moiu2y7o7n1rdf37to1-1280` |
 | `tumblr_mojuxvwSMT1rdf37to1_1280` | `tumblr-mojuxvwsmt1rdf37to1-1280` |
-| `tumblr_momwq0PplC1rdf37to1_500` | `tumblr-momwq0pplc1rdf37to1-500` |
-| `tumblr_mp38ylJOSa1rdf37to1_1280` | `tumblr-mp38yljosa1rdf37to1-1280` |
 | `tumblr_mpq5doT2VY1rdf37to1_1280` | `nothing-in-the-webflow-beta-dashboard` |
 | `tumblr_mq4feqgtgS1rdf37to1_400` | `tumblr-mq4feqgtgs1rdf37to1-400` |
 | `tumblr_mq4fhfjrBC1rdf37to1_400` | `tumblr-mq4fhfjrbc1rdf37to1-400` |
@@ -156,12 +147,10 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_mswof4RqCn1rdf37to1_1280` | `tumblr-mswof4rqcn1rdf37to1-1280` |
 | `tumblr_msxcobGgh51rdf37to1_1280` | `tumblr-msxcobggh51rdf37to1-1280` |
 | `tumblr_mt34utZIY01rdf37to1_1280` | `tumblr-mt34utziy01rdf37to1-1280` |
-| `tumblr_mt8030S4ue1rdf37to1_1280` | `tumblr-mt8030s4ue1rdf37to1-1280` |
 | `tumblr_mu1le0N3Jc1rdf37to1_1280` | `no-issues-in-bitbucket-project` |
 | `tumblr_mu1leuU2e61rdf37to1_1280` | `no-source-code-bitbucket-project` |
 | `tumblr_mu1lfv83zq1rdf37to1_1280` | `no-commits-in-bitbucket` |
 | `tumblr_mu1lgpNq061rdf37to1_1280` | `no-downloads-in-bitbucket` |
-| `tumblr_mughm8aTkF1rdf37to1_1280` | `tumblr-mughm8atkf1rdf37to1-1280` |
 | `tumblr_mw0d7v7UHA1rdf37to1_1280` | `tumblr-mw0d7v7uha1rdf37to1-1280` |
 | `tumblr_mw0d97IRqg1rdf37to1_1280` | `tumblr-mw0d97irqg1rdf37to1-1280` |
 | `tumblr_mxgq9vUten1rdf37to1_1280` | `tumblr-mxgq9vuten1rdf37to1-1280` |
@@ -177,16 +166,12 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_mzpvh0t9NH1rdf37to1_1280` | `tumblr-mzpvh0t9nh1rdf37to1-1280` |
 | `tumblr_mzpvhwWRvO1rdf37to1_1280` | `tumblr-mzpvhwwrvo1rdf37to1-1280` |
 | `tumblr_mzpx8uCpHJ1rdf37to1_1280` | `tumblr-mzpx8ucphj1rdf37to1-1280` |
-| `tumblr_mzpx9sf6YS1rdf37to1_1280` | `tumblr-mzpx9sf6ys1rdf37to1-1280` |
-| `tumblr_n001mrY8pL1rdf37to1_1280` | `tumblr-n001mry8pl1rdf37to1-1280` |
 | `tumblr_n0msqmU4fF1rdf37to1_1280` | `tumblr-n0msqmu4ff1rdf37to1-1280` |
 | `tumblr_n1wcbzB3p41rdf37to1_1280` | `tumblr-n1wcbzb3p41rdf37to1-1280` |
 | `tumblr_n2odn965Cl1rdf37to1_1280` | `tumblr-n2odn965cl1rdf37to1-1280` |
 | `tumblr_n2r60vpapJ1rdf37to1_1280` | `tumblr-n2r60vpapj1rdf37to1-1280` |
 | `tumblr_n2rbwte1If1rdf37to1_1280` | `tumblr-n2rbwte1if1rdf37to1-1280` |
 | `tumblr_n389pezetU1rdf37to1_1280` | `tumblr-n389pezetu1rdf37to1-1280` |
-| `tumblr_n38h639bLk1rdf37to1_1280` | `tumblr-n38h639blk1rdf37to1-1280` |
-| `tumblr_n3g08uZ9O71rdf37to1_1280` | `tumblr-n3g08uz9o71rdf37to1-1280` |
 | `tumblr_n3wxv76UDv1rdf37to1_1280` | `tumblr-n3wxv76udv1rdf37to1-1280` |
 | `tumblr_n4755rpgsw1rdf37to1_1280` | `no-messages-yet-in-linkedin-for-android` |
 | `tumblr_n4t9puqDVX1rdf37to1_1280` | `tumblr-n4t9puqdvx1rdf37to1-1280` |
@@ -195,13 +180,11 @@ These URLs will not resolve at their old address without a redirect.
 | `tumblr_n53ucnsv821rdf37to1_1280` | `tumblr-n53ucnsv821rdf37to1-1280` |
 | `tumblr_n5cybrpSUj1rdf37to1_1280` | `tumblr-n5cybrpsuj1rdf37to1-1280` |
 | `tumblr_n5cyczyQpq1rdf37to1_1280` | `tumblr-n5cyczyqpq1rdf37to1-1280` |
-| `tumblr_n5guzgTy6q1rdf37to1_1280` | `tumblr-n5guzgty6q1rdf37to1-1280` |
 | `tumblr_n5he14duwv1rdf37to1_1280` | `tumblr-n5he14duwv1rdf37to1-1280` |
 | `tumblr_n5hg77P2qu1rdf37to1_1280` | `no-activity-in-basecamp-for-the-web` |
 | `tumblr_n5hg87SjHo1rdf37to1_1280` | `tumblr-n5hg87sjho1rdf37to1-1280` |
 | `tumblr_n5hiaaMRQ11rdf37to1_1280` | `sync-projects-or-drag-and-drop-designs-to-invision` |
 | `tumblr_n5hlctjP2k1rdf37to1_1280` | `tumblr-n5hlctjp2k1rdf37to1-1280` |
-| `tumblr_n5hldmNcyT1rdf37to1_1280` | `no-conversations-and-comments` |
 | `tumblr_n5se46ce9w1rdf37to1_1280` | `tumblr-n5se46ce9w1rdf37to1-1280` |
 | `tumblr_n60wmfQ5b41rdf37to1_1280` | `tumblr-n60wmfq5b41rdf37to1-1280` |
 | `tumblr_n71s4yGMxn1rdf37to1_1280` | `tumblr-n71s4ygmxn1rdf37to1-1280` |
@@ -218,21 +201,18 @@ These URLs will not resolve at their old address without a redirect.
 
 Widen a range in `device_types`, or accept the fallback. No migration needed to change one.
 
-| Slug | Ratio | Fell back to |
-| --- | --- | --- |
-| `tumblr_n5hg87SjHo1rdf37to1_1280` | 3.107 | desktop |
-| `tumblr_n5hlctjP2k1rdf37to1_1280` | 2.936 | desktop |
-| `tumblr_n60wmfQ5b41rdf37to1_1280` | 2.943 | desktop |
+_None._
+
+### Tagged device the image shape contradicts (0)
+
+A legacy tag named the device; the picture is a shape that device does not produce. Nothing was changed — each entry is imported and displayed under the device it claims, so the call can be made by looking at it. A wide `phone` is usually several screenshots side by side, which is still a phone entry. Retag the entry, or widen the range in `device_types`.
+
+_None._
 
 ### Relations that resolved to nothing
 
 | Entry | Named a related entry titled |
 | --- | --- |
-| `no-contacts-to-merge` | No recent meetings or interactions |
-| `no-repositories-in-tower-2-for-mac` | No account selected in Tower 2 |
-| `no-services-in-tower-2-for-mac` | No account selected in Tower 2 |
-| `missed-call-and-voicemail-support` | No recent meetings or interactions |
-| `no-card-usage-in-monzo-for-android` | No conversations yet in Monzo for Android |
 | `no-highlights-yet-in-blinkist-for-android` | No books in Blinkist for Android |
 
 ### Body text kept as description
@@ -252,34 +232,76 @@ _None._
 
 ## Applied automatically
 
-### Device derived from aspect ratio (15)
+### Device derived from aspect ratio (1)
 
 | Slug | Ratio | Chose |
 | --- | --- | --- |
-| `tumblr_mga7lykLiE1rdf37to1_1280` | 1.620 | desktop |
-| `tumblr_mgdopiPf2A1rdf37to1_1280` | 1.337 | tablet |
 | `tumblr_mh8v21c0YA1rdf37to1_400` | 0.667 | tablet |
-| `tumblr_mniebhlbB71rdf37to1_1280` | 1.016 | tablet |
-| `tumblr_mo6r1aYBto1rdf37to1_1280` | 1.305 | tablet |
-| `tumblr_momwq0PplC1rdf37to1_500` | 1.349 | tablet |
-| `tumblr_mqjo18WF2O1rdf37to1_1280` | 0.563 | phone |
-| `tumblr_mughm8aTkF1rdf37to1_1280` | 1.775 | desktop |
-| `tumblr_mzpx9sf6YS1rdf37to1_1280` | 1.775 | desktop |
-| `tumblr_n001mrY8pL1rdf37to1_1280` | 0.810 | tablet |
-| `tumblr_n389pezetU1rdf37to1_1280` | 1.855 | desktop |
-| `tumblr_n38h639bLk1rdf37to1_1280` | 0.986 | tablet |
-| `tumblr_n3g08uZ9O71rdf37to1_1280` | 1.453 | tablet |
-| `tumblr_n5guzgTy6q1rdf37to1_1280` | 1.468 | tablet |
-| `tumblr_n5se46ce9w1rdf37to1_1280` | 1.026 | tablet |
 
-### OS left blank (153)
+### Device set by hand (52)
+
+Frontmatter `device`, written by `scripts/apply-decisions.ts` from a triage session. No tag or ratio was consulted, and these are excluded from the shape-disagreement list above.
+
+| Slug | Device |
+| --- | --- |
+| `no-results-in-sailica-app-for-macos` | desktop |
+| `tookapic` | tablet |
+| `tumblr_mg5wstHgDa1rdf37to1_1280` | phone |
+| `tumblr_mg5zp7EefY1rdf37to1_1280` | phone |
+| `tumblr_mg5zrwONUP1rdf37to1_1280` | phone |
+| `tumblr_mg5zzmFZns1rdf37to1_1280` | phone |
+| `tumblr_mg9zduwUqO1rdf37to1_1280` | phone |
+| `tumblr_mg9zlnUAWL1rdf37to1_1280` | phone |
+| `tumblr_mga4pl1ndE1rdf37to1_1280` | phone |
+| `tumblr_mga4ywdRlN1rdf37to1_1280` | phone |
+| `tumblr_mga5m0vZTn1rdf37to1_1280` | phone |
+| `tumblr_mgda3rCVpn1rdf37to1_1280` | desktop |
+| `tumblr_mgdozmf88c1rdf37to1_1280` | phone |
+| `tumblr_mggrayiCsC1rdf37to1_1280` | phone |
+| `tumblr_mgs0cuKnEV1rdf37to1_1280` | phone |
+| `tumblr_mgtxzlIyuD1rdf37to1_1280` | phone |
+| `tumblr_mh5i406uNF1rdf37to1_1280` | phone |
+| `tumblr_mh6ys2XuYR1rdf37to1_1280` | phone |
+| `tumblr_mh6yt8XsjV1rdf37to1_1280` | phone |
+| `tumblr_mh7egzSdDl1rdf37to1_1280` | phone |
+| `tumblr_mh9d0ac2bD1rdf37to1_1280` | desktop |
+| `tumblr_mhaflffRKA1rdf37to1_400` | phone |
+| `tumblr_mhcpbfsnK71rdf37to1_1280` | phone |
+| `tumblr_mhcph3vf7C1rdf37to1_1280` | phone |
+| `tumblr_mhi1rzlw921rdf37to1_1280` | tablet |
+| `tumblr_mhk5hznU1B1rdf37to1_1280` | phone |
+| `tumblr_mhmbkby2721rdf37to1_1280` | phone |
+| `tumblr_mhmc97fAMZ1rdf37to1_1280` | phone |
+| `tumblr_mhmchsBFkz1rdf37to1_1280` | phone |
+| `tumblr_mhox3qVIes1rdf37to1_1280` | phone |
+| `tumblr_mhp2dpWHD11rdf37to1_1280` | desktop |
+| `tumblr_mht6mfrqHL1rdf37to1_400` | phone |
+| `tumblr_mhvgoj3Hfq1rdf37to1_400` | phone |
+| `tumblr_mi309bohx61rdf37to1_1280` | phone |
+| `tumblr_mi99cyD08u1rdf37to1_1280` | phone |
+| `tumblr_mi9chncuMd1rdf37to2_r1_500` | phone |
+| `tumblr_mig4jctrxB1rdf37to1_1280` | desktop |
+| `tumblr_mj99i1MmUp1rdf37to1_1280` | desktop |
+| `tumblr_mjcufjCMBr1rdf37to1_1280` | phone |
+| `tumblr_mk7u00QtRa1rdf37to1_1280` | phone |
+| `tumblr_mlcoqkZMTx1rdf37to1_1280` | phone |
+| `tumblr_mnk7uenoAv1rdf37to1_1280` | desktop |
+| `tumblr_mnsl8gqcuJ1rdf37to1_1280` | phone |
+| `tumblr_mo6r1aYBto1rdf37to1_1280` | desktop |
+| `tumblr_mq4feqgtgS1rdf37to1_400` | phone |
+| `tumblr_mq4fhfjrBC1rdf37to1_400` | phone |
+| `tumblr_n389pezetU1rdf37to1_1280` | desktop |
+| `tumblr_n5he14duwv1rdf37to1_1280` | desktop |
+| `tumblr_n5hg87SjHo1rdf37to1_1280` | desktop |
+| `tumblr_n5hlctjP2k1rdf37to1_1280` | desktop |
+| `tumblr_n5se46ce9w1rdf37to1_1280` | desktop |
+| `tumblr_n60wmfQ5b41rdf37to1_1280` | desktop |
+
+### OS left blank (137)
 
 No legacy tag named an operating system. Left null for the vision backfill in spec 02 rather than guessed.
 
 - `nothing-in-your-adobe-creative-cloud-library`
-- `recent-meetings`
-- `tumblr_mga7lykLiE1rdf37to1_1280`
-- `tumblr_mgdopiPf2A1rdf37to1_1280`
 - `tumblr_mhaflffRKA1rdf37to1_400`
 - `tumblr_mhcpbfsnK71rdf37to1_1280`
 - `tumblr_mhcph3vf7C1rdf37to1_1280`
@@ -292,7 +314,6 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 - `tumblr_mhox3qVIes1rdf37to1_1280`
 - `tumblr_mhp2dpWHD11rdf37to1_1280`
 - `tumblr_mhpncgBtBP1rdf37to1_1280`
-- `tumblr_mhpzfw7qkv1rdf37to1_1280`
 - `tumblr_mhqrdkW1fd1rdf37to1_1280`
 - `tumblr_mhr5i9qjTg1rdf37to1_1280`
 - `tumblr_mhr79gbraw1rdf37to1_1280`
@@ -354,16 +375,12 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 - `tumblr_mmg717cdwy1rdf37to1_1280`
 - `tumblr_mmg7248hzQ1rdf37to1_1280`
 - `tumblr_mmra3g1F3F1rdf37to1_1280`
-- `tumblr_mniebhlbB71rdf37to1_1280`
 - `tumblr_mnk7uenoAv1rdf37to1_1280`
 - `tumblr_mnky9zY2391rdf37to1_1280`
 - `tumblr_mnsl8gqcuJ1rdf37to1_1280`
 - `tumblr_mo6loj4Mwn1rdf37to1_1280`
 - `tumblr_mo6r1aYBto1rdf37to1_1280`
-- `tumblr_moiu2y7o7N1rdf37to1_1280`
 - `tumblr_mojuxvwSMT1rdf37to1_1280`
-- `tumblr_momwq0PplC1rdf37to1_500`
-- `tumblr_mp38ylJOSa1rdf37to1_1280`
 - `tumblr_mq4feqgtgS1rdf37to1_400`
 - `tumblr_mq4fhfjrBC1rdf37to1_400`
 - `tumblr_mqjo18WF2O1rdf37to1_1280`
@@ -380,8 +397,6 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 - `tumblr_mswof4RqCn1rdf37to1_1280`
 - `tumblr_msxcobGgh51rdf37to1_1280`
 - `tumblr_mt34utZIY01rdf37to1_1280`
-- `tumblr_mt8030S4ue1rdf37to1_1280`
-- `tumblr_mughm8aTkF1rdf37to1_1280`
 - `tumblr_mw0d7v7UHA1rdf37to1_1280`
 - `tumblr_mw0d97IRqg1rdf37to1_1280`
 - `tumblr_mxgq9vUten1rdf37to1_1280`
@@ -397,16 +412,12 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 - `tumblr_mzpvh0t9NH1rdf37to1_1280`
 - `tumblr_mzpvhwWRvO1rdf37to1_1280`
 - `tumblr_mzpx8uCpHJ1rdf37to1_1280`
-- `tumblr_mzpx9sf6YS1rdf37to1_1280`
-- `tumblr_n001mrY8pL1rdf37to1_1280`
 - `tumblr_n0msqmU4fF1rdf37to1_1280`
 - `tumblr_n1wcbzB3p41rdf37to1_1280`
 - `tumblr_n2odn965Cl1rdf37to1_1280`
 - `tumblr_n2r60vpapJ1rdf37to1_1280`
 - `tumblr_n2rbwte1If1rdf37to1_1280`
 - `tumblr_n389pezetU1rdf37to1_1280`
-- `tumblr_n38h639bLk1rdf37to1_1280`
-- `tumblr_n3g08uZ9O71rdf37to1_1280`
 - `tumblr_n3wxv76UDv1rdf37to1_1280`
 - `tumblr_n4t9puqDVX1rdf37to1_1280`
 - `tumblr_n4t9qxutgl1rdf37to1_1280`
@@ -414,11 +425,9 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 - `tumblr_n53ucnsv821rdf37to1_1280`
 - `tumblr_n5cybrpSUj1rdf37to1_1280`
 - `tumblr_n5cyczyQpq1rdf37to1_1280`
-- `tumblr_n5guzgTy6q1rdf37to1_1280`
 - `tumblr_n5he14duwv1rdf37to1_1280`
 - `tumblr_n5hg87SjHo1rdf37to1_1280`
 - `tumblr_n5hlctjP2k1rdf37to1_1280`
-- `tumblr_n5hldmNcyT1rdf37to1_1280`
 - `tumblr_n5se46ce9w1rdf37to1_1280`
 - `tumblr_n60wmfQ5b41rdf37to1_1280`
 - `tumblr_n71s4yGMxn1rdf37to1_1280`
@@ -440,7 +449,7 @@ No legacy tag named an operating system. Left null for the vision backfill in sp
 
 ## Corpus housekeeping
 
-- Duplicate flat files skipped: **235**
+- Duplicate flat files skipped: **228**
 - Empty directories: **0**
 - Images that could not be read: **0**
 

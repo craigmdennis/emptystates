@@ -7,4 +7,5 @@ tags:
   - desktop
   - macos
 product: Sailica
+device: desktop
 ---
