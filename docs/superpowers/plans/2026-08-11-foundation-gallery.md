@@ -129,6 +129,10 @@ session back to the corpus. `docs/device-decisions.json` and
 | `src/pages/tags/[tag].astro` | Pre-filtered gallery |
 | `src/pages/privacy.astro` | Disclosure and opt-out |
 | `src/pages/api/view-pref.ts` | Counter + Plausible forward |
+| `src/lib/og/template.ts` | OG card layout — the only place it lives |
+| `src/lib/og/render.ts` | satori → resvg → PNG; Node only, build-time |
+| `src/lib/og/assets.ts` | Image bytes → data URI, mime sniffed from magic bytes |
+| `scripts/build-og-cards.ts` | Renders a card per state into R2 |
 | `src/styles/global.css` | Tokens, grid, card, hairline |
 
 ---
@@ -1313,6 +1317,140 @@ git commit -m "feat: add detail page filling viewport with original link"
 
 ---
 
+## Task 10A: Open Graph card per state
+
+Every `/s/<slug>` link currently unfurls with whatever `Base.astro` is given,
+which is nothing — the detail page passes no `image`. A gallery of screenshots
+whose links unfurl blank is the one place a missing image costs a reader
+something.
+
+Follows the process in `~/Sites/craigmdennis.com`, with the generation half
+moved. That site is static and renders cards at build time in
+`src/pages/og/x/[slug].png.ts`; this one runs `output: "server"` on Workers,
+and `@resvg/resvg-js` is a native addon workerd cannot load — the same
+constraint that split the migration into a Node reader and a runtime-agnostic
+importer. Cards are rendered in Node and put in R2, which the architecture
+already requires for images so they never invoke the Worker.
+
+Keyed by state id, not slug: the id is a ULID and never changes, so a later
+retitle moves the page's URL without orphaning its card.
+
+**Files:**
+- Create: `src/lib/og/template.ts`, `src/lib/og/render.ts`, `src/lib/og/assets.ts`, `scripts/build-og-cards.ts`
+- Add: `src/fonts/og/inter-regular.ttf`, `src/fonts/og/inter-semibold.ttf`
+- Modify: `src/layouts/Base.astro`, `src/pages/s/[slug].astro`, `package.json`
+- Test: `test/og.test.ts`
+
+**Interfaces:**
+- Consumes: `listStates` from Task 5, `StateRow.r2_key`, the `MEDIA` binding
+- Produces: `og/<id>.png` in R2 for every published state; `og:image` on every detail page
+
+- [ ] **Step 1: Install the build-time dependencies and fonts**
+
+```bash
+npm install --save-dev satori @resvg/resvg-js
+mkdir -p src/fonts/og
+cp ~/Sites/craigmdennis.com/src/fonts/og/inter-regular.ttf src/fonts/og/
+cp ~/Sites/craigmdennis.com/src/fonts/og/inter-semibold.ttf src/fonts/og/
+```
+
+Dev dependencies, as on the other site: both are imported only by
+`scripts/build-og-cards.ts`, so nothing new reaches the client or the Worker.
+TTF and not woff2 — satori parses font tables itself and cannot read woff2.
+Advercase stays behind; it is licensed for the other site.
+
+- [ ] **Step 2: Write `src/lib/og/template.ts`**
+
+The only place card layout lives. A function returning satori-compatible
+vnodes, exporting `OG_WIDTH = 1200` and `OG_HEIGHT = 630`.
+
+The screenshot is the subject here, so it takes the place the company logo
+holds on the other site: the state's own image, contained (never cropped) on a
+`--stone` ground, with the title in Inter SemiBold and the app name, device and
+OS in Inter Regular beneath it. Portrait phone shots leave a wide margin —
+fill it with the ground colour and keep the image whole, since a cropped empty
+state is no longer the thing being shown.
+
+- [ ] **Step 3: Write `src/lib/og/render.ts` and `assets.ts`**
+
+Copy both from `~/Sites/craigmdennis.com/src/lib/og/`, which are already
+generic:
+
+- `render.ts` — satori → `Resvg` → PNG buffer, fonts memoised in a
+  module-level promise so 235 renders read each TTF once. Resolve `FONT_DIR`
+  from `process.cwd()`; bundled chunk URLs do not map back to `src/`.
+- `assets.ts` — file → data URI, with the mime sniffed from magic bytes.
+  Keep the sniffing. This corpus has the same defect the comment describes:
+  `content/states/` holds `.jpg` files whose bytes are PNG, and a mislabelled
+  data URI renders as an empty box.
+
+Read the state's image from R2 through the `MEDIA` binding rather than from
+disk. R2 is the source of truth after Task 4, and a deleted corpus entry should
+not silently produce a card.
+
+- [ ] **Step 4: Write `scripts/build-og-cards.ts`**
+
+```bash
+npx tsx scripts/build-og-cards.ts --dry-run   # count what would render
+npx tsx scripts/build-og-cards.ts             # render and put
+npx tsx scripts/build-og-cards.ts --only <slug>
+```
+
+Same shape as `scripts/migrate-legacy.ts`: `getPlatformProxy()` for the `DB`
+and `MEDIA` bindings, page through `listStates`, render each card, put it at
+`og/<id>.png`. Log a count at the end. Regenerate every card each run — 235
+renders of a 1200×630 card costs less than tracking which inputs changed.
+
+- [ ] **Step 5: Emit the tags**
+
+`Base.astro` currently emits `og:image` alone (line 49). Add
+`og:image:width`, `og:image:height`, `og:image:type` and `og:image:alt` when
+an image is set, matching `Base.astro` on the other site — several unfurlers
+skip an image whose dimensions they must fetch to learn.
+
+`s/[slug].astro` passes `image={`https://img.emptystat.es/og/${state.id}.png`}`
+and the state's title as the alt.
+
+- [ ] **Step 6: Test**
+
+```ts
+it("renders a card at exactly 1200x630", async () => {
+  const png = await renderOgPng(ogCard(FIXTURE));
+  // PNG IHDR: width and height are big-endian uint32 at bytes 16 and 20.
+  const view = new DataView(png.buffer);
+  expect(view.getUint32(16)).toBe(1200);
+  expect(view.getUint32(20)).toBe(630);
+});
+```
+
+`test/og.test.ts` runs in Node, outside the Workers pool, since satori and
+resvg cannot load in workerd. Add a second case covering a state with a null
+`app_name` and a null `os`, which 137 entries have.
+
+- [ ] **Step 7: Verify against a real unfurl**
+
+```bash
+npx wrangler r2 object get emptystates-media/og/<id>.png --local --file /tmp/card.png
+```
+
+Check one card by eye, then after Task 12 deploys, paste an `/s/` URL into an
+unfurl debugger. Local checking cannot confirm the tags, because
+`img.emptystat.es` resolves only in production.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/lib/og src/fonts/og scripts/build-og-cards.ts test/og.test.ts \
+        src/layouts/Base.astro src/pages/s/ package.json
+git commit -m "feat: render an Open Graph card per state into R2"
+```
+
+**Out of scope.** Cards for states arriving through the submission queue —
+spec 02 owns that ingest path and should call the same `renderOgPng`. Cards
+for the gallery, tag pages and the index, which share one default card.
+
+---
+
 ## Task 11: Tag pages, privacy page, and URL preservation
 
 **Files:**
@@ -1391,6 +1529,15 @@ npx wrangler d1 migrations apply emptystates-db --remote
 
 Point `scripts/migrate-legacy.ts` at `--remote` and run. Confirm counts match the local run.
 
+- [ ] **Step 2b: Render the Open Graph cards against remote**
+
+```bash
+npx tsx scripts/build-og-cards.ts
+```
+
+Run after step 2: each card reads its screenshot from R2, so the originals have
+to be there first. Confirm the count matches the published state count.
+
 - [ ] **Step 3: Deploy**
 
 ```bash
@@ -1422,7 +1569,13 @@ git tag foundation-complete
 
 ## Self-Review
 
-**Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Task 10. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
+**Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Tasks 10 and 10A. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
+
+**Gap found and closed.** No task gave a detail page an `og:image`, so every
+`/s/` link would unfurl blank. Task 10A renders one card per state, following
+`~/Sites/craigmdennis.com/src/lib/og/`. That site renders at build time in a
+static endpoint; this one cannot, because `@resvg/resvg-js` is a native addon
+workerd will not load. Cards are rendered in Node and served from R2.
 
 **Gap found and closed.** §1's "remove EMDash" was mapped to Task 1 alone, which
 uninstalls the package. Eight components and two pages import it, and Tasks
