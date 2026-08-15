@@ -893,6 +893,165 @@ git commit -m "refactor: remove the EMDash-era components, read routes from D1"
 
 ---
 
+## Task 5B: Display variants
+
+Task 6's card points `src` and `srcset` at `w640/<id>.webp` and `w1280/<id>.webp`.
+R2 holds 235 objects, all under `originals/`, and spec 02 owns generating the
+variants — no task in this plan does. Task 6 step 3 asks for a manual check at
+three viewports, and every image would 404.
+
+CLS measures zero either way, because the card emits `width` and `height` from
+the stored dimensions and the browser reserves the box before loading anything.
+So the check as written passes against 235 empty frames.
+
+Pulls step 3 of spec 02's ingest pipeline forward, unchanged: WebP at 640,
+1280 and 2560 wide, quality 82, never upscaled. Spec 02 calls the same function
+when a submission arrives.
+
+Generated variants are still unreachable from `wrangler dev` — Task 5C covers
+that.
+
+**Files:**
+- Create: `src/lib/variants.ts`, `scripts/build-variants.ts`
+- Test: `test/variants.test.ts`
+- Modify: `package.json`
+
+**Interfaces:**
+- Consumes: `listStates` from Task 5, the `MEDIA` binding
+- Produces: `w640/`, `w1280/`, `w2560/` in R2
+
+- [ ] **Step 1: Write the failing tests**
+
+```ts
+// Never upscale: a 900px-wide original gets w640 only.
+expect(variantsFor(900)).toEqual([640]);
+expect(variantsFor(1280)).toEqual([640, 1280]);
+expect(variantsFor(640)).toEqual([640]);
+expect(variantsFor(500)).toEqual([]);   // smaller than every variant
+```
+
+A 500px original is a real case — `tumblr_mh8v21c0YA1rdf37to1_400` is 400 wide.
+`srcset` falls back to the largest variant that exists, so an entry with none
+uses its original.
+
+- [ ] **Step 2: Write `src/lib/variants.ts`**
+
+`variantsFor(width)` returns the widths to write, and `variantKey(width, id)`
+returns where each lives. Pure, so the never-upscale rule is testable without
+R2, and spec 02's upload path calls the same two functions.
+
+- [ ] **Step 3: Write `scripts/build-variants.ts`**
+
+```bash
+npx tsx scripts/build-variants.ts --dry-run
+npx tsx scripts/build-variants.ts
+npx tsx scripts/build-variants.ts --only <slug>
+```
+
+Same shape as `scripts/migrate-legacy.ts`: `getPlatformProxy()` for `DB` and
+`MEDIA`, page through `listStates`, read `originals/<id>.<ext>`, write each
+variant with `sharp(...).resize(w).webp({ quality: 82 })`. Skip a variant that
+already exists unless `--force`, so a re-run after adding one entry costs one
+render.
+
+Originals are never modified.
+
+- [ ] **Step 4: Verify**
+
+```bash
+npm test
+npx wrangler r2 object get emptystates-media/w640/<id>.webp --local --file /tmp/v.webp
+npx sharp --version >/dev/null; file /tmp/v.webp
+```
+
+Expected: a WebP 640 wide. Count the objects written against the number of
+published states at least 640 wide.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/variants.ts scripts/build-variants.ts test/variants.test.ts package.json
+git commit -m "feat: generate WebP display variants from the originals in R2"
+```
+
+---
+
+## Task 5C: Reach R2 from a local server
+
+`img.emptystat.es` is an R2 custom domain, so it resolves in production only.
+Task 5B's variants are in the bucket and invisible to `wrangler dev`, which
+leaves every task from 6 onward unverifiable at the one thing they are about.
+
+The architecture requires that images never invoke the Worker. That holds in
+production, where `PUBLIC_MEDIA_BASE` is unset and every URL points at the
+bucket's own domain. Development sets it to `/img` and reads the same objects
+through the `MEDIA` binding.
+
+One helper decides the base, so no template carries a conditional and no task
+after this one has to think about which environment it renders in.
+
+**Files:**
+- Create: `src/lib/media.ts`, `src/pages/img/[...key].ts`
+- Test: `test/media.test.ts`
+- Modify: `.dev.vars` (gitignored), `README.md`
+
+**Interfaces:**
+- Consumes: the `MEDIA` binding
+- Produces: `mediaUrl(key)` — the only way any template names an image
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+expect(mediaUrl("w640/abc.webp")).toBe("https://img.emptystat.es/w640/abc.webp");
+expect(mediaUrl("w640/abc.webp", "/img")).toBe("/img/w640/abc.webp");
+```
+
+Cover a base with a trailing slash and a key with a leading one; the two
+concatenated naively give `//`, which resolves to a different origin in a
+browser instead of failing loudly.
+
+- [ ] **Step 2: Write `src/lib/media.ts`**
+
+`mediaUrl(key)` returns `${base}/${key}`, with the base read from
+`PUBLIC_MEDIA_BASE` and falling back to `https://img.emptystat.es`.
+
+- [ ] **Step 3: Write `src/pages/img/[...key].ts`**
+
+Reads the `MEDIA` binding, returns 404 for a missing key, and sets
+`Content-Type` from the object's stored metadata with a long `Cache-Control`.
+`export const prerender = false`.
+
+- [ ] **Step 4: Point development at it**
+
+```
+# .dev.vars — gitignored
+PUBLIC_MEDIA_BASE=/img
+```
+
+Production leaves the variable unset. Note it in `README.md`, since a missing
+`.dev.vars` shows a working page with broken images, which reads as a data
+problem instead of a configuration one.
+
+- [ ] **Step 5: Verify**
+
+```bash
+npm test
+npm run build
+npx wrangler dev
+curl -sI http://localhost:8787/img/w640/<id>.webp
+```
+
+Expected: `200` and `content-type: image/webp`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/media.ts src/pages/img test/media.test.ts README.md
+git commit -m "feat: serve R2 objects locally so images resolve in development"
+```
+
+---
+
 ## Task 6: Card component and design tokens
 
 **Files:**
