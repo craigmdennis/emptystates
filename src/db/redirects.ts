@@ -10,6 +10,22 @@
  * this migration that costs somebody something.
  */
 
+/**
+ * Whether a path is shaped like something the table could claim.
+ *
+ * Every stored path is a retired `/s/<name>` or a legacy `/post/<id>/<slug>`.
+ * The middleware runs on every 404, and most 404s are scanners probing for
+ * `/wp-admin` and the like, so this answers those without a D1 read.
+ *
+ * A new shape in the table needs a prefix here — the suite checks this against
+ * every stored `from_path` so the guard cannot silently start skipping one.
+ */
+const CLAIMABLE = ["/s/", "/post/"];
+
+export function couldBeRedirect(pathname: string): boolean {
+  return CLAIMABLE.some((prefix) => pathname.startsWith(prefix));
+}
+
 export async function resolveRedirect(
   db: D1Database,
   path: string,

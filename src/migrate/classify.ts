@@ -88,6 +88,24 @@ const TAGS: Record<string, string> = {
   "user cleared": "user-cleared",
 };
 
+/**
+ * `web` says only that a browser was involved, which every entry tagged with a
+ * platform also implies. A tag naming the platform says more, so it wins
+ * whichever order the two appear in.
+ *
+ * Two named platforms on one entry is a question about the content, so the
+ * first stands and the migration report lists the entry.
+ */
+export function preferOs(
+  current: string | null,
+  candidate: string | null,
+): string | null {
+  if (!current) return candidate;
+  if (!candidate) return current;
+  if (current === "web" && candidate !== "web") return candidate;
+  return current;
+}
+
 const MAX_LENGTH = 40;
 
 /**

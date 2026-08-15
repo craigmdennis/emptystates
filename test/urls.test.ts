@@ -2,7 +2,7 @@ import { applyD1Migrations } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { it, expect, beforeAll } from "vitest";
 import legacy from "./fixtures/legacy-urls.json";
-import { resolveRedirect } from "../src/db/redirects";
+import { couldBeRedirect, resolveRedirect } from "../src/db/redirects";
 import { resolveTagPath } from "../src/lib/tags";
 
 beforeAll(async () => {
@@ -120,4 +120,31 @@ it("leaves a genuine 404 alone", async () => {
     async () => new Response("Not found", { status: 404 }),
   )) as Response;
   expect(res.status).toBe(404);
+});
+
+// Issue #28. Every 404 cost a D1 query, including scanner noise. Every stored
+// path starts /s/ or /post/, so anything else is answered without one.
+it("recognises the paths a redirect could claim", () => {
+  expect(couldBeRedirect("/s/tumblr_mggrayiCsC1rdf37to1_1280")).toBe(true);
+  expect(couldBeRedirect("/post/162316071385/no-stories")).toBe(true);
+});
+
+it("rules out the paths that make up most 404s", () => {
+  expect(couldBeRedirect("/wp-admin/setup-config.php")).toBe(false);
+  expect(couldBeRedirect("/favicon.ico")).toBe(false);
+  expect(couldBeRedirect("/.git/config")).toBe(false);
+  expect(couldBeRedirect("/tags/not-a-tag")).toBe(false);
+  expect(couldBeRedirect("/")).toBe(false);
+});
+
+// Checked against every path actually stored, so the guard cannot start
+// skipping a real redirect if the corpus gains a new shape.
+it("claims every from_path in the table", async () => {
+  const { results } = await env.DB.prepare(
+    "SELECT from_path FROM state_redirects",
+  ).all<{ from_path: string }>();
+  const missed = results
+    .map((r) => r.from_path)
+    .filter((p) => !couldBeRedirect(p));
+  expect(missed, `guard would skip: ${missed.join(", ")}`).toEqual([]);
 });

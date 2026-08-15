@@ -1,4 +1,4 @@
-import { classifyTag } from "../src/migrate/classify";
+import { classifyTag, preferOs } from "../src/migrate/classify";
 import { it, expect } from "vitest";
 
 // Every case below is a real value from content/states/.
@@ -81,4 +81,25 @@ it("drops anything longer than 40 characters", () => {
 
 it("reports unknown short tags as unmapped rather than guessing", () => {
   expect(classifyTag("quantum", "x")).toEqual({ kind: "unmapped", raw: "quantum" });
+});
+
+// Issue #26. `os ??=` in the importer took whichever OS tag came first, so
+// `desktop, browser, windows` imported as web and /tags/windows rendered empty.
+it("prefers a named platform over the generic web", () => {
+  expect(preferOs("web", "windows")).toBe("windows");
+  expect(preferOs("windows", "web")).toBe("windows");
+  expect(preferOs("web", "macos")).toBe("macos");
+  expect(preferOs(null, "web")).toBe("web");
+  expect(preferOs("web", null)).toBe("web");
+});
+
+// Two named platforms on one entry is a content question, not a mechanical
+// one, so the first stands and the report lists the entry.
+it("keeps the first of two named platforms", () => {
+  expect(preferOs("android", "macos")).toBe("android");
+  expect(preferOs("ios", "windows")).toBe("ios");
+});
+
+it("returns null when neither side names an OS", () => {
+  expect(preferOs(null, null)).toBeNull();
 });

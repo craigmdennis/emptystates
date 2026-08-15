@@ -12,8 +12,9 @@
  */
 
 import { ulid } from "ulidx";
-import { classifyTag } from "./classify";
+import { classifyTag, preferOs } from "./classify";
 import { writeFtsRow } from "../db/fts";
+import { normalizeRedirectPath } from "../lib/paths";
 import { dedupeSlug, isCleanSlug, slugify } from "../lib/slug";
 import { emptyReport, type MigrationReport } from "./report";
 import type { LegacyEntry } from "./types";
@@ -91,7 +92,9 @@ export async function importEntries(
           device ??= verdict.value;
           break;
         case "os":
-          os ??= verdict.value;
+          // Not `??=`: tag order decided the OS, so `desktop, browser, windows`
+          // imported as web. See preferOs.
+          os = preferOs(os, verdict.value);
           break;
         case "tag":
           if (!tagSlugs.includes(verdict.value)) tagSlugs.push(verdict.value);
@@ -234,7 +237,10 @@ export async function importEntries(
 
       // Both kinds of inbound path: the Tumblr URL the entry carried in its
       // frontmatter, and the /s/<old-name> this import is about to retire.
-      for (const from of [entry.redirectPath, redirectFromLegacy]) {
+      // Frontmatter holds one absolute URL among 33 paths, and resolution
+      // compares against url.pathname, so both are reduced to a path first.
+      for (const raw of [entry.redirectPath, redirectFromLegacy]) {
+        const from = normalizeRedirectPath(raw);
         if (!from) continue;
         statements.push(
           db

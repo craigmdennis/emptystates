@@ -12,7 +12,7 @@
 
 import type { MiddlewareHandler } from "astro";
 import { getDb } from "./db/client";
-import { resolveRedirect } from "./db/redirects";
+import { couldBeRedirect, resolveRedirect } from "./db/redirects";
 
 // A type-only import, so this module loads outside Astro's build and its
 // behaviour is testable. `defineMiddleware` from `astro:middleware` returns its
@@ -21,6 +21,10 @@ import { resolveRedirect } from "./db/redirects";
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const response = await next();
   if (response.status !== 404) return response;
+
+  // Most 404s are scanners probing for paths no redirect could claim, and each
+  // one cost a D1 read. The cheap test runs first.
+  if (!couldBeRedirect(context.url.pathname)) return response;
 
   const target = await resolveRedirect(getDb(), context.url.pathname);
   if (!target) return response;
