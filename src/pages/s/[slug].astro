@@ -2,12 +2,15 @@
 /**
  * Placeholder detail page. Task 10 replaces it with the viewport-filling one.
  *
- * Text only, for the reason given in index.astro: no display derivative of the
- * original exists yet.
+ * The screenshot and its metadata, unstyled. `sizes="100vw"` lets the browser
+ * pick the widest variant it needs, which is why `w2560` exists — 5 states have
+ * one. The other 230 top out lower, and 8 have no variant and are served their
+ * original.
  */
 import Layout from "../../layouts/Base.astro";
 import { getDb } from "../../db/client";
 import { getAdjacent, getStateBySlug } from "../../db/states";
+import { imageSources } from "../../lib/images";
 
 const { slug } = Astro.params;
 const db = getDb();
@@ -18,11 +21,26 @@ if (!state) {
 }
 
 const { prev, next } = await getAdjacent(db, state.published_at);
+const { src, srcset } = imageSources(state);
 ---
 
 <Layout title={state.title} description={state.description ?? undefined}>
-  <article class="font-mono text-sm grid gap-2">
+  <article class="font-mono text-sm grid gap-4">
     <h1 class="text-lg font-bold">{state.title}</h1>
+
+    <img
+      src={src}
+      srcset={srcset || undefined}
+      sizes="100vw"
+      width={state.width}
+      height={state.height}
+      alt={state.title}
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      class="max-w-full h-auto"
+    />
+
     <dl class="grid grid-cols-[8rem_1fr] gap-x-4">
       <dt class="text-base-content/50">App</dt>
       <dd>{state.app_name ?? "unknown"}</dd>
