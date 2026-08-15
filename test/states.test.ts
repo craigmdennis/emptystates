@@ -96,9 +96,10 @@ beforeEach(async () => {
   }
 });
 
-it("reads the D1 binding off Astro's runtime locals", () => {
-  const locals = { runtime: { env: { DB: env.DB } } };
-  expect(getDb(locals as never)).toBe(env.DB);
+// Astro 6 removed Astro.locals.runtime.env. The binding comes off the Workers
+// runtime import now, so getDb takes no argument.
+it("reads the D1 binding from the Workers runtime", () => {
+  expect(getDb()).toBe(env.DB);
 });
 
 it("lists published states newest first with a total", async () => {

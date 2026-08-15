@@ -20,7 +20,11 @@ design tokens. 85 tests passing.
 `/s/<slug>` read D1 through `src/db/` and render text; Tasks 7 and 10 replace
 them with the real gallery and detail page.
 
-Six things the plan got wrong, found by reading the real corpus rather than
+Neither route has been rendered by a running server yet. Serve the build with
+`npx wrangler dev` and open `/`, `/?device=desktop`, `/?page=4` and any
+`/s/<slug>`.
+
+Seven things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
 
 1. **Task 4's test design could not build.** `test/import.test.ts` imports the
@@ -54,6 +58,20 @@ trusting the spec. Each is implemented as described here, not as written below.
 6. **`StateRow` carries `byte_size` and `description`.** Task 10's link states
    the original's size, which the plan's own self-review notes and its
    `StateRow` list then omits. Both are selected by the query layer.
+
+7. **`getDb` takes no argument.** Task 5 specifies `getDb(locals)`, and Astro 6
+   removed `Astro.locals.runtime.env`:
+
+   ```
+   Error: Astro.locals.runtime.env has been removed in Astro v6.
+   Use 'import { env } from "cloudflare:workers"' instead.
+   ```
+
+   The binding comes off the Workers runtime import, so `getDb()` reads
+   `env.DB`. `src/db/client.ts` is the only module under `src/db/` that imports
+   `cloudflare:workers`, which keeps the query modules loadable from the Node
+   scripts under `scripts/`. The build and the typecheck both pass either way —
+   only a request surfaces this.
 
 Read `migration-report.md` for what the migration decided and what it refused
 to decide.
@@ -92,7 +110,7 @@ session back to the corpus. `docs/device-decisions.json` and
 | File | Responsibility |
 |---|---|
 | `migrations/0001_taxonomies.sql` … `0006_analytics.sql` | Schema, one concern per file |
-| `src/db/client.ts` | D1 handle from Astro locals; nothing else |
+| `src/db/client.ts` | D1 handle from the Workers runtime; nothing else |
 | `src/db/states.ts` | Read queries for gallery and detail |
 | `src/db/taxonomies.ts` | Device types, OSes, tags with counts |
 | `src/db/fts.ts` | `writeFtsRow()` — the single writer all mutations call |
@@ -700,7 +718,7 @@ git commit -m "feat: add legacy importer with tag classification and report"
 
 **Interfaces:**
 - Produces:
-  - `getDb(locals): D1Database`
+  - `getDb(): D1Database`
   - `listStates(db, { page, perPage, device?, os?, tag? }): Promise<{ rows: StateRow[]; total: number }>`
   - `getStateBySlug(db, slug): Promise<StateRow | null>`
   - `getAdjacent(db, publishedAt): Promise<{ prev: StateRow | null; next: StateRow | null }>`
@@ -834,7 +852,7 @@ import { getDb } from "../db/client";
 import { listStates } from "../db/states";
 
 const page = Number(Astro.url.searchParams.get("page") ?? 1);
-const { rows, total } = await listStates(getDb(Astro.locals), {
+const { rows, total } = await listStates(getDb(), {
   page,
   perPage: 60,
 });

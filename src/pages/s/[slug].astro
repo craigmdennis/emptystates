@@ -10,7 +10,7 @@ import { getDb } from "../../db/client";
 import { getAdjacent, getStateBySlug } from "../../db/states";
 
 const { slug } = Astro.params;
-const db = getDb(Astro.locals);
+const db = getDb();
 const state = slug ? await getStateBySlug(db, slug) : null;
 
 if (!state) {

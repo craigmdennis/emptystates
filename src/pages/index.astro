@@ -14,7 +14,7 @@ import { listFacets } from "../db/taxonomies";
 
 const PER_PAGE = 60;
 
-const db = getDb(Astro.locals);
+const db = getDb();
 const url = Astro.url;
 const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1);
 const device = url.searchParams.get("device") ?? undefined;
