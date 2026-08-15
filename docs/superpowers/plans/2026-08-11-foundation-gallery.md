@@ -13,9 +13,16 @@
 
 ## Status
 
-**Tasks 1–5C and 11 complete, Task 6 partly** (2026-08-15). Next: Task 10A
-(Open Graph cards) or Task 9 (`/api/view-pref`), both functional; Task 7 is the
-deferred styling. 117 tests passing.
+**Tasks 1–5C and 11 complete, Task 6 partly** (2026-08-15). Next: a basic
+layout — the design tokens and geometry Task 6 deferred, which Tasks 7 and 8
+describe. 129 tests passing.
+
+Issues #26, #27 and #28 are fixed and closed: OS precedence in the classifier,
+redirect paths normalised, and a shape check before the middleware's D1 read.
+
+**Task 11A renders last, immediately before deploy.** Its cards embed a
+screenshot keyed by state id and carry the title and app name, so any
+re-import or content correction retires every one of them.
 
 The gallery renders 60 screenshots a page through a bare `Card.astro`. Styling
 waits until the functionality underneath it is settled.
@@ -1502,7 +1509,101 @@ git commit -m "feat: add detail page filling viewport with original link"
 
 ---
 
-## Task 10A: Open Graph card per state
+## Task 11: Tag pages, privacy page, and URL preservation
+
+**Two corrections, both found by running it.**
+
+Nothing served `state_redirects`. The task names no file for it, and step 5
+says a 404 means fixing the importer's slug preference — but the 180 renamed
+slugs were deliberate and already have redirect rows. `src/middleware.ts`
+serves them, checking after the response so a live route always wins.
+
+The fixture command reads the working tree, which no longer holds the 18
+entries removed during triage. `test/fixtures/legacy-urls.json` is generated
+from `master`'s `content/states` instead — the URLs the live site publishes —
+and separates those 18, which 404 by decision.
+
+**Open finding, belongs to Task 3.** `classifyTag` takes the first OS verdict
+it sees, with no precedence among OS values, so tag order decides. Three
+entries carry both a web-ish and a concrete OS tag, and two lost the concrete
+one: `unable-to-connect-to-youtube-website` is `web` from `browser` when its
+tags say `windows`, and `new-page-in-notion` the same over `macos`. `/tags/windows`
+therefore renders empty. A precedence rule preferring a named platform over
+`web` fixes both, and needs the migration re-run.
+
+**Files:**
+- Create: `src/pages/tags/[tag].astro`, `src/pages/privacy.astro`
+- Test: `test/urls.test.ts`
+
+- [x] **Step 1: Write the failing URL preservation test**
+
+```ts
+import legacySlugs from "./fixtures/legacy-slugs.json";
+
+it("every pre-existing /s/ URL still resolves", async () => {
+  for (const slug of legacySlugs) {
+    const res = await SELF.fetch(`https://x/s/${slug}`);
+    expect(res.status, `/s/${slug}`).toBe(200);
+  }
+});
+
+it("every pre-existing tag page still resolves", async () => {
+  for (const tag of ["mobile", "desktop", "ios", "android"]) {
+    const res = await SELF.fetch(`https://x/tags/${tag}`);
+    expect(res.status, `/tags/${tag}`).toBe(200);
+  }
+});
+```
+
+Generate the fixture from git before starting:
+
+```bash
+git show master:gatsby-node.js > /dev/null && \
+ls content/states | grep -v '\.md$' | jq -R -s 'split("\n")|map(select(length>0))' \
+  > test/fixtures/legacy-slugs.json
+```
+
+- [x] **Step 2: Run to confirm failure**
+
+Run: `npm test -- urls`
+Expected: FAIL — most slugs 404.
+
+- [x] **Step 3: Implement `/tags/[tag].astro`**
+
+Legacy tags include device and OS values (`mobile`, `ios`) that are no longer tags. Resolve in order: tag table, then device type, then OS — so `/tags/mobile` maps to a device filter and keeps working.
+
+- [x] **Step 4: Implement `/privacy.astro`**
+
+Must state: Plausible cookieless aggregate analytics; the grid selection sent to a first-party endpoint **and that this is not blocked by ad blockers**; search queries stored with no identifier. Opt-out button sets `localStorage["es:optout"]`; `Base.astro` checks it before loading the Plausible script or calling `/api/view-pref`, and treats `navigator.doNotTrack === "1"` or `navigator.globalPrivacyControl` as opted out.
+
+- [x] **Step 5: Run the tests**
+
+Run: `npm test -- urls`
+Expected: PASS. Any 404 is a slug the importer renamed — fix the importer's slug preference in Task 4 step 7 item 8, re-run the migration, re-test.
+
+- [x] **Step 6: Run the full suite**
+
+Run: `npm test`
+Expected: all PASS.
+
+- [x] **Step 7: Commit**
+
+```bash
+git add src/pages/tags/ src/pages/privacy.astro test/urls.test.ts test/fixtures/
+git commit -m "feat: add tag pages and privacy opt-out, preserve legacy URLs"
+```
+
+---
+
+## Task 11A: Open Graph card per state
+
+**Runs last, immediately before deploy.** Each card embeds a screenshot read
+from R2 and is stored at `og/<state id>.png`, so every id in the corpus has to
+be settled before any card is rendered. Re-running the migration mints fresh
+ULIDs and retires every key — which happened to the display variants when
+issues #26 and #27 were fixed, and cost one rebuild. Rendering 235 cards on a
+stale id set costs more, and a card also embeds the title and app name, so a
+content correction invalidates it as surely as a re-import does.
 
 Every `/s/<slug>` link currently unfurls with whatever `Base.astro` is given,
 which is nothing — the detail page passes no `image`. A gallery of screenshots
@@ -1659,92 +1760,6 @@ for the gallery, tag pages and the index, which share one default card.
 
 ---
 
-## Task 11: Tag pages, privacy page, and URL preservation
-
-**Two corrections, both found by running it.**
-
-Nothing served `state_redirects`. The task names no file for it, and step 5
-says a 404 means fixing the importer's slug preference — but the 180 renamed
-slugs were deliberate and already have redirect rows. `src/middleware.ts`
-serves them, checking after the response so a live route always wins.
-
-The fixture command reads the working tree, which no longer holds the 18
-entries removed during triage. `test/fixtures/legacy-urls.json` is generated
-from `master`'s `content/states` instead — the URLs the live site publishes —
-and separates those 18, which 404 by decision.
-
-**Open finding, belongs to Task 3.** `classifyTag` takes the first OS verdict
-it sees, with no precedence among OS values, so tag order decides. Three
-entries carry both a web-ish and a concrete OS tag, and two lost the concrete
-one: `unable-to-connect-to-youtube-website` is `web` from `browser` when its
-tags say `windows`, and `new-page-in-notion` the same over `macos`. `/tags/windows`
-therefore renders empty. A precedence rule preferring a named platform over
-`web` fixes both, and needs the migration re-run.
-
-**Files:**
-- Create: `src/pages/tags/[tag].astro`, `src/pages/privacy.astro`
-- Test: `test/urls.test.ts`
-
-- [x] **Step 1: Write the failing URL preservation test**
-
-```ts
-import legacySlugs from "./fixtures/legacy-slugs.json";
-
-it("every pre-existing /s/ URL still resolves", async () => {
-  for (const slug of legacySlugs) {
-    const res = await SELF.fetch(`https://x/s/${slug}`);
-    expect(res.status, `/s/${slug}`).toBe(200);
-  }
-});
-
-it("every pre-existing tag page still resolves", async () => {
-  for (const tag of ["mobile", "desktop", "ios", "android"]) {
-    const res = await SELF.fetch(`https://x/tags/${tag}`);
-    expect(res.status, `/tags/${tag}`).toBe(200);
-  }
-});
-```
-
-Generate the fixture from git before starting:
-
-```bash
-git show master:gatsby-node.js > /dev/null && \
-ls content/states | grep -v '\.md$' | jq -R -s 'split("\n")|map(select(length>0))' \
-  > test/fixtures/legacy-slugs.json
-```
-
-- [x] **Step 2: Run to confirm failure**
-
-Run: `npm test -- urls`
-Expected: FAIL — most slugs 404.
-
-- [x] **Step 3: Implement `/tags/[tag].astro`**
-
-Legacy tags include device and OS values (`mobile`, `ios`) that are no longer tags. Resolve in order: tag table, then device type, then OS — so `/tags/mobile` maps to a device filter and keeps working.
-
-- [x] **Step 4: Implement `/privacy.astro`**
-
-Must state: Plausible cookieless aggregate analytics; the grid selection sent to a first-party endpoint **and that this is not blocked by ad blockers**; search queries stored with no identifier. Opt-out button sets `localStorage["es:optout"]`; `Base.astro` checks it before loading the Plausible script or calling `/api/view-pref`, and treats `navigator.doNotTrack === "1"` or `navigator.globalPrivacyControl` as opted out.
-
-- [x] **Step 5: Run the tests**
-
-Run: `npm test -- urls`
-Expected: PASS. Any 404 is a slug the importer renamed — fix the importer's slug preference in Task 4 step 7 item 8, re-run the migration, re-test.
-
-- [x] **Step 6: Run the full suite**
-
-Run: `npm test`
-Expected: all PASS.
-
-- [x] **Step 7: Commit**
-
-```bash
-git add src/pages/tags/ src/pages/privacy.astro test/urls.test.ts test/fixtures/
-git commit -m "feat: add tag pages and privacy opt-out, preserve legacy URLs"
-```
-
----
-
 ## Task 12: Deploy and verify against the spec checklist
 
 - [ ] **Step 1: Apply migrations to remote D1**
@@ -1810,10 +1825,10 @@ git tag foundation-complete
 
 ## Self-Review
 
-**Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Tasks 10 and 10A. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
+**Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Tasks 10 and 11A. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
 
 **Gap found and closed.** No task gave a detail page an `og:image`, so every
-`/s/` link would unfurl blank. Task 10A renders one card per state, following
+`/s/` link would unfurl blank. Task 11A renders one card per state, following
 `~/Sites/craigmdennis.com/src/lib/og/`. That site renders at build time in a
 static endpoint; this one cannot, because no native addon loads in workerd.
 Cards are rendered in Node and served from R2, and `sharp` rasterises the SVG
