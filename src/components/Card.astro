@@ -1,0 +1,34 @@
+---
+/**
+ * One gallery card. Renders the screenshot and nothing else.
+ *
+ * Styling waits until the functionality is settled: no view modes, no hover
+ * metadata, no layout tokens. Task 6 in the plan describes all three, and this
+ * is the subset that has to be right before any of them can be judged.
+ *
+ * `width` and `height` are always emitted from the stored dimensions, which is
+ * why `aspect_ratio` is denormalised onto `states` — the browser reserves the
+ * box before an image loads, so nothing shifts.
+ */
+import { imageSources } from "../lib/images";
+import type { StateRow } from "../db/states";
+
+interface Props {
+  state: StateRow;
+}
+
+const { state } = Astro.props;
+const { src, srcset } = imageSources(state);
+---
+
+<a href={`/s/${state.slug}`}>
+  <img
+    src={src}
+    srcset={srcset || undefined}
+    width={state.width}
+    height={state.height}
+    alt={state.title}
+    loading="lazy"
+    decoding="async"
+  />
+</a>

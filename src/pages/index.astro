@@ -8,6 +8,7 @@
  * answers a real request without pretending to be the gallery.
  */
 import Layout from "../layouts/Base.astro";
+import Card from "../components/Card.astro";
 import { getDb } from "../db/client";
 import { listStates } from "../db/states";
 import { listFacets } from "../db/taxonomies";
@@ -43,17 +44,14 @@ function pageHref(n: number): string {
     {tag && ` — tag: ${tag}`}
   </p>
 
-  <ul class="mb-8 grid gap-1">
-    {rows.map((s) => (
-      <li class="font-mono text-sm">
-        <a href={`/s/${s.slug}`} class="hover:underline">{s.title}</a>
-        <span class="text-base-content/50">
-          {" — "}{s.device_type}{s.os ? ` / ${s.os}` : ""}
-          {" — "}{s.width}&times;{s.height}
-        </span>
-      </li>
-    ))}
-  </ul>
+  {/*
+    A plain auto-fill grid so 60 screenshots are visible at once. Task 6 owns
+    the justified rows and the square mode; this only stops the page being one
+    column of full-width images.
+  */}
+  <div class="mb-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 items-start">
+    {rows.map((s) => <Card state={s} />)}
+  </div>
 
   <nav class="flex gap-3 font-mono text-xs mb-8" aria-label="Pagination">
     {page > 1 && <a href={pageHref(page - 1)} class="hover:underline">Previous</a>}
