@@ -13,7 +13,8 @@
     "migrate:legacy": "tsx scripts/migrate-legacy.ts",
     "review:shapes": "tsx scripts/review-device-shapes.ts",
     "triage": "tsx scripts/build-device-triage.ts",
-    "triage:apply": "tsx scripts/apply-decisions.ts"
+    "triage:apply": "tsx scripts/apply-decisions.ts",
+    "variants": "tsx scripts/build-variants.ts"
   },
   "repository": {
     "type": "git",
