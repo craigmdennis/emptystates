@@ -13,16 +13,20 @@
 
 ## Status
 
-**Tasks 1–5A complete** (2026-08-14). Next: Task 6, the card component and
-design tokens. 85 tests passing.
+**Tasks 1–5C complete** (2026-08-15). Next: Task 6, the card component and
+design tokens. 101 tests passing.
 
-`npm run build` and `npx tsc --noEmit` both run clean as of Task 5A. `/` and
-`/s/<slug>` read D1 through `src/db/` and render text; Tasks 7 and 10 replace
-them with the real gallery and detail page.
+`npm run build` and `npx tsc --noEmit` run clean, and `/` and `/s/<slug>` were
+confirmed against `npx wrangler dev`. Both render text through `src/db/`;
+Tasks 7 and 10 replace them with the real gallery and detail page.
 
-Neither route has been rendered by a running server yet. Serve the build with
-`npx wrangler dev` and open `/`, `/?device=desktop`, `/?page=4` and any
-`/s/<slug>`.
+R2 holds 261 display variants over the 235 originals. Set
+`PUBLIC_MEDIA_BASE=/img` in `.env` before serving, or images 404.
+
+**Two things Task 6 should expect.** Only 29 states are at least 1280 wide and
+5 are at least 2560, so its `srcset` cannot name `w1280` unconditionally —
+build the candidate list from `variantsFor(state.width)`. And 8 states are
+narrower than 640 and have no variant at all; those fall back to the original.
 
 Seven things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
@@ -920,7 +924,7 @@ that.
 - Consumes: `listStates` from Task 5, the `MEDIA` binding
 - Produces: `w640/`, `w1280/`, `w2560/` in R2
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // Never upscale: a 900px-wide original gets w640 only.
@@ -934,13 +938,13 @@ A 500px original is a real case — `tumblr_mh8v21c0YA1rdf37to1_400` is 400 wide
 `srcset` falls back to the largest variant that exists, so an entry with none
 uses its original.
 
-- [ ] **Step 2: Write `src/lib/variants.ts`**
+- [x] **Step 2: Write `src/lib/variants.ts`**
 
 `variantsFor(width)` returns the widths to write, and `variantKey(width, id)`
 returns where each lives. Pure, so the never-upscale rule is testable without
 R2, and spec 02's upload path calls the same two functions.
 
-- [ ] **Step 3: Write `scripts/build-variants.ts`**
+- [x] **Step 3: Write `scripts/build-variants.ts`**
 
 ```bash
 npx tsx scripts/build-variants.ts --dry-run
@@ -956,7 +960,7 @@ render.
 
 Originals are never modified.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 ```bash
 npm test
@@ -967,7 +971,7 @@ npx sharp --version >/dev/null; file /tmp/v.webp
 Expected: a WebP 640 wide. Count the objects written against the number of
 published states at least 640 wide.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/variants.ts scripts/build-variants.ts test/variants.test.ts package.json
@@ -999,7 +1003,7 @@ after this one has to think about which environment it renders in.
 - Consumes: the `MEDIA` binding
 - Produces: `mediaUrl(key)` — the only way any template names an image
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 expect(mediaUrl("w640/abc.webp")).toBe("https://img.emptystat.es/w640/abc.webp");
@@ -1010,29 +1014,35 @@ Cover a base with a trailing slash and a key with a leading one; the two
 concatenated naively give `//`, which resolves to a different origin in a
 browser instead of failing loudly.
 
-- [ ] **Step 2: Write `src/lib/media.ts`**
+- [x] **Step 2: Write `src/lib/media.ts`**
 
 `mediaUrl(key)` returns `${base}/${key}`, with the base read from
 `PUBLIC_MEDIA_BASE` and falling back to `https://img.emptystat.es`.
 
-- [ ] **Step 3: Write `src/pages/img/[...key].ts`**
+- [x] **Step 3: Write `src/pages/img/[...key].ts`**
 
 Reads the `MEDIA` binding, returns 404 for a missing key, and sets
 `Content-Type` from the object's stored metadata with a long `Cache-Control`.
 `export const prerender = false`.
 
-- [ ] **Step 4: Point development at it**
+- [x] **Step 4: Point development at it**
 
 ```
-# .dev.vars — gitignored
+# .env — gitignored
 PUBLIC_MEDIA_BASE=/img
 ```
 
-Production leaves the variable unset. Note it in `README.md`, since a missing
-`.dev.vars` shows a working page with broken images, which reads as a data
-problem instead of a configuration one.
+`.env` and not `.dev.vars`. Astro inlines `import.meta.env.PUBLIC_*` at build
+time from `.env`; `.dev.vars` populates the Worker's own `env`, which is a
+different object. The Workers test pool reads both, so a test of `mediaBase()`
+passes under either and hides the difference — which is why `resolveBase` is
+the pure half and the tested one.
 
-- [ ] **Step 5: Verify**
+Production leaves the variable unset. Note it in `README.md`: a missing `.env`
+renders a working page with broken images, which reads as a data problem
+instead of a configuration one.
+
+- [x] **Step 5: Verify**
 
 ```bash
 npm test
@@ -1043,7 +1053,7 @@ curl -sI http://localhost:8787/img/w640/<id>.webp
 
 Expected: `200` and `content-type: image/webp`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/media.ts src/pages/img test/media.test.ts README.md
@@ -1710,6 +1720,19 @@ npx wrangler d1 migrations apply emptystates-db --remote
 - [ ] **Step 2: Run the migration against remote**
 
 Point `scripts/migrate-legacy.ts` at `--remote` and run. Confirm counts match the local run.
+
+**Run it once.** Every run mints fresh ULIDs and puts a new set of originals
+without deleting the previous set, so a second run doubles the objects in the
+bucket and orphans the first set — nothing references them, and nothing removes
+them. Seven local runs left 1,738 objects under `originals/` against 235 rows.
+Before re-running against remote for any reason, list the bucket and delete the
+keys no `states.r2_key` names.
+
+- [ ] **Step 2a: Generate the display variants against remote**
+
+```bash
+npx tsx scripts/build-variants.ts
+```
 
 - [ ] **Step 2b: Render the Open Graph cards against remote**
 
