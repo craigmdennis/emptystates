@@ -130,7 +130,7 @@ session back to the corpus. `docs/device-decisions.json` and
 | `src/pages/privacy.astro` | Disclosure and opt-out |
 | `src/pages/api/view-pref.ts` | Counter + Plausible forward |
 | `src/lib/og/template.ts` | OG card layout — the only place it lives |
-| `src/lib/og/render.ts` | satori → resvg → PNG; Node only, build-time |
+| `src/lib/og/render.ts` | satori → SVG → sharp → PNG; Node only, build-time |
 | `src/lib/og/assets.ts` | Image bytes → data URI, mime sniffed from magic bytes |
 | `scripts/build-og-cards.ts` | Renders a card per state into R2 |
 | `src/styles/global.css` | Tokens, grid, card, hairline |
@@ -1325,12 +1325,16 @@ whose links unfurl blank is the one place a missing image costs a reader
 something.
 
 Follows the process in `~/Sites/craigmdennis.com`, with the generation half
-moved. That site is static and renders cards at build time in
-`src/pages/og/x/[slug].png.ts`; this one runs `output: "server"` on Workers,
-and `@resvg/resvg-js` is a native addon workerd cannot load — the same
-constraint that split the migration into a Node reader and a runtime-agnostic
-importer. Cards are rendered in Node and put in R2, which the architecture
-already requires for images so they never invoke the Worker.
+moved and the rasteriser swapped. That site is static and renders cards at
+build time in `src/pages/og/x/[slug].png.ts`; this one runs `output: "server"`
+on Workers, and no native addon loads in workerd — the same constraint that
+split the migration into a Node reader and a runtime-agnostic importer. Cards
+are rendered in Node and put in R2, which the architecture already requires for
+images so they never invoke the Worker.
+
+`sharp` rasterises the SVG. The other site uses `@resvg/resvg-js` for that
+step, and `sharp` is already here doing the same job for every image the
+migration measures.
 
 Keyed by state id, not slug: the id is a ULID and never changes, so a later
 retitle moves the page's URL without orphaning its card.
@@ -1345,19 +1349,24 @@ retitle moves the page's URL without orphaning its card.
 - Consumes: `listStates` from Task 5, `StateRow.r2_key`, the `MEDIA` binding
 - Produces: `og/<id>.png` in R2 for every published state; `og:image` on every detail page
 
-- [ ] **Step 1: Install the build-time dependencies and fonts**
+- [ ] **Step 1: Install satori and the fonts**
 
 ```bash
-npm install --save-dev satori @resvg/resvg-js
+npm install --save-dev satori
 mkdir -p src/fonts/og
 cp ~/Sites/craigmdennis.com/src/fonts/og/inter-regular.ttf src/fonts/og/
 cp ~/Sites/craigmdennis.com/src/fonts/og/inter-semibold.ttf src/fonts/og/
 ```
 
-Dev dependencies, as on the other site: both are imported only by
-`scripts/build-og-cards.ts`, so nothing new reaches the client or the Worker.
-TTF and not woff2 — satori parses font tables itself and cannot read woff2.
-Advercase stays behind; it is licensed for the other site.
+satori alone. The other site pairs it with `@resvg/resvg-js`, which rasterises
+SVG — work `sharp` already does here, and `sharp` is a dependency the migration
+uses to measure every image. satori adds flexbox layout to SVG, which nothing
+in this repo does.
+
+A dev dependency: `scripts/build-og-cards.ts` is the only importer, so nothing
+new reaches the client or the Worker. TTF and not woff2 — satori parses font
+tables itself and cannot read woff2. Advercase stays behind, licensed for the
+other site.
 
 - [ ] **Step 2: Write `src/lib/og/template.ts`**
 
@@ -1373,12 +1382,23 @@ state is no longer the thing being shown.
 
 - [ ] **Step 3: Write `src/lib/og/render.ts` and `assets.ts`**
 
-Copy both from `~/Sites/craigmdennis.com/src/lib/og/`, which are already
-generic:
+Both start from `~/Sites/craigmdennis.com/src/lib/og/`:
 
-- `render.ts` — satori → `Resvg` → PNG buffer, fonts memoised in a
+- `render.ts` — satori → SVG → `sharp` → PNG buffer. Fonts memoised in a
   module-level promise so 235 renders read each TTF once. Resolve `FONT_DIR`
-  from `process.cwd()`; bundled chunk URLs do not map back to `src/`.
+  from `process.cwd()`; bundled chunk URLs do not map back to `src/`. The
+  rasterise step replaces the other site's `Resvg` call:
+
+  ```ts
+  const svg = await satori(node, { width: OG_WIDTH, height: OG_HEIGHT, fonts });
+  return sharp(Buffer.from(svg)).png().toBuffer();
+  ```
+
+  Pass no `density`. vips scales an SVG by `density / 72`, so the `density: 96`
+  that reads as a sensible default produces a 1600×840 card. The default of 72
+  gives 1200×630 exactly. Leave satori's `embedFont` at its default, which
+  writes glyphs as paths, so rasterising needs no font at all.
+
 - `assets.ts` — file → data URI, with the mime sniffed from magic bytes.
   Keep the sniffing. This corpus has the same defect the comment describes:
   `content/states/` holds `.jpg` files whose bytes are PNG, and a mislabelled
@@ -1423,9 +1443,12 @@ it("renders a card at exactly 1200x630", async () => {
 });
 ```
 
-`test/og.test.ts` runs in Node, outside the Workers pool, since satori and
-resvg cannot load in workerd. Add a second case covering a state with a null
-`app_name` and a null `os`, which 137 entries have.
+`test/og.test.ts` runs in Node, outside the Workers pool, since `sharp` is a
+native addon workerd cannot load — the same reason `test/import.test.ts` had to
+be split. Add a second case covering a state with a null `app_name` and a null
+`os`, which 137 entries have. Assert the dimensions from the IHDR bytes: a
+wrong `density` produces a valid PNG at the wrong size, so a smoke test that
+only checks for output would pass.
 
 - [ ] **Step 7: Verify against a real unfurl**
 
@@ -1574,8 +1597,10 @@ git tag foundation-complete
 **Gap found and closed.** No task gave a detail page an `og:image`, so every
 `/s/` link would unfurl blank. Task 10A renders one card per state, following
 `~/Sites/craigmdennis.com/src/lib/og/`. That site renders at build time in a
-static endpoint; this one cannot, because `@resvg/resvg-js` is a native addon
-workerd will not load. Cards are rendered in Node and served from R2.
+static endpoint; this one cannot, because no native addon loads in workerd.
+Cards are rendered in Node and served from R2, and `sharp` rasterises the SVG
+in place of the other site's `@resvg/resvg-js`, which would duplicate a
+dependency the migration already uses.
 
 **Gap found and closed.** §1's "remove EMDash" was mapped to Task 1 alone, which
 uninstalls the package. Eight components and two pages import it, and Tasks
