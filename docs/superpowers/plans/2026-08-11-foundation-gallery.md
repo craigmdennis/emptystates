@@ -13,9 +13,9 @@
 
 ## Status
 
-**Tasks 1–5C complete, Task 6 partly** (2026-08-15). Next: Task 7, the
-justified gallery, which also picks up the design tokens Task 6 deferred.
-106 tests passing.
+**Tasks 1–5C and 11 complete, Task 6 partly** (2026-08-15). Next: Task 10A
+(Open Graph cards) or Task 9 (`/api/view-pref`), both functional; Task 7 is the
+deferred styling. 117 tests passing.
 
 The gallery renders 60 screenshots a page through a bare `Card.astro`. Styling
 waits until the functionality underneath it is settled.
@@ -1661,11 +1661,31 @@ for the gallery, tag pages and the index, which share one default card.
 
 ## Task 11: Tag pages, privacy page, and URL preservation
 
+**Two corrections, both found by running it.**
+
+Nothing served `state_redirects`. The task names no file for it, and step 5
+says a 404 means fixing the importer's slug preference — but the 180 renamed
+slugs were deliberate and already have redirect rows. `src/middleware.ts`
+serves them, checking after the response so a live route always wins.
+
+The fixture command reads the working tree, which no longer holds the 18
+entries removed during triage. `test/fixtures/legacy-urls.json` is generated
+from `master`'s `content/states` instead — the URLs the live site publishes —
+and separates those 18, which 404 by decision.
+
+**Open finding, belongs to Task 3.** `classifyTag` takes the first OS verdict
+it sees, with no precedence among OS values, so tag order decides. Three
+entries carry both a web-ish and a concrete OS tag, and two lost the concrete
+one: `unable-to-connect-to-youtube-website` is `web` from `browser` when its
+tags say `windows`, and `new-page-in-notion` the same over `macos`. `/tags/windows`
+therefore renders empty. A precedence rule preferring a named platform over
+`web` fixes both, and needs the migration re-run.
+
 **Files:**
 - Create: `src/pages/tags/[tag].astro`, `src/pages/privacy.astro`
 - Test: `test/urls.test.ts`
 
-- [ ] **Step 1: Write the failing URL preservation test**
+- [x] **Step 1: Write the failing URL preservation test**
 
 ```ts
 import legacySlugs from "./fixtures/legacy-slugs.json";
@@ -1693,30 +1713,30 @@ ls content/states | grep -v '\.md$' | jq -R -s 'split("\n")|map(select(length>0)
   > test/fixtures/legacy-slugs.json
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `npm test -- urls`
 Expected: FAIL — most slugs 404.
 
-- [ ] **Step 3: Implement `/tags/[tag].astro`**
+- [x] **Step 3: Implement `/tags/[tag].astro`**
 
 Legacy tags include device and OS values (`mobile`, `ios`) that are no longer tags. Resolve in order: tag table, then device type, then OS — so `/tags/mobile` maps to a device filter and keeps working.
 
-- [ ] **Step 4: Implement `/privacy.astro`**
+- [x] **Step 4: Implement `/privacy.astro`**
 
 Must state: Plausible cookieless aggregate analytics; the grid selection sent to a first-party endpoint **and that this is not blocked by ad blockers**; search queries stored with no identifier. Opt-out button sets `localStorage["es:optout"]`; `Base.astro` checks it before loading the Plausible script or calling `/api/view-pref`, and treats `navigator.doNotTrack === "1"` or `navigator.globalPrivacyControl` as opted out.
 
-- [ ] **Step 5: Run the tests**
+- [x] **Step 5: Run the tests**
 
 Run: `npm test -- urls`
 Expected: PASS. Any 404 is a slug the importer renamed — fix the importer's slug preference in Task 4 step 7 item 8, re-run the migration, re-test.
 
-- [ ] **Step 6: Run the full suite**
+- [x] **Step 6: Run the full suite**
 
 Run: `npm test`
 Expected: all PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/pages/tags/ src/pages/privacy.astro test/urls.test.ts test/fixtures/
