@@ -13,8 +13,12 @@
 
 ## Status
 
-**Tasks 1–5C complete** (2026-08-15). Next: Task 6, the card component and
-design tokens. 101 tests passing.
+**Tasks 1–5C complete, Task 6 partly** (2026-08-15). Next: Task 7, the
+justified gallery, which also picks up the design tokens Task 6 deferred.
+106 tests passing.
+
+The gallery renders 60 screenshots a page through a bare `Card.astro`. Styling
+waits until the functionality underneath it is settled.
 
 `npm run build` and `npx tsc --noEmit` run clean, and `/` and `/s/<slug>` were
 confirmed against `npx wrangler dev`. Both render text through `src/db/`;
@@ -1064,13 +1068,25 @@ git commit -m "feat: serve R2 objects locally so images resolve in development"
 
 ## Task 6: Card component and design tokens
 
+**Split.** The card renders the screenshot and nothing else, and every styled
+part below is deferred until the functionality underneath is settled. Task 7
+takes the tokens, since `--ar` and `--row-h` exist for the geometry it builds;
+Task 8 takes the hover metadata and the view modes.
+
+`src/lib/images.ts` is the part that had to be right first. `imageSources`
+builds the candidate list from `variantsFor(state.width)`, so a card asks only
+for objects Task 5B wrote — the `srcset` sketched below names `w1280` for every
+card, which would 404 for 206 of 235 states.
+
+Done for the bare card, unchecked below for the rest.
+
 **Files:**
-- Create: `src/components/Card.astro`, `src/styles/global.css`
-- Test: manual, at three viewports
+- Create: `src/components/Card.astro` (bare), `src/lib/images.ts`, `src/styles/global.css` (deferred to Task 7)
+- Test: `test/images.test.ts`; the styled card is manual, at three viewports
 
 **Interfaces:**
-- Consumes: `StateRow` from Task 5
-- Produces: `<Card state={row} view="justified" | "square" />`
+- Consumes: `StateRow` from Task 5, `variantsFor` from Task 5B, `mediaUrl` from Task 5C
+- Produces: `<Card state={row} />` now; `view="justified" | "square"` in Task 8
 
 - [ ] **Step 1: Write `src/styles/global.css`**
 
