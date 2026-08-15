@@ -15,6 +15,7 @@ data.db
 docs/device-triage.html
 docs/device-shape-review.html
 .env
+.dev.vars
 prod-dump.sql
 .worktrees/
 .superpowers/
