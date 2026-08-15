@@ -1,0 +1,92 @@
+---
+/**
+ * What this site records, and how to stop it.
+ *
+ * Written before the endpoints it describes exist, so it states what Task 9 and
+ * spec 02 will send. The opt-out flag is read by whatever loads them, and the
+ * flag works from the day the button does.
+ */
+import Layout from "../layouts/Base.astro";
+---
+
+<Layout
+  title="Privacy"
+  description="What emptystat.es records, and how to opt out."
+>
+  <article class="prose max-w-prose font-mono text-sm grid gap-4">
+    <h1 class="text-lg font-bold">Privacy</h1>
+
+    <p>
+      Three things are recorded here. None of them identifies you, and all three
+      can be switched off with the button at the foot of this page.
+    </p>
+
+    <h2 class="font-bold">Page views</h2>
+    <p>
+      Plausible, which is cookieless and aggregate. It records that a page was
+      viewed, not who viewed it, and sets nothing on your device.
+    </p>
+
+    <h2 class="font-bold">Which gallery layout you pick</h2>
+    <p>
+      Choosing between the justified and square views sends that choice to an
+      endpoint on this domain. It is first-party, so <strong>an ad blocker will
+      not stop it</strong> — the button below will. The count is a total per
+      layout with nothing attached to it.
+    </p>
+
+    <h2 class="font-bold">Search queries</h2>
+    <p>
+      Queries are stored so the gallery can be improved against what people look
+      for. No identifier is stored beside them: the text, and nothing else.
+    </p>
+
+    <h2 class="font-bold">Opting out</h2>
+    <p>
+      This is honoured automatically if your browser sends Do Not Track or Global
+      Privacy Control. The button sets a flag on this device only, so it needs
+      pressing once per browser.
+    </p>
+
+    <p>
+      <button id="optout" class="btn btn-sm" type="button">Opt out</button>
+      <span id="optout-state" class="ml-2 text-base-content/60"></span>
+    </p>
+  </article>
+</Layout>
+
+<script is:inline>
+  (function () {
+    var KEY = "es:optout";
+    var button = document.getElementById("optout");
+    var label = document.getElementById("optout-state");
+
+    // A browser signal counts as opting out and cannot be reversed from here,
+    // since the reader already asked once at a level above this page.
+    function signalled() {
+      return (
+        navigator.doNotTrack === "1" ||
+        navigator.globalPrivacyControl === true
+      );
+    }
+
+    function render() {
+      if (signalled()) {
+        label.textContent = "Opted out by your browser's setting.";
+        button.disabled = true;
+        return;
+      }
+      var out = localStorage.getItem(KEY) === "1";
+      label.textContent = out ? "Opted out on this device." : "";
+      button.textContent = out ? "Opt back in" : "Opt out";
+    }
+
+    button.addEventListener("click", function () {
+      if (localStorage.getItem(KEY) === "1") localStorage.removeItem(KEY);
+      else localStorage.setItem(KEY, "1");
+      render();
+    });
+
+    render();
+  })();
+</script>

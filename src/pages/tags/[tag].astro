@@ -1,0 +1,51 @@
+---
+/**
+ * A legacy tag page, filtered by whatever that tag became.
+ *
+ * Gatsby published /tags/<x> for every raw value in the frontmatter `tags`
+ * array, which mixed devices, operating systems and genuine tags. `resolveTagPath`
+ * routes each to the column it now lives in, so /tags/mobile reaches the phone
+ * filter and keeps resolving.
+ */
+import Layout from "../../layouts/Base.astro";
+import Card from "../../components/Card.astro";
+import { getDb } from "../../db/client";
+import { listStates } from "../../db/states";
+import { resolveTagPath } from "../../lib/tags";
+
+const PER_PAGE = 60;
+
+const route = Astro.params.tag ? resolveTagPath(Astro.params.tag) : null;
+if (!route) {
+  // 404 rather than an empty gallery: the middleware then gets its turn, in
+  // case this path is a retired one that moved.
+  return new Response("Not found", { status: 404 });
+}
+
+const page = Math.max(1, Number(Astro.url.searchParams.get("page") ?? 1) || 1);
+const { rows, total } = await listStates(getDb(), {
+  page,
+  perPage: PER_PAGE,
+  device: route.kind === "device" ? route.value : undefined,
+  os: route.kind === "os" ? route.value : undefined,
+  tag: route.kind === "tag" ? route.value : undefined,
+});
+
+const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+const pageHref = (n: number) => `/tags/${Astro.params.tag}?page=${n}`;
+---
+
+<Layout title={`${route.value} — EmptyStates`}>
+  <p class="font-mono text-xs text-base-content/60 mb-4">
+    {total} states — {route.kind}: {route.value} — page {page} of {lastPage}
+  </p>
+
+  <div class="mb-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 items-start">
+    {rows.map((s) => <Card state={s} />)}
+  </div>
+
+  <nav class="flex gap-3 font-mono text-xs" aria-label="Pagination">
+    {page > 1 && <a href={pageHref(page - 1)} class="hover:underline">Previous</a>}
+    {page < lastPage && <a href={pageHref(page + 1)} class="hover:underline">Next</a>}
+  </nav>
+</Layout>
