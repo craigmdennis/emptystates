@@ -39,7 +39,8 @@ export type ListOptions = {
   perPage: number;
   device?: string;
   os?: string;
-  tag?: string;
+  /** Combined with AND: an entry has to carry every one of them. */
+  tags?: string[];
 };
 
 /**
@@ -48,7 +49,7 @@ export type ListOptions = {
  */
 export async function listStates(
   db: D1Database,
-  { page, perPage, device, os, tag }: ListOptions,
+  { page, perPage, device, os, tags = [] }: ListOptions,
 ): Promise<{ rows: StateRow[]; total: number }> {
   const where = ["s.status = 'published'"];
   const params: unknown[] = [];
@@ -61,9 +62,11 @@ export async function listStates(
     where.push("s.os = ?");
     params.push(os);
   }
-  if (tag) {
-    // EXISTS instead of a join: a state carries several tags, and joining would
-    // return it once per match and break both the count and the page size.
+  // One EXISTS per tag, which is what ANDing them means: every clause has to
+  // find a row. EXISTS instead of a join because a state carries several tags,
+  // and joining would return it once per match and break both the count and
+  // the page size.
+  for (const tag of tags) {
     where.push(
       `EXISTS (SELECT 1 FROM state_tags st
                  JOIN tags t ON t.id = st.tag_id
@@ -109,14 +112,25 @@ export async function getStateBySlug(
 
 /**
  * The entries either side of one publication date, for the detail page's
- * previous and next links. Ordered the way the gallery is, so `next` is the
- * newer entry and `prev` the older one.
+ * previous and next links.
+ *
+ * `next` is the **older** entry. The gallery is ordered newest first, so the
+ * tile after the one a reader clicked is the older one, and next means the
+ * next tile along — not the next date. Reading order is what someone stepping
+ * through a grid has in mind; chronology is not.
+ *
+ * `position` counts the same way, so following Next counts up.
  */
 export async function getAdjacent(
   db: D1Database,
   publishedAt: string,
-): Promise<{ prev: StateRow | null; next: StateRow | null }> {
-  const [prev, next] = await Promise.all([
+): Promise<{
+  prev: StateRow | null;
+  next: StateRow | null;
+  /** 1-based, newest first, so it counts up as Next is followed. */
+  position: number;
+}> {
+  const [next, prev, newer] = await Promise.all([
     db
       .prepare(
         `SELECT ${COLUMNS} FROM states s
@@ -133,7 +147,58 @@ export async function getAdjacent(
       )
       .bind(publishedAt)
       .first<StateRow>(),
+    db
+      .prepare(
+        `SELECT COUNT(*) AS n FROM states
+          WHERE status = 'published' AND published_at > ?`,
+      )
+      .bind(publishedAt)
+      .first<{ n: number }>(),
   ]);
 
-  return { prev, next };
+  return { prev, next, position: (newer?.n ?? 0) + 1 };
+}
+
+export type StateTag = {
+  slug: string;
+  label: string;
+};
+
+/**
+ * One entry's tags, as links back to the filtered gallery.
+ *
+ * Not on `StateRow`: tags live in a join table, and selecting them alongside
+ * the row would either need a second round trip per state in the gallery or a
+ * group_concat nothing else wants.
+ */
+export async function listStateTags(
+  db: D1Database,
+  stateId: string,
+): Promise<StateTag[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT t.slug, t.label
+         FROM tags t
+         JOIN state_tags st ON st.tag_id = t.id
+        WHERE st.state_id = ?
+        ORDER BY t.label`,
+    )
+    .bind(stateId)
+    .all<StateTag>();
+
+  return results;
+}
+
+/**
+ * How many entries the collection holds, for the header on every page.
+ *
+ * Separate from `listStates` because the pages that show no gallery — detail,
+ * privacy — still print the number, and none of them may reach for a raw
+ * COUNT that forgets `status = 'published'`.
+ */
+export async function countStates(db: D1Database): Promise<number> {
+  const row = await db
+    .prepare("SELECT COUNT(*) AS n FROM states WHERE status = 'published'")
+    .first<{ n: number }>();
+  return row?.n ?? 0;
 }
