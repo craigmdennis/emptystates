@@ -13,16 +13,25 @@
 
 ## Status
 
-**Tasks 1–5C and 11 complete, Task 6 partly** (2026-08-15). Next: a basic
-layout — the design tokens and geometry Task 6 deferred, which Tasks 7 and 8
-describe. 129 tests passing.
+**Tasks 1–8, 10 and 11 complete** (2026-08-19). Next: Task 12, deploy. 146
+tests passing.
+
+Tasks 9 and 11A moved to `2026-08-19-pre-launch.md` on 2026-08-19. Both run
+after phase 2 and before launch, and neither blocks this deploy.
+
+Tasks 6, 7 and 8 were built to the handoff design in
+`docs/design-handoff/` rather than to the CSS sketched below — see correction 8.
 
 Issues #26, #27 and #28 are fixed and closed: OS precedence in the classifier,
 redirect paths normalised, and a shape check before the middleware's D1 read.
+Issues #29 and #30 are open against the toolbar popovers: no light dismiss on
+an outside click, and a row radius that should be the outer radius minus the
+padding.
 
-**Task 11A renders last, immediately before deploy.** Its cards embed a
-screenshot keyed by state id and carry the title and app name, so any
-re-import or content correction retires every one of them.
+**Open Graph cards are rendered from the pre-launch plan**, after phase 2's
+ingest path exists. Each card embeds a screenshot keyed by state id and carries
+the title and app name, so any re-import or content correction retires every
+one of them.
 
 The gallery renders 60 screenshots a page through a bare `Card.astro`. Styling
 waits until the functionality underneath it is settled.
@@ -39,7 +48,7 @@ R2 holds 261 display variants over the 235 originals. Set
 build the candidate list from `variantsFor(state.width)`. And 8 states are
 narrower than 640 and have no variant at all; those fall back to the original.
 
-Seven things the plan got wrong, found by reading the real corpus rather than
+Eight things the plan got wrong, found by reading the real corpus rather than
 trusting the spec. Each is implemented as described here, not as written below.
 
 1. **Task 4's test design could not build.** `test/import.test.ts` imports the
@@ -87,6 +96,34 @@ trusting the spec. Each is implemented as described here, not as written below.
    `cloudflare:workers`, which keeps the query modules loadable from the Node
    scripts under `scripts/`. The build and the typecheck both pass either way —
    only a request surfaces this.
+
+8. **Tasks 7 and 8 need no island, and no `justified-layout`.** The handoff
+   derives justified rows by walking entries, closing a row when
+   `sumAspect * target + gap >= width`, then scaling every cell by
+   `k = available / (sumAspect * target)`. Flexbox already does exactly that:
+   `flex: var(--ar) 1 calc(var(--ar) * var(--row-h))` on a fixed-height cell
+   distributes free space in proportion to aspect ratio, so each cell lands at
+   `aspect × rowHeight × k` and every cell in a row shares one height. A
+   `::after` with a huge `flex-grow` absorbs the last row's slack so a short
+   final row sits at target height instead of stretching. No measurement, no
+   `ResizeObserver`, no `client:idle` island, and Task 7's `npm install
+   justified-layout` is not just skipped but reversed. The same follows for
+   Task 8: both layouts are one DOM
+   under `[data-view]`, so the switch is a link, and the inline script only
+   saves the round trip.
+
+   The facet popover is `<details name="facet">` for the same reason — the
+   handoff's document-level `pointerdown` handler, Escape listener and open
+   state are all in the element already. What it does not give is light
+   dismiss by clicking outside; picking a value navigates, which closes it.
+
+   **Justified cells do not crop**, which the handoff says they should. The
+   cell takes `aspect-ratio: var(--ar)` instead of a fixed `--row-h`, so it is
+   the same shape as its screenshot and `object-fit` has nothing to remove.
+   Row heights then vary a little between rows. Cropping an empty state
+   removes the emptiness, which is the thing on display.
+
+   The design of record is `docs/design-handoff/README.md`.
 
 Read `migration-report.md` for what the migration decided and what it refused
 to decide.
@@ -143,7 +180,7 @@ session back to the corpus. `docs/device-decisions.json` and
 | `src/pages/s/[slug].astro` | Detail |
 | `src/pages/tags/[tag].astro` | Pre-filtered gallery |
 | `src/pages/privacy.astro` | Disclosure and opt-out |
-| `src/pages/api/view-pref.ts` | Counter + Plausible forward |
+| `src/pages/api/view-pref.ts` | Counter + Plausible forward (pre-launch plan) |
 | `src/lib/og/template.ts` | OG card layout — the only place it lives |
 | `src/lib/og/render.ts` | satori → SVG → sharp → PNG; Node only, build-time |
 | `src/lib/og/assets.ts` | Image bytes → data URI, mime sniffed from magic bytes |
@@ -1307,7 +1344,7 @@ Blocking and inline on purpose. Deferred, it would run after first paint and the
 
 - [ ] **Step 3: Write `src/islands/ViewToggle.tsx`**
 
-Two buttons. On click: set `document.documentElement.dataset.view`, write `localStorage`, and `navigator.sendBeacon("/api/view-pref", JSON.stringify({ view, viewport: window.innerWidth }))`.
+Two buttons. On click: set `document.documentElement.dataset.view` and write `localStorage`. The `navigator.sendBeacon("/api/view-pref", ...)` call arrives with the endpoint, in the pre-launch plan.
 
 `sendBeacon` rather than `fetch` — it survives the page being navigated away from, which is exactly when someone toggles and immediately clicks an entry.
 
@@ -1331,101 +1368,11 @@ git commit -m "feat: add square view mode and persisted view toggle"
 
 ## Task 9: `/api/view-pref` and the Plausible forward
 
-**Files:**
-- Create: `src/pages/api/view-pref.ts`
-- Test: `test/view-pref.test.ts`
-
-**Interfaces:**
-- Consumes: `env.DB`
-- Produces: `POST /api/view-pref` → 204
-
-- [ ] **Step 1: Write the failing test**
-
-```ts
-it("increments the counter for view and day", async () => {
-  const res = await SELF.fetch("https://x/api/view-pref", {
-    method: "POST",
-    body: JSON.stringify({ view: "square", viewport: 1280 }),
-  });
-  expect(res.status).toBe(204);
-
-  const row = await env.DB
-    .prepare("SELECT n FROM layout_prefs WHERE view='square'").first<{ n: number }>();
-  expect(row?.n).toBe(1);
-});
-
-it("rejects an unknown view value", async () => {
-  const res = await SELF.fetch("https://x/api/view-pref", {
-    method: "POST", body: JSON.stringify({ view: "spiral", viewport: 1280 }),
-  });
-  expect(res.status).toBe(400);
-});
-```
-
-- [ ] **Step 2: Run to confirm failure**
-
-Run: `npm test -- view-pref`
-Expected: FAIL — 404.
-
-- [ ] **Step 3: Implement the endpoint**
-
-```ts
-export const POST: APIRoute = async ({ request, locals }) => {
-  const { view, viewport } = await request.json();
-  if (view !== "justified" && view !== "square") return new Response(null, { status: 400 });
-
-  const env = locals.runtime.env;
-  const day = new Date().toISOString().slice(0, 10);
-
-  await env.DB.prepare(
-    `INSERT INTO layout_prefs (view, day, n) VALUES (?, ?, 1)
-     ON CONFLICT(view, day) DO UPDATE SET n = n + 1`
-  ).bind(view, day).run();
-
-  locals.runtime.ctx.waitUntil(
-    fetch("https://plausible.io/api/event", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // The VISITOR's UA and IP. A Worker egress IP is dropped by bot
-        // filtering, still returns 202, and shows only in x-plausible-dropped.
-        "User-Agent": request.headers.get("User-Agent") ?? "",
-        "X-Forwarded-For": request.headers.get("CF-Connecting-IP") ?? "",
-      },
-      body: JSON.stringify({
-        domain: "emptystat.es",
-        name: "View Mode",
-        url: request.headers.get("Referer") ?? "https://emptystat.es/",
-        props: { view, viewport: String(viewport) },
-      }),
-    }).then(r => {
-      if (r.headers.get("x-plausible-dropped") === "1") {
-        console.error("plausible dropped View Mode event");
-      }
-    })
-  );
-
-  return new Response(null, { status: 204 });
-};
-```
-
-- [ ] **Step 4: Run the tests**
-
-Run: `npm test -- view-pref`
-Expected: PASS both.
-
-- [ ] **Step 5: Verify against real Plausible after first deploy**
-
-Toggle the view on the deployed site, then confirm the `View Mode` goal appears in Plausible with a `view` property breakdown, and that no `x-plausible-dropped` warning appears in `npx wrangler tail`.
-
-Do not skip this. A wrong `X-Forwarded-For` produces silence, not an error.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add src/pages/api/view-pref.ts test/view-pref.test.ts
-git commit -m "feat: add view preference endpoint with Plausible forward"
-```
+**Moved to `2026-08-19-pre-launch.md`, task 1** (2026-08-19). It runs after
+phase 2, before launch. Its only caller is the layout switch, which flips
+`data-view` and stores the choice without reporting it, so nothing here waits
+on it. `/privacy` already describes the endpoint, so its behaviour is fixed by
+that page.
 
 ---
 
@@ -1597,166 +1544,11 @@ git commit -m "feat: add tag pages and privacy opt-out, preserve legacy URLs"
 
 ## Task 11A: Open Graph card per state
 
-**Runs last, immediately before deploy.** Each card embeds a screenshot read
-from R2 and is stored at `og/<state id>.png`, so every id in the corpus has to
-be settled before any card is rendered. Re-running the migration mints fresh
-ULIDs and retires every key — which happened to the display variants when
-issues #26 and #27 were fixed, and cost one rebuild. Rendering 235 cards on a
-stale id set costs more, and a card also embeds the title and app name, so a
-content correction invalidates it as surely as a re-import does.
-
-Every `/s/<slug>` link currently unfurls with whatever `Base.astro` is given,
-which is nothing — the detail page passes no `image`. A gallery of screenshots
-whose links unfurl blank is the one place a missing image costs a reader
-something.
-
-Follows the process in `~/Sites/craigmdennis.com`, with the generation half
-moved and the rasteriser swapped. That site is static and renders cards at
-build time in `src/pages/og/x/[slug].png.ts`; this one runs `output: "server"`
-on Workers, and no native addon loads in workerd — the same constraint that
-split the migration into a Node reader and a runtime-agnostic importer. Cards
-are rendered in Node and put in R2, which the architecture already requires for
-images so they never invoke the Worker.
-
-`sharp` rasterises the SVG. The other site uses `@resvg/resvg-js` for that
-step, and `sharp` is already here doing the same job for every image the
-migration measures.
-
-Keyed by state id, not slug: the id is a ULID and never changes, so a later
-retitle moves the page's URL without orphaning its card.
-
-**Files:**
-- Create: `src/lib/og/template.ts`, `src/lib/og/render.ts`, `src/lib/og/assets.ts`, `scripts/build-og-cards.ts`
-- Add: `src/fonts/og/inter-regular.ttf`, `src/fonts/og/inter-semibold.ttf`
-- Modify: `src/layouts/Base.astro`, `src/pages/s/[slug].astro`, `package.json`
-- Test: `test/og.test.ts`
-
-**Interfaces:**
-- Consumes: `listStates` from Task 5, `StateRow.r2_key`, the `MEDIA` binding
-- Produces: `og/<id>.png` in R2 for every published state; `og:image` on every detail page
-
-- [ ] **Step 1: Install satori and the fonts**
-
-```bash
-npm install --save-dev satori
-mkdir -p src/fonts/og
-cp ~/Sites/craigmdennis.com/src/fonts/og/inter-regular.ttf src/fonts/og/
-cp ~/Sites/craigmdennis.com/src/fonts/og/inter-semibold.ttf src/fonts/og/
-```
-
-satori alone. The other site pairs it with `@resvg/resvg-js`, which rasterises
-SVG — work `sharp` already does here, and `sharp` is a dependency the migration
-uses to measure every image. satori adds flexbox layout to SVG, which nothing
-in this repo does.
-
-A dev dependency: `scripts/build-og-cards.ts` is the only importer, so nothing
-new reaches the client or the Worker. TTF and not woff2 — satori parses font
-tables itself and cannot read woff2. Advercase stays behind, licensed for the
-other site.
-
-- [ ] **Step 2: Write `src/lib/og/template.ts`**
-
-The only place card layout lives. A function returning satori-compatible
-vnodes, exporting `OG_WIDTH = 1200` and `OG_HEIGHT = 630`.
-
-The screenshot is the subject here, so it takes the place the company logo
-holds on the other site: the state's own image, contained (never cropped) on a
-`--stone` ground, with the title in Inter SemiBold and the app name, device and
-OS in Inter Regular beneath it. Portrait phone shots leave a wide margin —
-fill it with the ground colour and keep the image whole, since a cropped empty
-state is no longer the thing being shown.
-
-- [ ] **Step 3: Write `src/lib/og/render.ts` and `assets.ts`**
-
-Both start from `~/Sites/craigmdennis.com/src/lib/og/`:
-
-- `render.ts` — satori → SVG → `sharp` → PNG buffer. Fonts memoised in a
-  module-level promise so 235 renders read each TTF once. Resolve `FONT_DIR`
-  from `process.cwd()`; bundled chunk URLs do not map back to `src/`. The
-  rasterise step replaces the other site's `Resvg` call:
-
-  ```ts
-  const svg = await satori(node, { width: OG_WIDTH, height: OG_HEIGHT, fonts });
-  return sharp(Buffer.from(svg)).png().toBuffer();
-  ```
-
-  Pass no `density`. vips scales an SVG by `density / 72`, so the `density: 96`
-  that reads as a sensible default produces a 1600×840 card. The default of 72
-  gives 1200×630 exactly. Leave satori's `embedFont` at its default, which
-  writes glyphs as paths, so rasterising needs no font at all.
-
-- `assets.ts` — file → data URI, with the mime sniffed from magic bytes.
-  Keep the sniffing. This corpus has the same defect the comment describes:
-  `content/states/` holds `.jpg` files whose bytes are PNG, and a mislabelled
-  data URI renders as an empty box.
-
-Read the state's image from R2 through the `MEDIA` binding rather than from
-disk. R2 is the source of truth after Task 4, and a deleted corpus entry should
-not silently produce a card.
-
-- [ ] **Step 4: Write `scripts/build-og-cards.ts`**
-
-```bash
-npx tsx scripts/build-og-cards.ts --dry-run   # count what would render
-npx tsx scripts/build-og-cards.ts             # render and put
-npx tsx scripts/build-og-cards.ts --only <slug>
-```
-
-Same shape as `scripts/migrate-legacy.ts`: `getPlatformProxy()` for the `DB`
-and `MEDIA` bindings, page through `listStates`, render each card, put it at
-`og/<id>.png`. Log a count at the end. Regenerate every card each run — 235
-renders of a 1200×630 card costs less than tracking which inputs changed.
-
-- [ ] **Step 5: Emit the tags**
-
-`Base.astro` currently emits `og:image` alone (line 49). Add
-`og:image:width`, `og:image:height`, `og:image:type` and `og:image:alt` when
-an image is set, matching `Base.astro` on the other site — several unfurlers
-skip an image whose dimensions they must fetch to learn.
-
-`s/[slug].astro` passes `image={`https://img.emptystat.es/og/${state.id}.png`}`
-and the state's title as the alt.
-
-- [ ] **Step 6: Test**
-
-```ts
-it("renders a card at exactly 1200x630", async () => {
-  const png = await renderOgPng(ogCard(FIXTURE));
-  // PNG IHDR: width and height are big-endian uint32 at bytes 16 and 20.
-  const view = new DataView(png.buffer);
-  expect(view.getUint32(16)).toBe(1200);
-  expect(view.getUint32(20)).toBe(630);
-});
-```
-
-`test/og.test.ts` runs in Node, outside the Workers pool, since `sharp` is a
-native addon workerd cannot load — the same reason `test/import.test.ts` had to
-be split. Add a second case covering a state with a null `app_name` and a null
-`os`, which 137 entries have. Assert the dimensions from the IHDR bytes: a
-wrong `density` produces a valid PNG at the wrong size, so a smoke test that
-only checks for output would pass.
-
-- [ ] **Step 7: Verify against a real unfurl**
-
-```bash
-npx wrangler r2 object get emptystates-media/og/<id>.png --local --file /tmp/card.png
-```
-
-Check one card by eye, then after Task 12 deploys, paste an `/s/` URL into an
-unfurl debugger. Local checking cannot confirm the tags, because
-`img.emptystat.es` resolves only in production.
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/lib/og src/fonts/og scripts/build-og-cards.ts test/og.test.ts \
-        src/layouts/Base.astro src/pages/s/ package.json
-git commit -m "feat: render an Open Graph card per state into R2"
-```
-
-**Out of scope.** Cards for states arriving through the submission queue —
-spec 02 owns that ingest path and should call the same `renderOgPng`. Cards
-for the gallery, tag pages and the index, which share one default card.
+**Moved to `2026-08-19-pre-launch.md`, task 2** (2026-08-19). It runs after
+phase 2, before launch. Each card embeds a screenshot keyed by state id and
+carries the title and app name, so the ingest path phase 2 adds — which mints
+ids and can retitle entries — has to be in place before 235 cards are rendered
+against the current set. Until then `/s/<slug>` unfurls without an image.
 
 ---
 
@@ -1785,14 +1577,10 @@ keys no `states.r2_key` names.
 npx tsx scripts/build-variants.ts
 ```
 
-- [ ] **Step 2b: Render the Open Graph cards against remote**
+- [ ] **Step 2b: Open Graph cards**
 
-```bash
-npx tsx scripts/build-og-cards.ts
-```
-
-Run after step 2: each card reads its screenshot from R2, so the originals have
-to be there first. Confirm the count matches the published state count.
+Deferred to `2026-08-19-pre-launch.md`, task 2. `/s/<slug>` unfurls without an
+image until then.
 
 - [ ] **Step 3: Deploy**
 
@@ -1828,7 +1616,7 @@ git tag foundation-complete
 **Spec coverage.** §1 remove EMDash → Tasks 1 and 5A. §2 schema → Task 2. §3 legacy migration → Tasks 3–4. §4 gallery → Tasks 6–8. §5 detail page → Tasks 10 and 11A. §6 analytics endpoints and privacy → Tasks 9, 11. §7 verification → Task 12.
 
 **Gap found and closed.** No task gave a detail page an `og:image`, so every
-`/s/` link would unfurl blank. Task 11A renders one card per state, following
+`/s/` link would unfurl blank. The pre-launch plan renders one card per state, following
 `~/Sites/craigmdennis.com/src/lib/og/`. That site renders at build time in a
 static endpoint; this one cannot, because no native addon loads in workerd.
 Cards are rendered in Node and served from R2, and `sharp` rasterises the SVG
