@@ -1,103 +1,147 @@
-# EmptyStates — functional and structural brief
+# EmptyStates — component brief
 
-A reference gallery of empty-state screenshots taken from real software. 235
-entries at launch, growing by public submission. One entry is one screenshot
-plus its metadata.
+The components below serve a reference gallery of empty-state screenshots taken
+from real software: 235 entries at launch, growing by public submission, where
+one entry is a screenshot plus its metadata.
 
-This brief describes what each view does and how its content is organised. It
-sets no visual direction.
+This brief names each component, its variants, its states, and the data shape it
+has to survive. It sets no visual direction.
 
-## What an entry carries
+## Components
 
-| Field | Notes |
-|---|---|
-| Title | Always present. 152 of 235 are a placeholder taken from the filename and will read as machine output until backfilled. |
-| App name | Absent on 178 of 235. |
-| Device type | One of phone, tablet, desktop, tv, console, watch. Always present. |
-| Operating system | One of ios, android, web, macos, windows, linux. Absent on 137 of 235. |
-| Tags | 25 distinct values across the corpus. An entry may carry none. |
-| Dimensions | Width, height and aspect ratio, stored per entry. |
-| Publication date | Orders the gallery and the previous/next links. |
-| Description, screen text | Extracted later by a vision model. Absent at launch. |
-| Original image | A link to the source file, with its size in bytes. |
-| Related entries | Editor-curated links between entries. 25 exist. |
+### Cell
 
-## Views
+One entry inside any grid. Wraps an image and its metadata, and the whole cell
+is a link to that entry.
 
-### Gallery
+- **Variants:** cropped, where the cell height is fixed and the width follows the
+  image's aspect ratio; contained, where the cell is square and the image sits
+  whole inside it.
+- **States:** rest, hover, focus, visited.
+- Metadata appears on hover and on keyboard focus alike.
+- Declares the image's intrinsic width and height, so nothing moves as the
+  image loads.
 
-The landing view. Paginated at 60 entries per page. Two layout modes, chosen by
-the reader and remembered on that device.
+### Responsive image
 
-**Justified rows.** Rows of equal height. Each entry's width follows its aspect
-ratio, and images crop to fill their cell. Row height derives from the viewport
-so a fixed count of rows is visible without scrolling: two rows on large and
-medium viewports, one and a half on small, where the partial row tells the
-reader more content sits below.
+One screenshot at whichever stored width suits the cell.
 
-**Square.** A uniform grid of square cells. Each image sits whole inside its
-cell with space around it. Nothing crops.
+- **Variants:** three generated widths (640, 1280, 2560), and a fourth case
+  serving the original file.
+- 206 of 235 entries have only the smallest generated width; 29 have more.
+  Eight have none and use the original.
+- Aspect ratios across the corpus run from 0.40 to 3.27, so no variant may
+  assume portrait or landscape.
 
-In both modes every cell is a link to that entry's detail view, and cells are
-separated by a consistent gap that reads as a continuous grid. A cell reveals
-the app name, operating system and device type on hover.
+### Metadata list
 
-Every image declares its intrinsic width and height, so the layout must not
-move as images load.
+App name, operating system, device type, tags, publication date, and a link to
+the original file.
 
-### Detail
+- **Variants:** inline, inside a cell; stacked, beside a full-size entry.
+- **States:** complete; missing app name; missing operating system; missing
+  both.
+- The incomplete states are the common ones — 178 of 235 entries carry no app
+  name and 137 carry no operating system — so a form that only reads well when
+  full is the wrong form.
 
-One entry. The screenshot is the primary element and fills the available
-viewport height. Accompanying it: title, app name, device, operating system,
-tags, publication date, and a link to the original image stating its file size.
-Previous and next links step through the gallery in publication order. Curated
-related entries appear as links where they exist.
+### Facet control
 
-### Filtered gallery
+One filter value with the count of entries carrying it.
 
-The gallery narrowed to one facet — device type, operating system, or tag —
-reached from the filter controls or from a tag on a detail page. Facet controls
-offer only values that at least one published entry carries, each with its
-count, so no control returns an empty result. Pagination and both layout modes
-behave as in the unfiltered gallery.
+- **States:** available, selected.
+- Only values that at least one published entry carries are ever rendered, so
+  this component has no zero-count state and no empty result behind it.
 
-### Search results
+### Tag
 
-Full-text search across title, app name, tags, colour names and extracted
-screen text. Results use the same cell and both layout modes.
+A link that filters the gallery to one tag. 25 distinct values.
 
-A query matching nothing needs a considered empty state of its own. This is a
-gallery of empty states, and readers will judge it.
+### Pagination control
 
-### Submission
+Movement across pages of 60 entries.
 
-A form for contributing a screenshot: image upload, app name, app URL, device,
-operating system, and an optional contributor name and handle. States needed
-for accepted formats, the size limit, a rejected file, and a successful
-submission awaiting review.
+- **States:** first page, middle, last page, single page.
 
-### Privacy
+### Adjacent navigation
 
-A text page carrying a control that opts the reader out of analytics, and
-showing whether the reader is already opted out through a browser setting.
+Previous and next entry in publication order.
 
-## Structure common to every page
+- **States:** both available, first entry, last entry.
 
-A header carrying the site name as a home link, the filter controls, an entry
-point to search, and the layout-mode toggle. A footer carrying a one-line
-description of the site and a link to the privacy page.
+### View toggle
 
-## Constraints the layouts must survive
+Switches between the two layout modes. The choice is remembered per device.
 
-1. Aspect ratios run from 0.40 to 3.27. A layout assuming portrait or landscape
-   fails on this corpus.
-2. Three stored image widths exist — 640, 1280 and 2560 — and only 29 entries
-   have anything above 640. Layouts cannot assume a large source image.
-3. Eight entries are narrower than 640 pixels and are served at their original
-   size.
-4. Images load from object storage and never pass through the application
+- **States:** one per mode.
+
+### Search field
+
+Text entry for full-text search across title, app name, tags, colour names and
+extracted screen text.
+
+- **States:** rest, focus, populated, submitting.
+
+### Empty state
+
+Shown when a search matches nothing, or a facet holds nothing.
+
+This system documents empty states, so readers will judge this component
+against the collection it sits inside.
+
+### Form controls
+
+For contributing a screenshot: file input, text input, select, submit.
+
+- **States:** rest, focus, invalid, disabled, submitting.
+- **Messages:** accepted formats, size limit, rejected file, submission
+  accepted and awaiting review.
+
+### Opt-out control
+
+Sets whether the reader is counted by analytics.
+
+- **States:** opted in; opted out on this device; opted out by a browser
+  setting, where the control cannot be changed here.
+
+### Header
+
+Site name as a home link, facet controls, an entry point to search, and the
+view toggle.
+
+### Footer
+
+A one-line description of the site and a link to the privacy page.
+
+### Original-file link
+
+Points at the unmodified source image and states its size in bytes.
+
+## Layout primitives
+
+### Justified row
+
+A row of equal height holding cropped cells, each cell's width set by its
+image's aspect ratio.
+
+Row height derives from the viewport so a fixed count of rows is visible
+without scrolling: two rows at large and medium widths, one and a half at small,
+where the partial row tells the reader more sits below.
+
+### Square grid
+
+Uniform square cells holding contained images.
+
+### Grid gap
+
+A consistent gap between cells in both primitives, reading as one continuous
+grid.
+
+## Constraints every component inherits
+
+1. Pages render on the server; interactive parts mount afterwards, and both
+   sides of that handoff produce the same layout.
+2. Images load from object storage and never pass through the application
    server.
-5. 137 entries carry no operating system and 178 carry no app name, so every
-   place metadata appears needs a form that reads correctly when it is missing.
-6. Pages render on the server; interactive parts mount afterwards and must
-   produce the same layout either side of that handoff.
+3. Titles are unreliable at launch: 152 of 235 are a placeholder taken from the
+   filename and read as machine output until a later pass replaces them.
