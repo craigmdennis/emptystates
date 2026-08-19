@@ -3,12 +3,13 @@
  * A legacy tag page, filtered by whatever that tag became.
  *
  * Gatsby published /tags/<x> for every raw value in the frontmatter `tags`
- * array, which mixed devices, operating systems and genuine tags. `resolveTagPath`
- * routes each to the column it now lives in, so /tags/mobile reaches the phone
- * filter and keeps resolving.
+ * array, which mixed devices, operating systems and genuine tags.
+ * `resolveTagPath` routes each to the column it now lives in, so /tags/mobile
+ * reaches the phone filter and keeps resolving.
  */
 import Layout from "../../layouts/Base.astro";
-import Card from "../../components/Card.astro";
+import Gallery from "../../components/Gallery.astro";
+import Pagination from "../../components/Pagination.astro";
 import { getDb } from "../../db/client";
 import { listStates } from "../../db/states";
 import { resolveTagPath } from "../../lib/tags";
@@ -28,24 +29,17 @@ const { rows, total } = await listStates(getDb(), {
   perPage: PER_PAGE,
   device: route.kind === "device" ? route.value : undefined,
   os: route.kind === "os" ? route.value : undefined,
-  tag: route.kind === "tag" ? route.value : undefined,
+  tags: route.kind === "tag" ? [route.value] : [],
 });
 
 const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
-const pageHref = (n: number) => `/tags/${Astro.params.tag}?page=${n}`;
 ---
 
-<Layout title={`${route.value} — EmptyStates`}>
-  <p class="font-mono text-xs text-base-content/60 mb-4">
-    {total} states — {route.kind}: {route.value} — page {page} of {lastPage}
+<Layout title={route.value}>
+  <p class="eyebrow" style="padding: 14px 0 10px;">
+    {route.kind}: {route.value} — {total} entries
   </p>
 
-  <div class="mb-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 items-start">
-    {rows.map((s) => <Card state={s} />)}
-  </div>
-
-  <nav class="flex gap-3 font-mono text-xs" aria-label="Pagination">
-    {page > 1 && <a href={pageHref(page - 1)} class="hover:underline">Previous</a>}
-    {page < lastPage && <a href={pageHref(page + 1)} class="hover:underline">Next</a>}
-  </nav>
+  <Gallery states={rows} />
+  <Pagination page={page} lastPage={lastPage} />
 </Layout>

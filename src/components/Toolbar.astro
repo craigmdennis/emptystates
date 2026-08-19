@@ -1,0 +1,190 @@
+---
+/**
+ * Filters, the range readout, and the layout switch.
+ *
+ * Every control here is a link. The handoff's popover wants a document-level
+ * pointerdown handler, an Escape listener and a piece of open/closed state;
+ * `<details name="facet">` is the same thing already in the browser, and one
+ * open popover closes the others for free. Picking a value navigates, which
+ * closes it as well.
+ *
+ * Tags are multi-select and AND-combined, so they ride as repeated `tag=`
+ * parameters. Picking one navigates, which would close the popover — the link
+ * carries `open=tag` so it comes back open, since choosing three tags should
+ * not mean opening the same popover three times.
+ */
+import { toggleParam, withParams } from "../lib/query";
+import type { Facet } from "../db/taxonomies";
+
+interface Props {
+  facets: { devices: Facet[]; oses: Facet[]; tags: Facet[] };
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+const { facets, total, page, perPage } = Astro.props;
+const url = Astro.url;
+
+const current = {
+  device: url.searchParams.get("device"),
+  os: url.searchParams.get("os"),
+};
+const selectedTags = url.searchParams.getAll("tag");
+const openFacet = url.searchParams.get("open");
+
+// 137 entries carry no OS. Saying so on the Any row is the honest version of a
+// facet whose counts do not add up to the collection.
+const unrecordedOs = total - facets.oses.reduce((n, o) => n + o.count, 0);
+
+const groups = [
+  {
+    key: "device" as const,
+    label: "Device",
+    options: facets.devices,
+    any: "Any",
+  },
+  {
+    key: "os" as const,
+    label: "OS",
+    options: facets.oses,
+    any: unrecordedOs > 0 ? `Any (${unrecordedOs} unrecorded)` : "Any",
+  },
+];
+
+// One selection reads as itself; several read as the first plus a count, since
+// three tag names do not fit on a chip.
+const tagLabel = selectedTags.length
+  ? facets.tags.find((t) => t.slug === selectedTags[0])?.label ??
+    selectedTags[0]
+  : null;
+const tagChip =
+  selectedTags.length > 1 ? `${tagLabel} +${selectedTags.length - 1}` : tagLabel;
+
+const filtered = Boolean(
+  current.device || current.os || selectedTags.length,
+);
+const from = total === 0 ? 0 : (page - 1) * perPage + 1;
+const to = Math.min(page * perPage, total);
+---
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    {
+      groups.map((group) => {
+        const active = current[group.key];
+        const label = group.options.find((o) => o.slug === active)?.label;
+        return (
+          <details class="facet" name="facet" data-on={active ? "" : undefined}>
+            <summary>
+              {group.label}
+              {label && <span class="mono">{label}</span>}
+            </summary>
+            <div class="facet-pop">
+              <a
+                href={withParams(url, {
+                  [group.key]: null,
+                  page: null,
+                  open: null,
+                })}
+                aria-current={active ? undefined : "true"}
+              >
+                {group.any}
+                <span class="mono">{total}</span>
+              </a>
+              {group.options.map((option) => (
+                <a
+                  href={withParams(url, {
+                    [group.key]: option.slug,
+                    page: null,
+                    open: null,
+                  })}
+                  aria-current={option.slug === active ? "true" : undefined}
+                >
+                  {option.label}
+                  <span class="mono">{option.count}</span>
+                </a>
+              ))}
+            </div>
+          </details>
+        );
+      })
+    }
+
+    <details
+      class="facet"
+      name="facet"
+      data-on={selectedTags.length ? "" : undefined}
+      open={openFacet === "tag"}
+    >
+      <summary>
+        Tags
+        {tagChip && <span class="mono">{tagChip}</span>}
+      </summary>
+      <div class="facet-pop">
+        <a
+          href={withParams(url, { tag: null, page: null, open: null })}
+          aria-current={selectedTags.length ? undefined : "true"}
+        >
+          Any
+          <span class="mono">{total}</span>
+        </a>
+        {
+          facets.tags.map((option) => {
+            const on = selectedTags.includes(option.slug);
+            const toggled = new URL(toggleParam(url, "tag", option.slug), url);
+            return (
+              <a
+                href={withParams(toggled, { open: "tag" })}
+                aria-current={on ? "true" : undefined}
+              >
+                <span class="check" data-on={on ? "" : undefined}>
+                  {option.label}
+                </span>
+                <span class="mono">{option.count}</span>
+              </a>
+            );
+          })
+        }
+      </div>
+    </details>
+
+    {
+      filtered && (
+        <a
+          class="clear"
+          href={withParams(url, {
+            device: null,
+            os: null,
+            tag: null,
+            page: null,
+            open: null,
+          })}
+        >
+          Clear
+        </a>
+      )
+    }
+  </div>
+
+  <div class="toolbar-right">
+    <span class="mono-11">{from}–{to} of {total}</span>
+
+    <nav class="switch" aria-label="Gallery layout">
+      <a
+        href={withParams(url, { view: "justified", open: null })}
+        data-mode="justified"
+        aria-label="Justified rows"
+      >
+        <i></i><i></i><i></i>
+      </a>
+      <a
+        href={withParams(url, { view: "square", open: null })}
+        data-mode="square"
+        aria-label="Square grid"
+      >
+        <i></i><i></i><i></i><i></i>
+      </a>
+    </nav>
+  </div>
+</div>

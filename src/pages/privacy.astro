@@ -2,9 +2,13 @@
 /**
  * What this site records, and how to stop it.
  *
- * Written before the endpoints it describes exist, so it states what Task 9 and
- * spec 02 will send. The opt-out flag is read by whatever loads them, and the
- * flag works from the day the button does.
+ * The card and its switch are the handoff's §11. The three things listed are
+ * this site's, not the prototype's: the layout choice goes to a first-party
+ * endpoint, and saying so is the point — an ad blocker will not catch it, so
+ * the switch here is the only thing that will.
+ *
+ * Written before the endpoints it describes exist. The flag works from the day
+ * the switch does, and whatever loads them reads it.
  */
 import Layout from "../layouts/Base.astro";
 ---
@@ -13,80 +17,100 @@ import Layout from "../layouts/Base.astro";
   title="Privacy"
   description="What emptystat.es records, and how to opt out."
 >
-  <article class="prose max-w-prose font-mono text-sm grid gap-4">
-    <h1 class="text-lg font-bold">Privacy</h1>
+  <div class="page">
+    <p class="eyebrow">Privacy</p>
+    <h1>What this site records</h1>
 
     <p>
-      Three things are recorded here. None of them identifies you, and all three
-      can be switched off with the button at the foot of this page.
-    </p>
-
-    <h2 class="font-bold">Page views</h2>
-    <p>
-      Plausible, which is cookieless and aggregate. It records that a page was
-      viewed, not who viewed it, and sets nothing on your device.
-    </p>
-
-    <h2 class="font-bold">Which gallery layout you pick</h2>
-    <p>
-      Choosing between the justified and square views sends that choice to an
-      endpoint on this domain. It is first-party, so <strong>an ad blocker will
-      not stop it</strong> — the button below will. The count is a total per
-      layout with nothing attached to it.
-    </p>
-
-    <h2 class="font-bold">Search queries</h2>
-    <p>
-      Queries are stored so the gallery can be improved against what people look
-      for. No identifier is stored beside them: the text, and nothing else.
-    </p>
-
-    <h2 class="font-bold">Opting out</h2>
-    <p>
-      This is honoured automatically if your browser sends Do Not Track or Global
-      Privacy Control. The button sets a flag on this device only, so it needs
-      pressing once per browser.
+      Page views, through Plausible: cookieless, aggregate, and nothing set on
+      your device. It records that a page was viewed, not who viewed it.
     </p>
 
     <p>
-      <button id="optout" class="btn btn-sm" type="button">Opt out</button>
-      <span id="optout-state" class="ml-2 text-base-content/60"></span>
+      Which gallery layout you pick. That choice goes to an endpoint on this
+      domain, so it is first-party and <strong
+        >an ad blocker will not stop it</strong
+      > — the switch below will. What arrives is a count per layout with nothing
+      attached to it.
     </p>
-  </article>
-</Layout>
 
-<script is:inline>
-  (function () {
-    var KEY = "es:optout";
-    var button = document.getElementById("optout");
-    var label = document.getElementById("optout-state");
+    <p>
+      Search queries, stored so the gallery can be improved against what people
+      look for. The text, and no identifier beside it.
+    </p>
 
-    // A browser signal counts as opting out and cannot be reversed from here,
-    // since the reader already asked once at a level above this page.
-    function signalled() {
-      return (
+    <p>
+      Submissions store the image, the metadata typed with it, and the credit
+      chosen. No email address is asked for, and a submitted image can be
+      removed on request.
+    </p>
+
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <p class="card-title">Opt out of analytics</p>
+          <p class="card-state" id="optout-state">
+            On. Aggregate page views only, no cookies or identifiers.
+          </p>
+        </div>
+        <button
+          type="button"
+          id="optout"
+          class="switch-control"
+          role="switch"
+          aria-checked="false"
+          aria-label="Opt out of analytics"></button>
+      </div>
+
+      <p class="card-note" id="optout-note" hidden>
+        Your browser is sending a Do Not Track signal, which this site honours
+        before anything else. No analytics run on your visit, and this switch is
+        locked because there is nothing left for it to turn off. If you turn Do
+        Not Track off in your browser settings, the switch here becomes yours to
+        set.
+      </p>
+    </div>
+
+    <p class="footnote">
+      Last changed 17 August 2026 · removal requests: remove@emptystat.es
+    </p>
+  </div>
+
+  <script is:inline>
+    (function () {
+      var KEY = "es:optout";
+      var button = document.getElementById("optout");
+      var state = document.getElementById("optout-state");
+      var note = document.getElementById("optout-note");
+
+      // A browser signal counts as opting out and is not reversible from here:
+      // the reader already answered this one level up.
+      var signalled =
         navigator.doNotTrack === "1" ||
-        navigator.globalPrivacyControl === true
-      );
-    }
+        navigator.globalPrivacyControl === true;
 
-    function render() {
-      if (signalled()) {
-        label.textContent = "Opted out by your browser's setting.";
-        button.disabled = true;
-        return;
+      function render() {
+        var out = signalled || localStorage.getItem(KEY) === "1";
+        button.setAttribute("aria-checked", String(out));
+        button.disabled = signalled;
+        note.hidden = !signalled;
+        state.textContent = signalled
+          ? "Off. Nothing is being recorded for this visit."
+          : out
+            ? "Off. Nothing is recorded for this browser. The choice is stored locally, not on a server."
+            : "On. Aggregate page views only, no cookies or identifiers.";
       }
-      var out = localStorage.getItem(KEY) === "1";
-      label.textContent = out ? "Opted out on this device." : "";
-      button.textContent = out ? "Opt back in" : "Opt out";
-    }
 
-    button.addEventListener("click", function () {
-      if (localStorage.getItem(KEY) === "1") localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, "1");
-      render();
-    });
+      button.addEventListener("click", function () {
+        if (signalled) return;
+        if (localStorage.getItem(KEY) === "1") localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY, "1");
+        render();
+      });
 
-    render();
-  })();
-</script>
+      try {
+        render();
+      } catch (e) {}
+    })();
+  </script>
+</Layout>

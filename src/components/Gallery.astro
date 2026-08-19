@@ -1,0 +1,20 @@
+---
+/**
+ * The grid, in whichever layout `<html data-view>` names.
+ *
+ * Both the index and the tag pages render this. Neither knows which layout is
+ * showing — that is a CSS question, answered once in `global.css`.
+ */
+import Card from "./Card.astro";
+import type { StateRow } from "../db/states";
+
+interface Props {
+  states: StateRow[];
+}
+
+const { states } = Astro.props;
+---
+
+<div class="gallery">
+  {states.map((state) => <Card state={state} />)}
+</div>

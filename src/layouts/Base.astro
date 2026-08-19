@@ -1,5 +1,14 @@
 ---
+/**
+ * The shell every page sits in: header, footer, and the view mode.
+ *
+ * `data-view` lives on `<html>` because both gallery layouts are the same DOM
+ * under different CSS — see `global.css`. That is what lets the switch be a
+ * link that works without JavaScript, and an attribute flip when there is any.
+ */
 import "../styles/global.css";
+import { getDb } from "../db/client";
+import { countStates } from "../db/states";
 
 interface Props {
   title: string;
@@ -15,27 +24,21 @@ const {
 
 const siteTitle = "emptystat.es";
 const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? "https://emptystat.es");
+const canonicalUrl = new URL(
+  Astro.url.pathname,
+  Astro.site ?? "https://emptystat.es",
+);
 
-// Slugs, not display words: `device_types` seeds `phone` and `console`, so the
-// older `mobile` and `game` links returned an empty gallery. Task 6 replaces
-// this with a bar built from listFacets, which can only offer a device
-// something published actually carries.
-const deviceTypes = [
-  { label: "All", href: "/" },
-  { label: "Phone", href: "/?device=phone" },
-  { label: "Desktop", href: "/?device=desktop" },
-  { label: "Tablet", href: "/?device=tablet" },
-  { label: "TV", href: "/?device=tv" },
-  { label: "Watch", href: "/?device=watch" },
-  { label: "Console", href: "/?device=console" },
-];
+const total = await countStates(getDb());
 
-const currentDevice = Astro.url.searchParams.get("device");
+// Server default. The inline script below corrects it to the stored choice
+// before first paint, so nobody sees the other layout flash past.
+const requested = Astro.url.searchParams.get("view");
+const view = requested === "square" ? "square" : "justified";
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-view={view}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,48 +51,79 @@ const currentDevice = Astro.url.searchParams.get("device");
     <meta property="og:url" content={canonicalUrl} />
     {image && <meta property="og:image" content={image} />}
     <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Spectral:wght@400;500&display=swap"
+    />
+
+    <script is:inline>
+      // Blocking on purpose: deferred, this would run after first paint and the
+      // reader would watch the wrong layout become the right one.
+      try {
+        var q = new URLSearchParams(location.search).get("view");
+        if (q === "square" || q === "justified") {
+          localStorage.setItem("es:view", q);
+        } else {
+          var v = localStorage.getItem("es:view");
+          if (v === "square" || v === "justified") {
+            document.documentElement.dataset.view = v;
+          }
+        }
+      } catch (e) {}
+    </script>
   </head>
 
-  <body class="bg-base-100 text-base-content min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="border-b border-base-300 sticky top-0 z-50 bg-base-100/95 backdrop-blur-sm">
-      <div class="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
-        <!-- Logo -->
-        <a href="/" class="font-mono text-sm font-bold tracking-tight hover:opacity-70 transition-opacity">
-          emptystat.es
+  <body class="shell">
+    <header class="site-header">
+      <div class="wrap">
+        <a href="/" class="wordmark">
+          <strong>Emptystates</strong>
+          <span class="mono-11">{total} entries</span>
         </a>
 
-        <!-- Device nav -->
-        <nav aria-label="Filter by device" class="flex gap-1 flex-wrap">
-          {deviceTypes.map(({ label, href }) => {
-            const paramValue = new URL(href, "https://emptystat.es").searchParams.get("device");
-            const isActive = paramValue === currentDevice || (!paramValue && !currentDevice);
-            return (
-              <a
-                href={href}
-                class:list={[
-                  "btn btn-xs btn-ghost font-mono",
-                  isActive && "btn-active",
-                ]}
-              >
-                {label}
-              </a>
-            );
-          })}
+        <nav class="site-nav">
+          <a href="/privacy">Privacy</a>
         </nav>
       </div>
     </header>
 
-    <!-- Main content -->
-    <main class="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-6">
-      <slot />
+    <main class="site-main">
+      <div class="wrap">
+        <slot />
+      </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-base-300 py-6 px-4 text-center">
-      <p class="text-xs text-base-content/50 font-mono">
-        A curated collection of empty state designs
-      </p>
+    <footer class="site-footer">
+      <div class="wrap mono">
+        <span
+          >Emptystates — {total} empty-state screenshots from real software. Growing
+          by submission.</span
+        >
+        <nav class="mono">
+          <a href="/privacy">Privacy</a>
+          <span>Screenshots belong to their authors</span>
+        </nav>
+      </div>
     </footer>
+
+    <script is:inline>
+      // The switch is a link and stays one. This only saves the round trip:
+      // both layouts are already in the DOM, so flipping the attribute is the
+      // whole change.
+      document.addEventListener("click", function (ev) {
+        var link = ev.target instanceof Element && ev.target.closest("[data-mode]");
+        if (!link || ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+        ev.preventDefault();
+        var mode = link.getAttribute("data-mode");
+        document.documentElement.dataset.view = mode;
+        try {
+          localStorage.setItem("es:view", mode);
+        } catch (e) {}
+        history.replaceState(null, "", link.getAttribute("href"));
+      });
+    </script>
   </body>
 </html>

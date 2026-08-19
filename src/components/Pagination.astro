@@ -1,0 +1,49 @@
+---
+/**
+ * Pages of 60. Rendered only when there is more than one.
+ *
+ * Both galleries had their own copy of Previous/Next; this is the copy.
+ * Numbers are listed in full — with four pages that is right, and an ellipsis
+ * becomes worth writing somewhere past ten.
+ */
+import { withParams } from "../lib/query";
+
+interface Props {
+  page: number;
+  lastPage: number;
+}
+
+const { page, lastPage } = Astro.props;
+const url = Astro.url;
+const href = (n: number) =>
+  withParams(url, { page: n === 1 ? null : n, open: null });
+const pages = Array.from({ length: lastPage }, (_, i) => i + 1);
+---
+
+{
+  lastPage > 1 && (
+    <nav class="pager" aria-label="Pagination">
+      {page > 1 ? (
+        <a href={href(page - 1)} rel="prev">
+          Previous
+        </a>
+      ) : (
+        <span>Previous</span>
+      )}
+
+      {pages.map((n) => (
+        <a href={href(n)} aria-current={n === page ? "page" : undefined}>
+          {n}
+        </a>
+      ))}
+
+      {page < lastPage ? (
+        <a href={href(page + 1)} rel="next">
+          Next
+        </a>
+      ) : (
+        <span>Next</span>
+      )}
+    </nav>
+  )
+}

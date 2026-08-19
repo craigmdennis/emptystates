@@ -1,14 +1,14 @@
 ---
 /**
- * Placeholder gallery. Task 7 replaces it with the justified-rows layout.
+ * The gallery.
  *
- * Text only: R2 serves originals from a public host that does not resolve
- * locally, and the w640/w1280/w2560 derivatives every display path is supposed
- * to use are not generated until spec 02. Listing titles proves the query layer
- * answers a real request without pretending to be the gallery.
+ * Filters come off the query string, so a filtered view is a URL somebody can
+ * send. The layout mode is in `<html data-view>` and the toolbar, not here.
  */
 import Layout from "../layouts/Base.astro";
-import Card from "../components/Card.astro";
+import Gallery from "../components/Gallery.astro";
+import Pagination from "../components/Pagination.astro";
+import Toolbar from "../components/Toolbar.astro";
 import { getDb } from "../db/client";
 import { listStates } from "../db/states";
 import { listFacets } from "../db/taxonomies";
@@ -20,47 +20,18 @@ const url = Astro.url;
 const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1);
 const device = url.searchParams.get("device") ?? undefined;
 const os = url.searchParams.get("os") ?? undefined;
-const tag = url.searchParams.get("tag") ?? undefined;
+const tags = url.searchParams.getAll("tag");
 
 const [{ rows, total }, facets] = await Promise.all([
-  listStates(db, { page, perPage: PER_PAGE, device, os, tag }),
+  listStates(db, { page, perPage: PER_PAGE, device, os, tags }),
   listFacets(db),
 ]);
 
 const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
-
-function pageHref(n: number): string {
-  const next = new URL(url);
-  next.searchParams.set("page", String(n));
-  return `${next.pathname}${next.search}`;
-}
 ---
 
 <Layout title="EmptyStates">
-  <p class="font-mono text-xs text-base-content/60 mb-4">
-    {total} states — page {page} of {lastPage}
-    {device && ` — device: ${device}`}
-    {os && ` — os: ${os}`}
-    {tag && ` — tag: ${tag}`}
-  </p>
-
-  {/*
-    A plain auto-fill grid so 60 screenshots are visible at once. Task 6 owns
-    the justified rows and the square mode; this only stops the page being one
-    column of full-width images.
-  */}
-  <div class="mb-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 items-start">
-    {rows.map((s) => <Card state={s} />)}
-  </div>
-
-  <nav class="flex gap-3 font-mono text-xs mb-8" aria-label="Pagination">
-    {page > 1 && <a href={pageHref(page - 1)} class="hover:underline">Previous</a>}
-    {page < lastPage && <a href={pageHref(page + 1)} class="hover:underline">Next</a>}
-  </nav>
-
-  <p class="font-mono text-xs text-base-content/50">
-    {facets.devices.map((d) => `${d.slug} ${d.count}`).join("  ")}
-    {" | "}
-    {facets.oses.map((o) => `${o.slug} ${o.count}`).join("  ")}
-  </p>
+  <Toolbar facets={facets} total={total} page={page} perPage={PER_PAGE} />
+  <Gallery states={rows} />
+  <Pagination page={page} lastPage={lastPage} />
 </Layout>

@@ -1,43 +1,988 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
-}
+
+/*
+ * The handoff design, as tokens and component classes.
+ *
+ * The prototype it came from carries every value inline on every element — the
+ * chip background appears eleven times, the mono label rule twenty-odd. Here
+ * each is named once. Anything that repeats in the design is a class; anything
+ * that varies per entry (`--ar`, `--nat-w`) is a custom property set inline,
+ * because that is the only part the server actually has to compute.
+ */
 
 @theme {
-  /* DaisyUI theme customization via Tailwind 4 */
-  --color-base-100: #fafaf9;
-  --color-base-200: #f0efed;
-  --color-base-300: #e2e0dc;
-  --color-base-content: #1c1917;
-  --color-neutral: #292524;
-  --color-neutral-content: #fafaf9;
-  --color-primary: #1c1917;
-  --color-primary-content: #fafaf9;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: Spectral, Georgia, serif;
+}
 
-  /* Custom spacing scale */
-  --space-grid-gap: 0.75rem;
+:root {
+  --ground: #e9e9e9;
+  --ground-header: rgba(233, 233, 233, 0.94);
+  --chip: #dfdfdf;
+  --chip-hover: #d2d2d2;
+  --track-hover: #cbcbcb;
+  --surface: #f8f8f8;
+  --raised: #fdfdfd;
+
+  --rule: #cfcfcf;
+  --rule-soft: #dcdcdc;
+  --rule-cell: #d4d4d4;
+  --rule-pop: #d7d7d7;
+
+  --ink: #111111;
+  --ink-2: #333333;
+  --muted: #616161;
+  --meta: #7a7a7a;
+  --meta-2: #8e8e8e;
+  --faint: #9a9a9a;
+  --faint-2: #ababab;
+  --faint-3: #b5b5b5;
+
+  --page-max: 1560px;
+  --gap: 8px;
+
+  /* Row height comes from the viewport so a fixed number of rows is visible
+     without scrolling. `--chrome` is everything above and below the gallery. */
+  --rows: 2;
+  --chrome: 190px;
+  --row-h: clamp(
+    120px,
+    calc((100dvh - var(--chrome) - var(--gap)) / var(--rows)),
+    430px
+  );
+
+  --sq-min: 196px;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --sq-min: 168px;
+  }
+}
+
+@media (max-width: 700px) {
+  :root {
+    /* A half row peeking below the fold says there is more without spending a
+       whole row saying it. */
+    --rows: 1.5;
+    --chrome: 210px;
+    --sq-min: 140px;
+  }
 }
 
 @layer base {
-  /* Use system monospace for metadata labels — utilitarian feel */
-  [data-label] {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.6875rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  html {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Focus mode: crop cards to focal point instead of showing full image */
-  [data-focus-mode="on"] .group img {
-    object-fit: cover !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    object-position: var(--focal-x) var(--focal-y);
+  a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  [data-focus-mode="on"] .group .cursor-zoom-in {
-    cursor: pointer !important;
+  ::selection {
+    background: var(--ink);
+    color: #fff;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+}
+
+/* ---- shared type ------------------------------------------------------- */
+
+/* Every small-caps label in the design: facet counts, metadata keys, footer,
+   captions, pager. One rule instead of twenty inline copies. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--meta);
+}
+
+.mono-11 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--meta);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--meta-2);
+}
+
+/* ---- shell ------------------------------------------------------------- */
+
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  max-width: var(--page-max);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--ground-header);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.site-header .wrap {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.wordmark strong {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+}
+
+.site-main {
+  flex: 1 1 auto;
+}
+
+.site-footer {
+  border-top: 1px solid var(--rule);
+  background: var(--chip);
+}
+
+.site-footer .wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  padding-bottom: 22px;
+}
+
+.site-footer nav {
+  display: flex;
+  gap: 20px;
+}
+
+.site-footer a:hover {
+  color: var(--ink);
+}
+
+/* ---- toolbar ----------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 0 10px;
+  flex-wrap: wrap;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbar-right {
+  gap: 14px;
+}
+
+.facet {
+  position: relative;
+}
+
+.facet > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background: var(--chip);
+  font-size: 13px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.facet > summary::-webkit-details-marker {
+  display: none;
+}
+
+.facet > summary:hover {
+  background: var(--chip-hover);
+}
+
+.facet[data-on] > summary {
+  background: var(--raised);
+  border-color: var(--ink-2);
+}
+
+/* The chevron, as the design draws it: a square rotated 45° keeping two
+   borders. Cheaper than an SVG and it inherits colour. */
+.facet > summary::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  margin-top: -3px;
+  border-right: 1.5px solid var(--meta);
+  border-bottom: 1.5px solid var(--meta);
+  transform: rotate(45deg);
+}
+
+.facet-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  min-width: 224px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--raised);
+  border: 1px solid var(--rule-pop);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.12);
+}
+
+.facet-pop a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.facet-pop a:hover {
+  background: var(--chip-hover);
+}
+
+.facet-pop a[aria-current="true"] {
+  background: var(--chip);
+  color: var(--ink);
+}
+
+/* Tags combine, so their rows are checkboxes rather than a single choice. The
+   box is drawn on the label; the row is still a link, and the state it shows
+   comes from the same `data-on` the href was built from. */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.check::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border: 1.5px solid #c2c2c2;
+  border-radius: 3px;
+}
+
+.check[data-on]::before {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Only the tag rows carry a checkbox, so a selected one needs no second
+   highlight behind it. */
+.facet-pop a:has(.check)[aria-current="true"] {
+  background: none;
+}
+
+.facet-pop a:has(.check):hover {
+  background: var(--chip-hover);
+}
+
+.clear {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--meta);
+}
+
+.clear:hover {
+  color: var(--ink);
+}
+
+/* ---- layout switch ----------------------------------------------------- */
+
+.switch {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--chip);
+}
+
+.switch:hover {
+  background: var(--track-hover);
+}
+
+.switch::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 38px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--ink);
+  pointer-events: none;
+  transition: transform 170ms cubic-bezier(0.4, 0.05, 0.2, 1);
+}
+
+[data-view="square"] .switch::before {
+  transform: translateX(40px);
+}
+
+.switch a {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--meta);
+}
+
+[data-view="justified"] .switch a[data-mode="justified"],
+[data-view="square"] .switch a[data-mode="square"] {
+  color: #e9e9e9;
+}
+
+/* Both icons are CSS boxes: three bars, and a two-by-two grid. */
+.switch i {
+  display: block;
+  background: currentColor;
+}
+
+.switch a[data-mode="justified"] i {
+  height: 11px;
+}
+
+.switch a[data-mode="justified"] i:nth-child(1) {
+  width: 5px;
+}
+.switch a[data-mode="justified"] i:nth-child(2) {
+  width: 9px;
+}
+.switch a[data-mode="justified"] i:nth-child(3) {
+  width: 3px;
+}
+
+/* Two columns, so the four squares wrap into a 2×2 block rather than a row. */
+.switch a[data-mode="square"] {
+  display: grid;
+  grid-template-columns: 4.5px 4.5px;
+  gap: 2px;
+  place-content: center;
+}
+
+.switch a[data-mode="square"] i {
+  width: 4.5px;
+  height: 4.5px;
+}
+
+/* ---- gallery ----------------------------------------------------------- */
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  margin-bottom: 8px;
+}
+
+/*
+ * Justified rows without the packing loop.
+ *
+ * Growing each cell in proportion to its aspect ratio, from a basis of
+ * aspect × row height, gives every cell in a row a width of
+ * aspect × rowHeight × k — the scale factor the handoff derives by hand.
+ * Flexbox closes the rows; nothing measures anything.
+ *
+ * The height comes from `aspect-ratio`, not a fixed `--row-h`. Both give equal
+ * heights across a row, since every cell grows by the same k — but only this
+ * one keeps the cell the same shape as its screenshot, and a cell that matches
+ * its image is a cell that cannot crop it. Rows then vary slightly in height,
+ * which is what a justified layout does.
+ */
+[data-view="justified"] .cell {
+  flex: var(--ar) 1 calc(var(--ar) * var(--row-h));
+  aspect-ratio: var(--ar);
+}
+
+/* Absorbs the last row's slack so a short final row sits at target height,
+   left-aligned, instead of stretching to fill the width. */
+[data-view="justified"] .gallery::after {
+  content: "";
+  flex: 999999 1 0;
+  height: 0;
+}
+
+[data-view="square"] .gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--sq-min), 1fr));
+}
+
+[data-view="square"] .cell {
+  aspect-ratio: 1;
+  padding: 26px 26px 24px;
+  background: var(--surface);
+  border: 1px solid var(--rule-cell);
+}
+
+[data-view="square"] .cell:hover {
+  border-color: var(--faint-2);
+}
+
+.cell {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--chip);
+}
+
+.cell img {
+  display: block;
+}
+
+/* `contain`, not `cover`. The cell already carries the image's aspect ratio so
+   there is nothing to crop; contain is the guard against sub-pixel rounding
+   shaving an edge off. Screenshots are the subject — none of one is spare. */
+[data-view="justified"] .cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Shown whole, and never enlarged past what the file actually holds — 206 of
+   235 screenshots are 640px wide or less. */
+[data-view="square"] .cell img {
+  width: auto;
+  height: auto;
+  max-width: min(100%, var(--nat-w));
+  max-height: 100%;
+  margin: auto;
+  object-fit: contain;
+}
+
+.cell .inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover metadata, justified mode. Absent fields are dropped upstream, never
+   rendered as "Unknown". */
+.cell .meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  min-height: 30px;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 9px;
+  background: linear-gradient(
+    to top,
+    rgba(17, 17, 17, 0.94),
+    rgba(17, 17, 17, 0.64) 62%,
+    rgba(17, 17, 17, 0)
+  );
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: #e9e9e9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.cell:hover .meta,
+.cell:focus-visible .meta {
+  opacity: 1;
+}
+
+/* The title strip, square mode. Always visible — the square cell has room the
+   justified one does not. */
+.cell .caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--meta);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell:hover .caption {
+  color: var(--ink);
+}
+
+/* A filename truncates from the head, so the distinctive tail survives. */
+.cell .caption[data-placeholder] {
+  direction: rtl;
+  text-align: left;
+}
+
+[data-view="justified"] .caption,
+[data-view="square"] .meta {
+  display: none;
+}
+
+/* ---- pagination -------------------------------------------------------- */
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 28px 0 56px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.pager a,
+.pager span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  min-width: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink);
+}
+
+.pager span {
+  border-color: var(--rule-soft);
+  color: var(--faint-3);
+  cursor: default;
+}
+
+.pager a[aria-current="page"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--raised);
+}
+
+/* ---- buttons ----------------------------------------------------------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: none;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--ink);
+}
+
+.button[data-primary] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--raised);
+}
+
+.button:disabled {
+  border-color: var(--rule-soft);
+  color: var(--faint-3);
+  cursor: not-allowed;
+}
+
+/* ---- prose pages ------------------------------------------------------- */
+
+.page {
+  max-width: 620px;
+  padding: 32px 0 64px;
+}
+
+.page h1 {
+  margin: 14px 0 0;
+  font-family: var(--font-serif);
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.page > p {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.page h1 + p {
+  margin-top: 20px;
+}
+
+.footnote {
+  margin: 28px 0 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--meta-2);
+}
+
+/* ---- setting card ------------------------------------------------------ */
+
+.card {
+  margin-top: 36px;
+  padding: 22px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+.card-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.card-state {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.card-note {
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--meta);
+}
+
+/* The switch. `aria-checked` drives the appearance, so the state a screen
+   reader is told is the same state the knob is drawn from — they cannot drift. */
+.switch-control {
+  position: relative;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 13px;
+  background: var(--chip);
+  cursor: pointer;
+}
+
+.switch-control::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.28);
+  transition: left 130ms ease;
+}
+
+.switch-control[aria-checked="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.switch-control[aria-checked="true"]::after {
+  left: 20px;
+}
+
+/* Locked by the browser's own signal: on, and not the reader's to change here. */
+.switch-control:disabled {
+  background: var(--rule-cell);
+  border-color: var(--faint-3);
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-control::after,
+  .switch::before {
+    transition: none;
+  }
+}
+
+/* ---- detail ------------------------------------------------------------ */
+
+.detail-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 14px 0 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.detail-bar a:hover {
+  color: var(--ink);
+}
+
+.detail-bar nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.detail-bar nav span[aria-disabled] {
+  color: var(--faint-3);
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 40px;
+  padding: 24px 0 56px;
+  border-top: 1px solid var(--rule);
+
+  /* What is left of the viewport once the header, the entry bar, this
+     padding and the caption have taken theirs. The floor stops a short window
+     from squeezing the screenshot into a stamp. */
+  --shot-h: max(320px, calc(100dvh - 200px));
+}
+
+.detail-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  min-width: 0;
+}
+
+/*
+ * As large as the space allows, whole, and never past its own resolution.
+ *
+ * The width is stated rather than left to `max-width`, because an `auto` width
+ * comes from the intrinsic size of whichever variant `srcset` picked — a
+ * 1680px screenshot served as its 1280px copy laid out at 53% of the room it
+ * had. Naming the three limits in one `min()` makes the box the answer to
+ * "how wide can this be", not "how wide did the file happen to be":
+ *
+ *   100%                  the column
+ *   --nat-w               the original's own pixels, so nothing is upscaled
+ *   --shot-h × --ar       the width at which the height fills the viewport
+ *
+ * `height: auto` then follows the aspect ratio off the width/height
+ * attributes, so the box is the picture — no letterboxing, and no dead space
+ * under it for the caption to float in.
+ */
+.detail-figure img {
+  width: min(100%, var(--nat-w), calc(var(--shot-h) * var(--ar)));
+  height: auto;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  min-width: 0;
+}
+
+.detail-meta dl {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  row-gap: 11px;
+  column-gap: 16px;
+  margin: 0;
+  width: 100%;
+}
+
+.detail-meta dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--meta-2);
+  padding-top: 2px;
+}
+
+.detail-meta dd {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.detail-meta dd.num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.original {
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.original a {
+  font-size: 13px;
+}
+
+.original a:hover {
+  text-decoration: underline;
+}
+
+/* The arrow every site uses to mean "this leaves the page". Drawn rather than
+   set as a character, so it takes the link's colour and sits on its baseline. */
+.external {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.external svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--meta);
+}
+
+.external:hover svg {
+  color: var(--ink);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--chip);
+  font-size: 13px;
+}
+
+.chip:hover {
+  background: var(--chip-hover);
+}
+
+/* One column below the width the two would need: 620px of content, 300px of
+   metadata and the gap between them. */
+@media (max-width: 960px) {
+  .detail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+
+    /* One column, so the metadata is below the fold rather than beside it —
+       the screenshot gives back enough height for the title to show under it. */
+    --shot-h: max(280px, 52dvh);
+  }
+}
+
+.title-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 23px;
+  line-height: 1.3;
+}
+
+/* A filename is not a title and is not set like one. */
+.title-file {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--ink-2);
+  word-break: break-all;
 }

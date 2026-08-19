@@ -1,16 +1,18 @@
 ---
 /**
- * One gallery card. Renders the screenshot and nothing else.
+ * One gallery cell, in whichever layout the page is set to.
  *
- * Styling waits until the functionality is settled: no view modes, no hover
- * metadata, no layout tokens. Task 6 in the plan describes all three, and this
- * is the subset that has to be right before any of them can be judged.
+ * There is no `view` prop and no second component: the two layouts are the
+ * same markup under `[data-view]` in `global.css`. That is also what makes the
+ * switch instant — nothing re-renders, and the metadata each layout shows is
+ * already in the DOM.
  *
  * `width` and `height` are always emitted from the stored dimensions, which is
- * why `aspect_ratio` is denormalised onto `states` — the browser reserves the
+ * why `aspect_ratio` is denormalised onto `states`: the browser reserves the
  * box before an image loads, so nothing shifts.
  */
 import { imageSources } from "../lib/images";
+import { isPlaceholderTitle } from "../lib/titles";
 import type { StateRow } from "../db/states";
 
 interface Props {
@@ -19,16 +21,36 @@ interface Props {
 
 const { state } = Astro.props;
 const { src, srcset } = imageSources(state);
+
+// Absent fields are dropped, never printed as "Unknown" — 178 entries have no
+// app name and 137 no OS, so the common case has to read as a shorter line
+// rather than a form with holes in it.
+const meta = [state.app_name, state.os, state.device_type]
+  .filter(Boolean)
+  .join("  ·  ");
+
+const placeholder = isPlaceholderTitle(state.title);
+const alt = placeholder ? "Empty state screenshot" : state.title;
 ---
 
-<a href={`/s/${state.slug}`}>
-  <img
-    src={src}
-    srcset={srcset || undefined}
-    width={state.width}
-    height={state.height}
-    alt={state.title}
-    loading="lazy"
-    decoding="async"
-  />
+<a
+  class="cell"
+  href={`/s/${state.slug}`}
+  style={`--ar:${state.aspect_ratio.toFixed(4)};--nat-w:${state.width}px`}
+>
+  <div class="inner">
+    <img
+      src={src}
+      srcset={srcset || undefined}
+      width={state.width}
+      height={state.height}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  <div class="meta">{meta}</div>
+  <div class="caption" data-placeholder={placeholder ? "" : undefined}>
+    {state.title}
+  </div>
 </a>
