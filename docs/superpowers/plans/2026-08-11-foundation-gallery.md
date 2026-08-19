@@ -19,11 +19,14 @@ tests passing.
 Tasks 9 and 11A moved to `2026-08-19-pre-launch.md` on 2026-08-19. Both run
 after phase 2 and before launch, and neither blocks this deploy.
 
-Every remaining task is filed against the `v2.0 launch` milestone, so the
-public tracker shows what is left. Task 12 is [#32](https://github.com/craigmdennis/emptystates/issues/32);
-specs 02, 03 and 04 are [#33](https://github.com/craigmdennis/emptystates/issues/33),
+Every remaining task is filed as an issue, so the public tracker shows what is
+left. `v2.0 launch` holds task 12 as [#32](https://github.com/craigmdennis/emptystates/issues/32),
+spec 02 as [#33](https://github.com/craigmdennis/emptystates/issues/33), and the
+two pre-launch tasks. Submissions and their review queue —
 [#34](https://github.com/craigmdennis/emptystates/issues/34) and
-[#35](https://github.com/craigmdennis/emptystates/issues/35).
+[#35](https://github.com/craigmdennis/emptystates/issues/35), specs 03 and 04 —
+moved to `v2.1` on 2026-08-19: the first release serves the gallery, search and
+the entry pages, and the collection grows by hand until then.
 
 Tasks 6, 7 and 8 were built to the handoff design in
 `docs/design-handoff/` rather than to the CSS sketched below — see correction 8.
