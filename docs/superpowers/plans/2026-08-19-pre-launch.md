@@ -40,6 +40,8 @@ invalidates it as surely as a re-import does. Rendering 235 cards before that is
 
 ## Task 1: `/api/view-pref` and the Plausible forward
 
+Tracked as [#36](https://github.com/craigmdennis/emptystates/issues/36).
+
 **Files:**
 - Create: `src/pages/api/view-pref.ts`
 - Test: `test/view-pref.test.ts`
@@ -140,6 +142,8 @@ git commit -m "feat: add view preference endpoint with Plausible forward"
 ---
 
 ## Task 2: Open Graph card per state
+
+Tracked as [#37](https://github.com/craigmdennis/emptystates/issues/37).
 
 **Runs last, immediately before deploy.** Each card embeds a screenshot read
 from R2 and is stored at `og/<state id>.png`, so every id in the corpus has to

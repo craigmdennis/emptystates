@@ -19,6 +19,12 @@ tests passing.
 Tasks 9 and 11A moved to `2026-08-19-pre-launch.md` on 2026-08-19. Both run
 after phase 2 and before launch, and neither blocks this deploy.
 
+Every remaining task is filed against the `v2.0 launch` milestone, so the
+public tracker shows what is left. Task 12 is [#32](https://github.com/craigmdennis/emptystates/issues/32);
+specs 02, 03 and 04 are [#33](https://github.com/craigmdennis/emptystates/issues/33),
+[#34](https://github.com/craigmdennis/emptystates/issues/34) and
+[#35](https://github.com/craigmdennis/emptystates/issues/35).
+
 Tasks 6, 7 and 8 were built to the handoff design in
 `docs/design-handoff/` rather than to the CSS sketched below — see correction 8.
 
@@ -1368,7 +1374,8 @@ git commit -m "feat: add square view mode and persisted view toggle"
 
 ## Task 9: `/api/view-pref` and the Plausible forward
 
-**Moved to `2026-08-19-pre-launch.md`, task 1** (2026-08-19). It runs after
+**Moved to `2026-08-19-pre-launch.md`, task 1** (2026-08-19). Tracked as
+[#36](https://github.com/craigmdennis/emptystates/issues/36). It runs after
 phase 2, before launch. Its only caller is the layout switch, which flips
 `data-view` and stores the choice without reporting it, so nothing here waits
 on it. `/privacy` already describes the endpoint, so its behaviour is fixed by
@@ -1544,7 +1551,8 @@ git commit -m "feat: add tag pages and privacy opt-out, preserve legacy URLs"
 
 ## Task 11A: Open Graph card per state
 
-**Moved to `2026-08-19-pre-launch.md`, task 2** (2026-08-19). It runs after
+**Moved to `2026-08-19-pre-launch.md`, task 2** (2026-08-19). Tracked as
+[#37](https://github.com/craigmdennis/emptystates/issues/37). It runs after
 phase 2, before launch. Each card embeds a screenshot keyed by state id and
 carries the title and app name, so the ingest path phase 2 adds — which mints
 ids and can retitle entries — has to be in place before 235 cards are rendered
@@ -1553,6 +1561,8 @@ against the current set. Until then `/s/<slug>` unfurls without an image.
 ---
 
 ## Task 12: Deploy and verify against the spec checklist
+
+Tracked as [#32](https://github.com/craigmdennis/emptystates/issues/32).
 
 - [ ] **Step 1: Apply migrations to remote D1**
 
