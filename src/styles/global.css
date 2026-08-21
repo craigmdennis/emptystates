@@ -562,6 +562,17 @@
   opacity: 1;
 }
 
+/* One line, clipped from the right, which is what the strip did when it held
+   a single text node. `.dotted` wraps by default; a gallery cell cannot. */
+.cell .meta .dotted {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.cell .meta .dotted > * {
+  white-space: nowrap;
+}
+
 /* The title strip, square mode. Always visible — the square cell has room the
    justified one does not. */
 .cell .caption {
@@ -902,8 +913,15 @@
   font-size: 12px;
 }
 
+/* The link and the file details share one line with a real gap. Before this
+   was a flex row the space between them was a newline in the template, which
+   the JSX whitespace rules drop. */
 .original {
   width: 100%;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
   padding-top: 16px;
   border-top: 1px solid var(--rule);
 }
@@ -916,26 +934,96 @@
   text-decoration: underline;
 }
 
-/* The arrow every site uses to mean "this leaves the page". Drawn rather than
-   set as a character, so it takes the link's colour and sits on its baseline. */
+/* ---- icons and drawn separators ---------------------------------------- *
+ *
+ * Nothing here is typed. An arrow, a cross between two numbers and the dot
+ * between two facts are all drawn, for one reason: a character lives inside a
+ * text run, and the whitespace around a text run is exactly what the compiler
+ * collapses. Every separator below is either a flex item or a pseudo-element,
+ * neither of which a whitespace rule can reach.
+ */
+
+/* The one place stroke and joins are decided. `Icon.astro` sets the grid. */
+.icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A run of short facts with a dot between each. The dot belongs to the item
+   that follows it, so a run of one prints no dot and a run that grows needs no
+   interleaving at the call site. `:not([hidden])` is what lets a view reveal
+   an item later without leaving a leading dot behind meanwhile. */
+.dotted {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dotted > * {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dotted > *:not([hidden]) + *:not([hidden])::before {
+  content: "";
+  flex: none;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+/* Tighter than the dot run it can sit inside, so a width and its height read
+   as one value. Declared after `.dotted > *`, whose specificity it matches. */
+.dims {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* A range, and the row that ends a page. */
+.range {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range-nums {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Back to the gallery. */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The arrow every site uses to mean "this leaves the page". It takes the
+   link's colour and sits on its baseline. */
 .external {
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
-.external svg {
-  width: 10px;
-  height: 10px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.external .icon {
   color: var(--meta);
 }
 
-.external:hover svg {
+.external:hover .icon {
   color: var(--ink);
 }
 

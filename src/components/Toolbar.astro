@@ -14,6 +14,7 @@
  * not mean opening the same popover three times.
  */
 import { toggleParam, withParams } from "../lib/query";
+import Icon from "./Icon.astro";
 import type { Facet } from "../db/taxonomies";
 
 interface Props {
@@ -168,7 +169,14 @@ const to = Math.min(page * perPage, total);
   </div>
 
   <div class="toolbar-right">
-    <span class="mono-11">{from}–{to} of {total}</span>
+    <span class="mono-11 range">
+      <span class="range-nums">
+        <span>{from}</span>
+        <Icon name="dash" label="to" size={8} />
+        <span>{to}</span>
+      </span>
+      <span>of {total}</span>
+    </span>
 
     <nav class="switch" aria-label="Gallery layout">
       <a

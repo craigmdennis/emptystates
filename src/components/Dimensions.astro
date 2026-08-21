@@ -1,0 +1,23 @@
+---
+/**
+ * A width and a height, with the cross drawn between them rather than set as
+ * a multiplication sign. Announced as "1680 by 1027".
+ *
+ * Three views print dimensions: the figure caption, the Size row and the file
+ * details under the original link.
+ */
+import Icon from "./Icon.astro";
+
+interface Props {
+  width: number;
+  height: number;
+}
+
+const { width, height } = Astro.props;
+---
+
+<span class="dims">
+  <span>{width}</span>
+  <Icon name="times" label="by" size={9} />
+  <span>{height}</span>
+</span>

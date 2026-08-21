@@ -23,6 +23,8 @@ import {
 } from "../../db/states";
 import { imageSources } from "../../lib/images";
 import { isPlaceholderTitle } from "../../lib/titles";
+import Icon from "../../components/Icon.astro";
+import Dimensions from "../../components/Dimensions.astro";
 import { mediaUrl } from "../../lib/media";
 
 const { slug } = Astro.params;
@@ -46,11 +48,19 @@ const alt = placeholder ? "Empty state screenshot" : state.title;
 // A row exists when there is something to put in it. Device, Published and
 // Size are the three every entry carries; app name and OS are missing from
 // most of the collection, and printing "unknown" 178 times says nothing.
-const rows: { key: string; value: string; num?: boolean }[] = [
+type MetaRow = {
+  key: string;
+  value?: string;
+  /** Width and height, drawn with a cross between them by `Dimensions`. */
+  dims?: [number, number];
+  num?: boolean;
+};
+
+const rows: MetaRow[] = [
   ...(state.app_name ? [{ key: "App", value: state.app_name }] : []),
   { key: "Device", value: state.device_type },
   ...(state.os ? [{ key: "OS", value: state.os }] : []),
-  { key: "Size", value: `${state.width}×${state.height}`, num: true },
+  { key: "Size", dims: [state.width, state.height], num: true },
   {
     key: "Published",
     value: state.published_at.slice(0, 10),
@@ -71,7 +81,10 @@ const kb = Math.round(state.byte_size / 1024);
 
 <Layout title={state.title} description={state.description ?? undefined}>
   <div class="detail-bar">
-    <a href="/">← Gallery</a>
+    <a href="/" class="back">
+      <Icon name="arrow-left" size={10} />
+      <span>Gallery</span>
+    </a>
     <nav aria-label="Adjacent entries">
       <span>{position} / {total}</span>
       {
@@ -112,8 +125,9 @@ const kb = Math.round(state.byte_size / 1024);
         fetchpriority="high"
         decoding="async"
       />
-      <figcaption class="mono" id="scale">
-        {state.width}×{state.height}
+      <figcaption class="mono dotted" id="scale">
+        <span id="scale-pct" hidden></span>
+        <Dimensions width={state.width} height={state.height} />
       </figcaption>
     </figure>
 
@@ -136,7 +150,13 @@ const kb = Math.round(state.byte_size / 1024);
           rows.map((row) => (
             <>
               <dt>{row.key}</dt>
-              <dd class={row.num ? "num" : undefined}>{row.value}</dd>
+              <dd class={row.num ? "num" : undefined}>
+                {row.dims ? (
+                  <Dimensions width={row.dims[0]} height={row.dims[1]} />
+                ) : (
+                  row.value
+                )}
+              </dd>
             </>
           ))
         }
@@ -169,16 +189,15 @@ const kb = Math.round(state.byte_size / 1024);
           target="_blank"
           rel="noopener"
         >
-          Show original
-          <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-            <path d="M4 2h6v6" />
-            <path d="M10 2 2.5 9.5" />
-          </svg>
+          <span>Show original</span>
+          <Icon name="external" size={10} />
           <span class="sr-only">(opens in a new tab)</span>
         </a>
-        <span class="mono"
-          >{format} · {kb} KB · {state.width}×{state.height}</span
-        >
+        <span class="mono dotted">
+          <span>{format}</span>
+          <span>{kb} KB</span>
+          <Dimensions width={state.width} height={state.height} />
+        </span>
       </p>
     </div>
   </article>
@@ -189,21 +208,26 @@ const kb = Math.round(state.byte_size / 1024);
     // only adds the percentage once the rendered width is a fact.
     (function () {
       var img = document.getElementById("shot");
-      var caption = document.getElementById("scale");
-      if (!img || !caption) return;
+      // Only the percentage is scripted. The dimensions beside it are markup —
+      // a `Dimensions` component with a drawn cross — so this writes into its
+      // own span rather than replacing the caption, which would delete them.
+      // The dot between the two is drawn by `.dotted`, and appears with the
+      // span: `[hidden]` is what holds it back until there is a figure to show.
+      var pctEl = document.getElementById("scale-pct");
+      if (!img || !pctEl) return;
 
       // The original's width, off the attribute — not naturalWidth, which is
       // whichever variant the browser chose and would report a 640px copy of a
       // 1280px screenshot as full size.
       var full = Number(img.getAttribute("width"));
-      var dims = caption.textContent.trim();
       if (!full) return;
 
       function render() {
         var pct = Math.round((img.clientWidth / full) * 100);
         if (!pct) return;
-        caption.textContent =
-          (pct >= 100 ? "actual size" : "shown at " + pct + "%") + " · " + dims;
+        pctEl.textContent =
+          pct >= 100 ? "actual size" : "shown at " + pct + "%";
+        pctEl.hidden = false;
       }
 
       render();

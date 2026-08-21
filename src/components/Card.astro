@@ -24,10 +24,10 @@ const { src, srcset } = imageSources(state);
 
 // Absent fields are dropped, never printed as "Unknown" — 178 entries have no
 // app name and 137 no OS, so the common case has to read as a shorter line
-// rather than a form with holes in it.
-const meta = [state.app_name, state.os, state.device_type]
-  .filter(Boolean)
-  .join("  ·  ");
+// rather than a form with holes in it. Kept as an array: `.dotted` draws the
+// separator between whatever survives, so one fact prints no separator and
+// three print two, with nothing to interleave here.
+const meta = [state.app_name, state.os, state.device_type].filter(Boolean);
 
 const placeholder = isPlaceholderTitle(state.title);
 const alt = placeholder ? "Empty state screenshot" : state.title;
@@ -49,7 +49,17 @@ const alt = placeholder ? "Empty state screenshot" : state.title;
       decoding="async"
     />
   </div>
-  <div class="meta">{meta}</div>
+  <div class="meta">
+    {
+      meta.length > 0 && (
+        <span class="dotted">
+          {meta.map((fact) => (
+            <span>{fact}</span>
+          ))}
+        </span>
+      )
+    }
+  </div>
   <div class="caption" data-placeholder={placeholder ? "" : undefined}>
     {state.title}
   </div>
