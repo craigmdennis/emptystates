@@ -4,6 +4,7 @@ import { it, expect, beforeAll } from "vitest";
 import legacy from "./fixtures/legacy-urls.json";
 import { couldBeRedirect, resolveRedirect } from "../src/db/redirects";
 import { resolveTagPath } from "../src/lib/tags";
+import { parsePageSegment } from "../src/lib/pagination";
 
 beforeAll(async () => {
   await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
@@ -147,4 +148,34 @@ it("claims every from_path in the table", async () => {
     .map((r) => r.from_path)
     .filter((p) => !couldBeRedirect(p));
   expect(missed, `guard would skip: ${missed.join(", ")}`).toEqual([]);
+});
+
+// Every filter is a query parameter, so a legacy path form names the query
+// form. One list, one address.
+it("redirects a legacy tag path to its filter", () => {
+  const route = resolveTagPath("mobile");
+  expect(route).toEqual({ kind: "device", value: "phone" });
+  expect(`/?${route!.kind}=${route!.value}`).toBe("/?device=phone");
+});
+
+it("carries the page segment into the redirect target", () => {
+  expect(parsePageSegment("3")).toBe(3);
+  const route = resolveTagPath("mobile")!;
+  expect(`/3?${route.kind}=${route.value}`).toBe("/3?device=phone");
+});
+
+// A tag sharing a slug with a device or an operating system would give one
+// word two query keys. `?tag=phone` and `?device=phone` would return
+// different sets. `classifyTag` tests three closed allowlists in order — OS,
+// then DEVICE, then TAGS — so a facet term never reaches the tag map. This
+// asserts the result, so an edit to that map cannot reintroduce the
+// collision quietly.
+it("keeps tag slugs disjoint from the facet slugs", async () => {
+  const { results } = await env.DB.prepare(
+    `SELECT slug FROM tags
+      WHERE slug IN (SELECT slug FROM device_types)
+         OR slug IN (SELECT slug FROM operating_systems)`,
+  ).all<{ slug: string }>();
+  const clash = results.map((r) => r.slug);
+  expect(clash, `tags naming a facet: ${clash.join(", ")}`).toEqual([]);
 });

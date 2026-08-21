@@ -1,0 +1,40 @@
+---
+/**
+ * Every legacy tag path, redirected to the filter it became.
+ *
+ * Gatsby published /tags/<x> for every raw value in the frontmatter `tags`
+ * array, which mixed devices, operating systems and genuine tags.
+ * `resolveTagPath` routes each to the column it now lives in.
+ *
+ * A redirect rather than a second gallery: `/tags/mobile` and `/?device=phone`
+ * return the same 187 entries, and one list takes one address. A filter is a
+ * query parameter everywhere on this site, so the path form names the query
+ * form and stops there.
+ *
+ * A rest route because `[tag].astro` and a `[tag]/` directory cannot both
+ * exist, and master publishes `/tags/mobile/2` as well as `/tags/mobile`.
+ */
+import { resolveTagPath } from "../../lib/tags";
+import { parsePageSegment } from "../../lib/pagination";
+
+const parts = (Astro.params.rest ?? "").split("/").filter(Boolean);
+if (parts.length === 0 || parts.length > 2) {
+  return new Response("Not found", { status: 404 });
+}
+
+const [tag, pageSegment] = parts;
+
+// `parsePageSegment` rejects "1", since `/1` duplicates `/`. Master published
+// no `/tags/<x>/1`, and a hand-typed one names page 1 and redirects there.
+const page = pageSegment === "1" ? 1 : parsePageSegment(pageSegment);
+if (page === null) return new Response("Not found", { status: 404 });
+
+const route = resolveTagPath(tag);
+// 404 rather than a redirect to an empty gallery. The middleware then gets its
+// turn, in case this path is a retired one that moved.
+if (!route) return new Response("Not found", { status: 404 });
+
+// `route.kind` is "device", "os" or "tag", which are the three query keys.
+const base = page > 1 ? `/${page}` : "/";
+return Astro.redirect(`${base}?${route.kind}=${route.value}`, 301);
+---

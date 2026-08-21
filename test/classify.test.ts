@@ -103,3 +103,15 @@ it("keeps the first of two named platforms", () => {
 it("returns null when neither side names an OS", () => {
   expect(preferOs(null, null)).toBeNull();
 });
+
+// The `TAGS` map is the only route to `kind: "tag"`. A facet term added to it
+// would produce a tag slug colliding with a device or an operating system,
+// and one word would then name two query keys.
+it("classifies every facet term as a facet", () => {
+  const facets = [
+    "mobile", "mobil", "phone", "tablet", "desktop", "tv", "console", "watch",
+    "ios", "android", "web", "browser", "macos", "windows", "linux",
+  ];
+  const asTag = facets.filter((t) => classifyTag(t, "x").kind === "tag");
+  expect(asTag, `classified as tags: ${asTag.join(", ")}`).toEqual([]);
+});
