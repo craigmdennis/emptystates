@@ -14,7 +14,8 @@
     "review:shapes": "tsx scripts/review-device-shapes.ts",
     "triage": "tsx scripts/build-device-triage.ts",
     "triage:apply": "tsx scripts/apply-decisions.ts",
-    "variants": "tsx scripts/build-variants.ts"
+    "variants": "tsx scripts/build-variants.ts",
+    "check:urls": "tsx scripts/check-legacy-urls.ts"
   },
   "repository": {
     "type": "git",

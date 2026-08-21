@@ -1,5 +1,5 @@
 {
-  "note": "Live URLs on emptystat.es before the rebuild, taken from master's content/states.",
+  "note": "Live URLs on emptystat.es before the rebuild, taken from master's content/states. `states` and `retiredWithPages` together are every address Gatsby publishes. The remaining ten names in `deletedDuringTriage` hold only a .png on master, so no page was ever built for them.",
   "states": [
     "Photo_12-08-2014_13_01_24",
     "Photo_12-08-2014_14_05_22",
@@ -297,5 +297,25 @@
     "user cleared",
     "web",
     "windows"
+  ],
+  "retiredWithPages": [
+    "no-notes-in-bear-markdown-editor-for-macos",
+    "tumblr_mggzbrxUhV1rdf37to1_1280",
+    "tumblr_mh5iv6T19s1rdf37to1_1280",
+    "tumblr_mhpzfw7qkv1rdf37to1_1280",
+    "tumblr_moiu2y7o7N1rdf37to1_1280",
+    "tumblr_mp38ylJOSa1rdf37to1_1280",
+    "tumblr_mt8030S4ue1rdf37to1_1280",
+    "tumblr_n5hldmNcyT1rdf37to1_1280"
+  ],
+  "indexPages": [
+    "/2",
+    "/3",
+    "/4"
+  ],
+  "tagPages": [
+    "/tags/mobile/2",
+    "/tags/mobile/3",
+    "/tags/mobile/4"
   ]
 }
