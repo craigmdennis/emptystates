@@ -13,7 +13,7 @@
  * carries `open=tag` so it comes back open, since choosing three tags should
  * not mean opening the same popover three times.
  */
-import { toggleParam, withParams } from "../lib/query";
+import { readList, toggleParam, withParams } from "../lib/query";
 import Icon from "./Icon.astro";
 import type { Facet } from "../db/taxonomies";
 
@@ -31,7 +31,7 @@ const current = {
   device: url.searchParams.get("device"),
   os: url.searchParams.get("os"),
 };
-const selectedTags = url.searchParams.getAll("tag");
+const selectedTags = readList(url, "tag");
 const openFacet = url.searchParams.get("open");
 
 // 137 entries carry no OS. Saying so on the Any row is the honest version of a

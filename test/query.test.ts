@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { toggleParam, withParams } from "../src/lib/query";
+import { readList, toggleParam, withParams } from "../src/lib/query";
 
 const url = (s: string) => new URL(s, "https://emptystat.es");
 
@@ -30,22 +30,52 @@ it("keeps the path it was given", () => {
   );
 });
 
-// Tags are multi-select, so they arrive as repeated `tag` parameters and each
-// row in the popover is a link that adds or removes its own.
-it("adds a tag alongside the ones already chosen", () => {
-  expect(toggleParam(url("/?tag=first-run"), "tag", "inbox-zero")).toBe(
-    "/?tag=first-run&tag=inbox-zero",
+// Tags are multi-select and ride in one comma-separated `tag` parameter. Each
+// row in the popover is a link that adds or removes its own value. Google's
+// ecommerce URL page states "Avoid using the same parameters twice. Googlebot
+// may ignore one of the values otherwise."
+it("adds a first tag as one parameter", () => {
+  expect(toggleParam(url("/"), "tag", "error")).toBe("/?tag=error");
+});
+
+it("appends a second tag to the same parameter", () => {
+  expect(toggleParam(url("/?tag=error"), "tag", "onboarding")).toBe(
+    "/?tag=error,onboarding",
   );
 });
 
 it("removes only the tag it names", () => {
-  expect(
-    toggleParam(url("/?tag=first-run&tag=inbox-zero"), "tag", "first-run"),
-  ).toBe("/?tag=inbox-zero");
+  expect(toggleParam(url("/?tag=error,onboarding"), "tag", "error")).toBe(
+    "/?tag=onboarding",
+  );
 });
 
+it("removes the parameter when the last tag goes", () => {
+  expect(toggleParam(url("/?tag=error"), "tag", "error")).toBe("/");
+});
+
+// Narrowing from page 3 of a longer result set lands past the end of a
+// shorter one, so a selection returns to the base path.
 it("keeps the other filters while toggling a tag, and resets the page", () => {
-  expect(toggleParam(url("/?device=phone&page=3"), "tag", "first-run")).toBe(
+  expect(toggleParam(url("/3?device=phone"), "tag", "first-run")).toBe(
     "/?device=phone&tag=first-run",
+  );
+});
+
+it("reads the value back as a list", () => {
+  expect(readList(url("/?tag=error,onboarding"), "tag")).toEqual([
+    "error",
+    "onboarding",
+  ]);
+  expect(readList(url("/"), "tag")).toEqual([]);
+  expect(readList(url("/?tag="), "tag")).toEqual([]);
+});
+
+// `URLSearchParams.toString` percent-encodes the comma as `%2C`. A reader
+// decodes both spellings the same way, so the difference reaches a search
+// engine as two addresses and reaches the site as none.
+it("carries a literal comma through withParams", () => {
+  expect(withParams(url("/?tag=error,onboarding"), { open: "tag" })).toBe(
+    "/?tag=error,onboarding&open=tag",
   );
 });

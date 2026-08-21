@@ -12,6 +12,7 @@ import Toolbar from "../components/Toolbar.astro";
 import { getDb } from "../db/client";
 import { listStates } from "../db/states";
 import { listFacets } from "../db/taxonomies";
+import { readList } from "../lib/query";
 
 const PER_PAGE = 60;
 
@@ -20,7 +21,7 @@ const url = Astro.url;
 const page = Math.max(1, Number(url.searchParams.get("page") ?? 1) || 1);
 const device = url.searchParams.get("device") ?? undefined;
 const os = url.searchParams.get("os") ?? undefined;
-const tags = url.searchParams.getAll("tag");
+const tags = readList(url, "tag");
 
 const [{ rows, total }, facets] = await Promise.all([
   listStates(db, { page, perPage: PER_PAGE, device, os, tags }),
