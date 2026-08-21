@@ -179,3 +179,25 @@ it("keeps tag slugs disjoint from the facet slugs", async () => {
   const clash = results.map((r) => r.slug);
   expect(clash, `tags naming a facet: ${clash.join(", ")}`).toEqual([]);
 });
+
+// Eight entries publish on master and were dropped during triage. Their
+// addresses are in inbound links and bookmarks, so each answers with a 301 to
+// the gallery rather than a 404.
+it("sends a retired entry to the gallery", async () => {
+  expect(await resolveRedirect(env.DB, "/s/tumblr_mp38ylJOSa1rdf37to1_1280")).toBe("/");
+  expect(
+    await resolveRedirect(env.DB, "/s/no-notes-in-bear-markdown-editor-for-macos"),
+  ).toBe("/");
+});
+
+it("ignores a trailing slash on a retired entry, as Gatsby's URLs carried one", async () => {
+  expect(await resolveRedirect(env.DB, "/s/tumblr_mp38ylJOSa1rdf37to1_1280/")).toBe("/");
+});
+
+// The set is checked after the table, so a retired path that later gains a
+// real state resolves to that state.
+it("prefers a live entry over the retired set", async () => {
+  expect(await resolveRedirect(env.DB, "/s/tumblr_mggrayiCsC1rdf37to1_1280")).toBe(
+    "/s/no-deals-yet",
+  );
+});

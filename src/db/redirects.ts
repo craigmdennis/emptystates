@@ -26,6 +26,30 @@ export function couldBeRedirect(pathname: string): boolean {
   return CLAIMABLE.some((prefix) => pathname.startsWith(prefix));
 }
 
+/**
+ * Entries master publishes that this corpus dropped during triage.
+ *
+ * `state_redirects.state_id` is `NOT NULL REFERENCES states(id)`, so a row
+ * cannot name a target that is not an entry. These eight have no successor,
+ * so they answer with the gallery.
+ *
+ * A literal set rather than a table: eight strings that will not grow, read
+ * without a D1 round trip on paths that are all scanner-adjacent anyway.
+ *
+ * Exported so `test/legacy-urls.test.ts` can hold it against the fixture,
+ * which is the only thing keeping the two lists the same.
+ */
+export const RETIRED = new Set([
+  "/s/no-notes-in-bear-markdown-editor-for-macos",
+  "/s/tumblr_mggzbrxUhV1rdf37to1_1280",
+  "/s/tumblr_mh5iv6T19s1rdf37to1_1280",
+  "/s/tumblr_mhpzfw7qkv1rdf37to1_1280",
+  "/s/tumblr_moiu2y7o7N1rdf37to1_1280",
+  "/s/tumblr_mp38ylJOSa1rdf37to1_1280",
+  "/s/tumblr_mt8030S4ue1rdf37to1_1280",
+  "/s/tumblr_n5hldmNcyT1rdf37to1_1280",
+]);
+
 export async function resolveRedirect(
   db: D1Database,
   path: string,
@@ -46,5 +70,8 @@ export async function resolveRedirect(
     .bind(candidates[0], candidates[1])
     .first<{ slug: string }>();
 
-  return row ? `/s/${row.slug}` : null;
+  if (row) return `/s/${row.slug}`;
+
+  // After the table, so a path that gains a real successor wins over the set.
+  return candidates.some((c) => RETIRED.has(c)) ? "/" : null;
 }
