@@ -2,11 +2,11 @@
 /**
  * Pages of 60. Rendered only when there is more than one.
  *
- * Both galleries had their own copy of Previous/Next; this is the copy.
- * Numbers are listed in full — with four pages that is right, and an ellipsis
- * becomes worth writing somewhere past ten.
+ * The page number is a path segment and the filters are a query string, so a
+ * pager link keeps the current search verbatim and changes only the path.
+ * `open` is dropped, since it would reopen a popover on arrival.
  */
-import { withParams } from "../lib/query";
+import { basePath, pageHref } from "../lib/pagination";
 
 interface Props {
   page: number;
@@ -15,8 +15,18 @@ interface Props {
 
 const { page, lastPage } = Astro.props;
 const url = Astro.url;
-const href = (n: number) =>
-  withParams(url, { page: n === 1 ? null : n, open: null });
+
+const base = basePath(url.pathname);
+
+const search = new URLSearchParams(url.search);
+search.delete("open");
+search.delete("page");
+// Literal commas, matching `canonicalPath` and `src/lib/query.ts`.
+const query = [...search]
+  .map(([k, v]) => `${k}=${v.split(",").map(encodeURIComponent).join(",")}`)
+  .join("&");
+
+const href = (n: number) => pageHref(base, n, query);
 const pages = Array.from({ length: lastPage }, (_, i) => i + 1);
 ---
 

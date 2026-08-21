@@ -1,3 +1,5 @@
+import { basePath } from "./pagination";
+
 /**
  * Rewrites the current query string for a link.
  *
@@ -71,7 +73,7 @@ export function toggleParam(url: URL, key: string, value: string): string {
 
   // The page number is a path segment, so returning to page 1 means dropping
   // it from the path.
-  const base = next.pathname.replace(/\/\d+$/, "") || "/";
+  const base = basePath(next.pathname);
 
   return `${base}${serialise(next.searchParams)}`;
 }

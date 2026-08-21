@@ -14,6 +14,7 @@
  * not mean opening the same popover three times.
  */
 import { readList, toggleParam, withParams } from "../lib/query";
+import { basePath } from "../lib/pagination";
 import Icon from "./Icon.astro";
 import type { Facet } from "../db/taxonomies";
 
@@ -26,6 +27,12 @@ interface Props {
 
 const { facets, total, page, perPage } = Astro.props;
 const url = Astro.url;
+
+// Choosing a filter returns to page 1. The page number is a path segment, so
+// a facet link builds from the base path. The layout switch keeps the current
+// path, since changing layout does not change which entries match.
+const filterUrl = new URL(url);
+filterUrl.pathname = basePath(url.pathname);
 
 const current = {
   device: url.searchParams.get("device"),
@@ -83,9 +90,8 @@ const to = Math.min(page * perPage, total);
             </summary>
             <div class="facet-pop">
               <a
-                href={withParams(url, {
+                href={withParams(filterUrl, {
                   [group.key]: null,
-                  page: null,
                   open: null,
                 })}
                 aria-current={active ? undefined : "true"}
@@ -95,9 +101,8 @@ const to = Math.min(page * perPage, total);
               </a>
               {group.options.map((option) => (
                 <a
-                  href={withParams(url, {
+                  href={withParams(filterUrl, {
                     [group.key]: option.slug,
-                    page: null,
                     open: null,
                   })}
                   aria-current={option.slug === active ? "true" : undefined}
@@ -124,7 +129,7 @@ const to = Math.min(page * perPage, total);
       </summary>
       <div class="facet-pop">
         <a
-          href={withParams(url, { tag: null, page: null, open: null })}
+          href={withParams(filterUrl, { tag: null, open: null })}
           aria-current={selectedTags.length ? undefined : "true"}
         >
           Any
@@ -154,11 +159,10 @@ const to = Math.min(page * perPage, total);
       filtered && (
         <a
           class="clear"
-          href={withParams(url, {
+          href={withParams(filterUrl, {
             device: null,
             os: null,
             tag: null,
-            page: null,
             open: null,
           })}
         >

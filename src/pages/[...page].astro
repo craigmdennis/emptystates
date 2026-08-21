@@ -1,0 +1,53 @@
+---
+/**
+ * The gallery, at `/` and at `/2` upward.
+ *
+ * A rest route rather than an `index.astro` beside a `[page].astro`, so the
+ * body exists once. Astro prefers a static route and then a dynamic one, so
+ * `/privacy` and `/s/<slug>` are claimed before this sees them.
+ *
+ * Everything this does not claim has to 404 here. A rest route at the root
+ * matches `/wp-admin/setup-config.php` as readily as `/2`, and the middleware
+ * only gets its turn on a 404.
+ */
+import Layout from "../layouts/Base.astro";
+import Gallery from "../components/Gallery.astro";
+import Pagination from "../components/Pagination.astro";
+import Toolbar from "../components/Toolbar.astro";
+import { getDb } from "../db/client";
+import { listStates } from "../db/states";
+import { listFacets } from "../db/taxonomies";
+import { parsePageSegment } from "../lib/pagination";
+import { readList } from "../lib/query";
+
+const PER_PAGE = 60;
+
+const segment = Astro.params.page;
+// `/1` names the page `/` already serves. One 301 rather than two addresses.
+if (segment === "1") return Astro.redirect("/", 301);
+
+const page = parsePageSegment(segment);
+if (page === null) return new Response("Not found", { status: 404 });
+
+const url = Astro.url;
+const device = url.searchParams.get("device") ?? undefined;
+const os = url.searchParams.get("os") ?? undefined;
+const tags = readList(url, "tag");
+
+const db = getDb();
+const [{ rows, total }, facets] = await Promise.all([
+  listStates(db, { page, perPage: PER_PAGE, device, os, tags }),
+  listFacets(db),
+]);
+
+const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+// A page past the end is a 404 rather than an empty gallery under a 200,
+// which is what a crawler reads as a real page holding nothing.
+if (page > lastPage) return new Response("Not found", { status: 404 });
+---
+
+<Layout title="EmptyStates">
+  <Toolbar facets={facets} total={total} page={page} perPage={PER_PAGE} />
+  <Gallery states={rows} />
+  <Pagination page={page} lastPage={lastPage} />
+</Layout>
