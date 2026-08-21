@@ -9,6 +9,7 @@
 import "../styles/global.css";
 import { getDb } from "../db/client";
 import { countStates } from "../db/states";
+import { canonicalPath } from "../lib/canonical";
 
 interface Props {
   title: string;
@@ -25,7 +26,7 @@ const {
 const siteTitle = "emptystat.es";
 const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
 const canonicalUrl = new URL(
-  Astro.url.pathname,
+  canonicalPath(Astro.url),
   Astro.site ?? "https://emptystat.es",
 );
 
