@@ -1,13 +1,13 @@
 /**
  * Serves an R2 object, for development only.
  *
- * Production points `PUBLIC_MEDIA_BASE` at nothing and every image URL resolves
- * to `img.emptystat.es`, the bucket's own custom domain, so images never invoke
- * the Worker — which the architecture requires. That domain has no local
- * equivalent, so `PUBLIC_MEDIA_BASE=/img` in `.dev.vars` routes the same
- * objects through the `MEDIA` binding instead.
+ * Every deployed image URL resolves to `img.emptystat.es`, the bucket's own
+ * custom domain, so images never invoke the Worker. `mediaBase()` returns that
+ * host for any build, staging included.
  *
- * Nothing links here when the variable is unset.
+ * `astro dev` runs on Vite with no bucket to read, so `PUBLIC_MEDIA_BASE=/img`
+ * in `.env` points each image here and this route reads it through the `MEDIA`
+ * binding. Nothing links here from a build.
  */
 
 import type { APIRoute } from "astro";

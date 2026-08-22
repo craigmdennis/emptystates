@@ -1,8 +1,18 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+
+  // This name matches the live Worker, which serves emptystat.es and
+  // www.emptystat.es as custom domains. `wrangler deploy` with no `--env`
+  // replaces the live site in one step, so the cutover is that command and
+  // nothing else.
+  //
+  // Test against `--env staging` first. That deploys a separate Worker,
+  // `emptystates-v2`, reading the same D1 and R2, and answering on its own
+  // workers.dev address.
   "name": "emptystates",
   "compatibility_date": "2026-08-04",
   "compatibility_flags": ["nodejs_compat"],
+
   "d1_databases": [
     {
       "binding": "DB",
@@ -17,15 +27,43 @@
       "bucket_name": "emptystates-media"
     }
   ],
-  "queues": {
-    "producers": [{ "queue": "ingest", "binding": "INGEST" }],
-    "consumers": [
-      {
-        "queue": "ingest",
-        "max_batch_size": 5,
-        "max_retries": 3,
-        "dead_letter_queue": "ingest-dlq"
-      }
-    ]
+
+  "env": {
+    // The address to check before the cutover. Same data, same code, its own
+    // Worker and its own hostname, so nothing here can reach emptystat.es.
+    //
+    // Bindings are repeated because wrangler does not inherit `d1_databases`,
+    // `r2_buckets` or `workers_dev` into an environment. `compatibility_date`
+    // and `compatibility_flags` are inherited.
+    //
+    //   npm run build:staging && npx wrangler deploy --env staging
+    //
+    // `build:staging` sets PUBLIC_MEDIA_BASE=/img, so images route through
+    // src/pages/img/[...key].ts and the MEDIA binding. Production reads them
+    // from img.emptystat.es, which never invokes the Worker.
+    "staging": {
+      "name": "emptystates-v2",
+      "workers_dev": true,
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "emptystates-db",
+          "database_id": "a695d0d3-a878-4ada-be03-380fd207c773",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "emptystates-media"
+        }
+      ]
+    }
   }
+
+  // No `queues` block. The ingest producer and consumer belong to spec 02,
+  // and nothing in src/ references the INGEST binding. Declaring a consumer
+  // for a queue that does not exist fails the deploy, and the Astro adapter's
+  // Worker exports no queue() handler to receive a message anyway. Add both
+  // back with the ingest pipeline in #33.
 }

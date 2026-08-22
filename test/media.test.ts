@@ -30,3 +30,9 @@ it("does not double the separator when the base ends in a slash", () => {
 it("does not double the separator when the key starts with one", () => {
   expect(mediaUrl("/w640/abc.webp", "/img")).toBe("/img/w640/abc.webp");
 });
+
+// The host every deployed page reads images from. A build returns this
+// whatever `PUBLIC_MEDIA_BASE` holds, so changing it here changes production.
+it("names the bucket's custom domain as the default", () => {
+  expect(DEFAULT_BASE).toBe("https://img.emptystat.es");
+});
