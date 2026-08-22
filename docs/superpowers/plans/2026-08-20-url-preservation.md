@@ -759,7 +759,7 @@ grep -n "page" src/components/Toolbar.astro
 
 Expected: matches on the `page` and `perPage` props and on the `page: null` arguments, and nothing building a path.
 
-- [ ] **Step 8: Verify the route boundaries by hand**
+- [x] **Step 8: Verify the route boundaries by hand**
 
 Astro's route priority is not something a unit test in the Workers pool reaches, because the adapter writes `main` into `dist/` at build time.
 
@@ -933,7 +933,7 @@ Expected: PASS. The disjointness case returns an empty array against the current
 Run: `npm test`
 Expected: PASS.
 
-- [ ] **Step 7: Verify by hand**
+- [x] **Step 7: Verify by hand**
 
 ```bash
 npm run build && npx wrangler dev
@@ -1318,6 +1318,35 @@ The ingest path in spec 02 and the submissions form in spec 03 write tags withou
 - **`robots.txt`.** Master publishes one; v2 does not. Nothing in this plan depends on it.
 - **The submissions guard.** `classifyTag` runs in the migration alone. Spec 02's ingest path and spec 03's submissions form write tags without it, so neither is stopped from inserting a facet-named tag. Separate issue, `v2.1`.
 - **Open Graph cards.** `2026-08-19-pre-launch.md` owns them, and a card is keyed by state id rather than by address.
+
+## Verified against a build, 2026-08-21
+
+All 15 addresses in Task 2 step 8 and Task 3 step 7 answered as specified,
+against `npm run build && npx wrangler dev`:
+
+| Address | Result |
+|---|---|
+| `/`, `/2`, `/privacy` | 200 |
+| `/2/` | 301 to `/2` |
+| `/1` | 301 to `/` |
+| `/99`, `/wp-admin/setup-config.php`, `/tags/not-a-tag`, `/tags/mobile/2/3` | 404 |
+| `/tags/mobile` | 301 to `/?device=phone` |
+| `/tags/mobile/` | 301 to `/tags/mobile` |
+| `/tags/mobile/2` | 301 to `/2?device=phone` |
+| `/tags/mobile/1` | 301 to `/?device=phone` |
+| `/tags/ios` | 301 to `/?os=ios` |
+| `/tags/onboarding` | 301 to `/?tag=onboarding` |
+
+`/wp-admin/setup-config.php` answering 404 is the row that matters: the root
+rest route claims every path no other route took, and a 200 there would serve
+the gallery to a scanner.
+
+`/tags/mobile/` reaching `/tags/mobile` and no further in one request confirms
+the ordering read from `node_modules/astro/dist/core/routing/handler.js:38`.
+`handleTrailingSlash` returns before anything else runs.
+
+Still outstanding: the `curl -sIL` chain over a renamed entry address, which
+measures the middleware hop rather than a route hop.
 
 ## Corrections found while executing, 2026-08-21
 
