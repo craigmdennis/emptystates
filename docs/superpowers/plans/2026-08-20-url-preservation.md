@@ -366,6 +366,12 @@ curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' \
   http://localhost:8787/s/tumblr_mggrayiCsC1rdf37to1_1280/
 ```
 
+Measured on the same build:
+
+```
+301 http://localhost:8787/s/tumblr_mggrayiCsC1rdf37to1_1280
+```
+
 The second hop is `context.redirect(target, 301)` in `src/middleware.ts`,
 which is a fixed 301 whatever the method.
 
