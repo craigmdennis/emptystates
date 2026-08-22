@@ -307,7 +307,7 @@ legacy tag paths instead of serving them.
 Run: `npm test`
 Expected: PASS, 157 tests.
 
-- [ ] **Step 8: Confirm the two-hop chain on a legacy entry address**
+- [x] **Step 8: Confirm the two-hop chain on a legacy entry address**
 
 Astro applies the slash redirect before the middleware. `handleRequest` in
 `node_modules/astro/dist/core/routing/handler.js:38` calls `handleTrailingSlash`
@@ -342,7 +342,32 @@ curl -sIL http://localhost:8787/s/tumblr_mggrayiCsC1rdf37to1_1280/ \
   | grep -i '^HTTP/\|^location:'
 ```
 
-Expected: two `301` lines, then `200`.
+Expected: two redirects, then `200`.
+
+Measured on 2026-08-21:
+
+```
+HTTP/1.1 308 Permanent Redirect
+Location: /s/tumblr_mggrayiCsC1rdf37to1_1280
+HTTP/1.1 301 Moved Permanently
+Location: /s/no-deals-yet
+HTTP/1.1 200 OK
+```
+
+**The 308 on the first hop is `curl -I` sending HEAD.**
+`trailing-slash-handler.js:17` reads
+`state.request.method === "GET" ? 301 : 308`, so a browser receives 301 and a
+HEAD probe receives 308. Both are permanent, and 308 preserves the method.
+Anyone re-running this check with `-I` sees the same 308 and nothing is wrong.
+Read the GET status with:
+
+```bash
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' \
+  http://localhost:8787/s/tumblr_mggrayiCsC1rdf37to1_1280/
+```
+
+The second hop is `context.redirect(target, 301)` in `src/middleware.ts`,
+which is a fixed 301 whatever the method.
 
 - [x] **Step 9: Commit**
 
