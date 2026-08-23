@@ -159,6 +159,12 @@
   flex: 0 0 auto;
 }
 
+.logo {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
 .wordmark strong {
   font-size: 15px;
   font-weight: 500;

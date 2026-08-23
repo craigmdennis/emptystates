@@ -34,7 +34,13 @@ export default defineConfig({
         miniflare: {
           bindings: {
             TEST_MIGRATIONS: migrations,
-            TEST_SOURCES: readSources("src"),
+            TEST_SOURCES: {
+              ...readSources("src"),
+              // `deploy-safety.test.ts` reads the two files that decide which
+              // Worker a deploy reaches.
+              "wrangler.jsonc": readFileSync("wrangler.jsonc", "utf8"),
+              "package.json": readFileSync("package.json", "utf8"),
+            },
           },
         },
       };

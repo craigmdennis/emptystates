@@ -10,6 +10,7 @@ import "../styles/global.css";
 import { getDb } from "../db/client";
 import { countStates } from "../db/states";
 import { canonicalPath } from "../lib/canonical";
+import Logo from "../components/Logo.astro";
 
 interface Props {
   title: string;
@@ -53,6 +54,26 @@ const view = requested === "square" ? "square" : "justified";
     {image && <meta property="og:image" content={image} />}
     <meta name="twitter:card" content="summary_large_image" />
 
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <script is:inline>
+      // `/privacy` states that the switch there is the only thing that stops
+      // this, and that an ad blocker will not. So the three signals are read
+      // before the script is requested, rather than after it has loaded.
+      try {
+        var out =
+          localStorage.getItem("es:optout") === "1" ||
+          navigator.doNotTrack === "1" ||
+          navigator.globalPrivacyControl === true;
+        if (!out) {
+          var s = document.createElement("script");
+          s.defer = true;
+          s.src = "https://plausible.io/js/pa-mcGkDVqdn7WDFxJz2eI03.js";
+          document.head.appendChild(s);
+        }
+      } catch (e) {}
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -81,6 +102,7 @@ const view = requested === "square" ? "square" : "justified";
     <header class="site-header">
       <div class="wrap">
         <a href="/" class="wordmark">
+          <Logo size={17} />
           <strong>Emptystates</strong>
           <span class="mono-11">{total} entries</span>
         </a>

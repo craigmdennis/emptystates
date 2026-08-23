@@ -1,0 +1,9 @@
+# Every gallery view is reachable from `/`, and `rel=canonical` names which
+# filter combinations are the ones to index. Nothing is disallowed here: a
+# blocked URL cannot be read, so its canonical is never seen and its links
+# lead nowhere.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://emptystat.es/sitemap.xml

@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "deploy": "npm run build && tsx scripts/deploy.ts",
+    "deploy:production": "npm run build && tsx scripts/deploy.ts --production",
     "preview": "astro preview",
     "clean": "astro clean",
     "test": "vitest run",

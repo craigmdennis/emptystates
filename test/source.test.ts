@@ -32,8 +32,12 @@ const isComment = (line: string) => /^\s*(\*|\/\/|\/\*)/.test(line);
 const GLYPHS = /[\u00B7\u00D7\u2022\u2013\u2026\u2190\u2191\u2192\u2193\u2197\u2713]/;
 
 it("draws icons through Icon.astro and nowhere else", () => {
+  // `Logo.astro` draws the brand mark: one filled path on a 338-unit box,
+  // which is neither an icon nor on `Icon.astro`'s 12x12 stroked grid.
+  const DRAWS_SVG = ["src/components/Icon.astro", "src/components/Logo.astro"];
+
   const offenders = templates
-    .filter(([path]) => path !== "src/components/Icon.astro")
+    .filter(([path]) => !DRAWS_SVG.includes(path))
     .filter(([, body]) =>
       body.split("\n").some((line) => !isComment(line) && line.includes("<svg")),
     )
