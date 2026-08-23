@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // No framework integration: nothing here is an island. Both gallery layouts
 // are one DOM under `[data-view]`, the filters are links, and the two scripts
-// in `Base.astro` are inline. React went out with the last EMDash component.
+// in `Base.astro` are inline. React went out with the last CMS component.
 export default defineConfig({
   // One address per page. Under Astro's default of 'ignore', `/2` and `/2/`
   // both answer 200 and the canonical is all that separates them. Under

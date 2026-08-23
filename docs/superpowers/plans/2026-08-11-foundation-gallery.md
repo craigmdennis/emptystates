@@ -1601,7 +1601,7 @@ image until then.
 npm run build && npx wrangler deploy
 ```
 
-- [ ] **Step 4: Confirm no EMDash reference survived**
+- [x] **Step 4: Confirm no EMDash reference survived**
 
 ```bash
 grep -rn "emdash\|EmDash\|EMDash" src/ astro.config.mjs wrangler.jsonc package.json \
