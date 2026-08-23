@@ -1567,13 +1567,13 @@ against the current set. Until then `/s/<slug>` unfurls without an image.
 
 Tracked as [#32](https://github.com/craigmdennis/emptystates/issues/32).
 
-- [ ] **Step 1: Apply migrations to remote D1**
+- [x] **Step 1: Apply migrations to remote D1**
 
 ```bash
 npx wrangler d1 migrations apply emptystates-db --remote
 ```
 
-- [ ] **Step 2: Run the migration against remote**
+- [x] **Step 2: Run the migration against remote**
 
 Point `scripts/migrate-legacy.ts` at `--remote` and run. Confirm counts match the local run.
 
@@ -1584,7 +1584,7 @@ them. Seven local runs left 1,738 objects under `originals/` against 235 rows.
 Before re-running against remote for any reason, list the bucket and delete the
 keys no `states.r2_key` names.
 
-- [ ] **Step 2a: Generate the display variants against remote**
+- [x] **Step 2a: Generate the display variants against remote**
 
 ```bash
 npx tsx scripts/build-variants.ts

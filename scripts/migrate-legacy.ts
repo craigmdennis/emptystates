@@ -23,20 +23,26 @@ const REPORT_PATH = "migration-report.md";
 
 const dryRun = process.argv.includes("--dry-run");
 
+const remote = process.argv.includes("--remote");
+
 const { env, dispose } = await getPlatformProxy<{
   DB: D1Database;
   MEDIA: R2Bucket;
-}>({
-  // Pinned off rather than left to the default, which is `true`. Local-only is
-  // the whole safety property of a dry run, and it should not become untrue
-  // because someone later marks a binding remote in wrangler.jsonc. The remote
-  // import is Task 12's job and needs that config change made deliberately.
-  remoteBindings: false,
-});
+}>(
+  remote
+    ? // `wrangler.remote.jsonc` marks both bindings `remote: true`. A separate
+      // file, so `wrangler dev` cannot pick the flag up and write to the
+      // database the site serves.
+      { configPath: "wrangler.remote.jsonc", remoteBindings: true }
+    : // Local-only is the whole safety property of a dry run, and it should not
+      // become untrue because someone later marks a binding remote in
+      // `wrangler.jsonc`.
+      { remoteBindings: false },
+);
 
 try {
   console.log(
-    `Reading ${CORPUS_DIR} — ${dryRun ? "dry run" : "local write"}`,
+    `Reading ${CORPUS_DIR} — ${dryRun ? "dry run" : remote ? "REMOTE write" : "local write"}`,
   );
 
   const resolution = await discoverCorpus(CORPUS_DIR);

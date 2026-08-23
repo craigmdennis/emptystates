@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Bindings that reach the real D1 and the real R2, for the two migration
+  // scripts and nothing else.
+  //
+  //   npx tsx scripts/migrate-legacy.ts --remote
+  //   npx tsx scripts/build-variants.ts --remote
+  //
+  // A separate file rather than a `remote` flag in `wrangler.jsonc`, because
+  // `remote: true` there would also apply to `wrangler dev`, and a local
+  // session would then write to the database the site serves.
+  //
+  // **Never deploy with this config.** It carries no routes and no
+  // environments on purpose: `wrangler deploy` reads `wrangler.jsonc`.
+  //
+  // `wrangler d1` commands need `--config wrangler.jsonc` after any build.
+  // The Astro adapter writes `.wrangler/deploy/config.json`, which points
+  // wrangler at the generated `dist/server/wrangler.json`, and D1 commands
+  // fail there with API error 7403.
+  "name": "emptystates-migrate",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "emptystates-db",
+      "database_id": "a695d0d3-a878-4ada-be03-380fd207c773",
+      "migrations_dir": "migrations",
+      "remote": true
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "emptystates-media",
+      "remote": true
+    }
+  ]
+}

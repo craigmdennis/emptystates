@@ -29,10 +29,22 @@ const force = args.includes("--force");
 const onlyIndex = args.indexOf("--only");
 const only = onlyIndex === -1 ? null : args[onlyIndex + 1];
 
+const remote = process.argv.includes("--remote");
+
 const { env, dispose } = await getPlatformProxy<{
   DB: D1Database;
   MEDIA: R2Bucket;
-}>({ remoteBindings: false });
+}>(
+  remote
+    ? // `wrangler.remote.jsonc` marks both bindings `remote: true`. A separate
+      // file, so `wrangler dev` cannot pick the flag up and write to the
+      // database the site serves.
+      { configPath: "wrangler.remote.jsonc", remoteBindings: true }
+    : // Local-only is the whole safety property of a dry run, and it should not
+      // become untrue because someone later marks a binding remote in
+      // `wrangler.jsonc`.
+      { remoteBindings: false },
+);
 
 try {
   const states = [];
