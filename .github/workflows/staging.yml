@@ -1,0 +1,58 @@
+name: Staging
+
+# Every push to v2 runs the suite, then publishes the staging Worker.
+#
+# Nothing in this file names the live Worker. `test/deploy-safety.test.ts`
+# asserts that, because the incident on 2026-08-23 was a command that reached
+# production while reading as though it named staging.
+on:
+  push:
+    branches: [v2]
+  pull_request:
+    branches: [v2]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+
+    # The token lives here rather than at repository level, so a workflow that
+    # does not name an environment has no Cloudflare credential at all.
+    environment:
+      name: staging
+      url: https://emptystates-v2.craig-8d2.workers.dev
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # 24 rather than the 26 on the author's machine: astro wants >=22.12 and
+      # vitest wants ^20 || ^22 || >=24, so 24 is the lowest release both
+      # accept and the one with prebuilt sharp and workerd binaries.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+
+      # No `tsc --noEmit` step: typescript is not a dependency of this project,
+      # and `npx tsc` in CI would resolve an unpinned compiler on every run.
+      - run: npm test
+
+      # A pull request builds and tests. Only a push publishes.
+      - name: Publish to staging
+        if: github.event_name == 'push'
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Build only
+        if: github.event_name == 'pull_request'
+        run: npm run build

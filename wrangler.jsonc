@@ -3,8 +3,10 @@
 
   // **This is the staging Worker.** A bare `wrangler deploy` publishes
   // `emptystates-v2` on its workers.dev address and cannot reach
-  // emptystat.es. The live Worker is called `emptystates`, and reaching it
-  // takes `npm run deploy:production`, which asks for typed confirmation.
+  // emptystat.es. The live Worker is called `emptystates`, and no local
+  // command names it: production is published by
+  // `.github/workflows/production.yml`, from a `v2.*` tag, behind the
+  // required reviewer on the `production` environment. See docs/deploying.md.
   //
   // The name is inverted on purpose. On 2026-08-23 a
   // `wrangler deploy --env staging` replaced the live Gatsby site, because
@@ -15,9 +17,9 @@
   // publishes staging.
   //
   // **Do not add an `env` block here.** It does not survive a build, and
-  // `test/deploy-safety.test.ts` fails if one appears. The deploy target is
-  // set by `scripts/deploy.ts`, which patches the generated config's `name` —
-  // the field wrangler actually reads.
+  // `test/deploy-safety.test.ts` fails if one appears. CI names its target
+  // with `--name`, which wrangler resolves as `args.name ?? config.name` and
+  // which therefore overrides the generated config outright.
   "name": "emptystates-v2",
   "workers_dev": true,
 

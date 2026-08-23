@@ -1,0 +1,128 @@
+name: Production
+
+# Tagging is the whole interface. `git tag v2.0.0 && git push origin v2.0.0`
+# uploads a version and stops; the promote job then waits on the `production`
+# environment's required reviewer before any traffic moves.
+#
+# A tag rather than `workflow_dispatch` because a dispatch only appears once
+# the workflow file sits on the repository's default branch, and that is still
+# `master`. A tag push runs the workflow file from the tagged commit, so this
+# works from v2 today.
+on:
+  push:
+    tags: ["v2.*"]
+
+permissions:
+  contents: read
+
+env:
+  WORKER: emptystates
+
+jobs:
+  # Uploading creates a version and a preview URL. It moves no traffic, so it
+  # needs no approval — the point is to have something to look at before
+  # approving.
+  upload:
+    runs-on: ubuntu-latest
+    environment:
+      name: production-preview
+    outputs:
+      version-id: ${{ steps.upload.outputs.version-id }}
+      preview-url: ${{ steps.upload.outputs.preview-url }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      # `--name` overrides the name in the generated config, which the adapter
+      # writes as the staging Worker. Wrangler resolves it as
+      # `args.name ?? config.name`, so the flag wins outright. This is the one
+      # place the live Worker is named, and it is named on purpose.
+      - id: upload
+        name: Upload a version, deploy nothing
+        run: |
+          set -euo pipefail
+          npx wrangler versions upload \
+            --name "$WORKER" \
+            --tag "${GITHUB_SHA::8}" \
+            --message "${GITHUB_REF_NAME} (${GITHUB_SHA::8})" 2>&1 | tee upload.log
+
+          version_id=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' upload.log | tail -1)
+          preview_url=$(grep -oE 'https://[^ ]+\.workers\.dev' upload.log | tail -1 || true)
+
+          if [ -z "$version_id" ]; then
+            echo "::error::No version id in the upload output. Refusing to hand a blank id to the promote job."
+            exit 1
+          fi
+
+          echo "version-id=$version_id" >> "$GITHUB_OUTPUT"
+          echo "preview-url=$preview_url" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Summarise what the reviewer is approving
+        run: |
+          {
+            echo "## Version ready to promote"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Worker | \`$WORKER\` |"
+            echo "| Tag | \`${GITHUB_REF_NAME}\` |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Version | \`${{ steps.upload.outputs.version-id }}\` |"
+            echo "| Preview | ${{ steps.upload.outputs.preview-url }} |"
+            echo
+            echo "Check the preview, then approve the **promote** job."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The gate. `production` carries the required reviewer and a tag-only branch
+  # policy, so this job cannot start from a branch push or from an unapproved
+  # run.
+  promote:
+    needs: upload
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://emptystat.es
+    concurrency:
+      group: production
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+
+      # The exact version the reviewer looked at. Nothing is rebuilt here, so
+      # the bytes on the preview are the bytes that take traffic.
+      - name: Move traffic to the approved version
+        run: |
+          npx wrangler versions deploy "${VERSION_ID}@100" \
+            --name "$WORKER" \
+            --message "${GITHUB_REF_NAME} approved by ${GITHUB_ACTOR}" \
+            --yes
+        env:
+          VERSION_ID: ${{ needs.upload.outputs.version-id }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # The rollback on 2026-08-23 reverted the origin and left the edge
+      # serving the old HTML for several minutes. A promote has the same
+      # problem in the other direction, so the purge is part of the deploy
+      # rather than a thing to remember afterwards.
+      - name: Purge the zone cache
+        run: bash scripts/purge-cache.sh
+        env:
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

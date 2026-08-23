@@ -12,13 +12,21 @@ import { defineConfig } from "vitest/config";
  * `source.test.ts` checks the templates themselves rather than what they
  * render, and workerd has no filesystem — the same reason the migrations are
  * read out here and passed in.
+ *
+ * `match` decides which files a directory contributes, so the same walk reads
+ * `src` and the workflow directory. Reading the whole workflow directory
+ * rather than three named files is what makes `deploy-safety.test.ts` cover a
+ * workflow added later.
  */
-function readSources(dir: string, acc: Record<string, string> = {}) {
+function readSources(
+  dir: string,
+  match: RegExp,
+  acc: Record<string, string> = {},
+) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) readSources(path, acc);
-    else if (/\.(astro|ts|css)$/.test(entry.name))
-      acc[path] = readFileSync(path, "utf8");
+    if (entry.isDirectory()) readSources(path, match, acc);
+    else if (match.test(entry.name)) acc[path] = readFileSync(path, "utf8");
   }
   return acc;
 }
@@ -35,11 +43,13 @@ export default defineConfig({
           bindings: {
             TEST_MIGRATIONS: migrations,
             TEST_SOURCES: {
-              ...readSources("src"),
-              // `deploy-safety.test.ts` reads the two files that decide which
+              ...readSources("src", /\.(astro|ts|css)$/),
+              // `deploy-safety.test.ts` reads every file that decides which
               // Worker a deploy reaches.
+              ...readSources(".github/workflows", /\.ya?ml$/),
               "wrangler.jsonc": readFileSync("wrangler.jsonc", "utf8"),
               "package.json": readFileSync("package.json", "utf8"),
+              "scripts/deploy.ts": readFileSync("scripts/deploy.ts", "utf8"),
             },
           },
         },
