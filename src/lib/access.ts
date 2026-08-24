@@ -15,9 +15,12 @@ export function requiresAuth(pathname: string): boolean {
   return /^\/(?:api\/)?admin(?:\/|$)/.test(pathname);
 }
 
-function b64urlToBytes(s: string): Uint8Array {
+function b64urlToBytes(s: string): Uint8Array<ArrayBuffer> {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
 }
 
 function decodeJson(part: string): Record<string, unknown> {
