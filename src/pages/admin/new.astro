@@ -100,6 +100,7 @@ const continueId = draft ? null : await nextPendingDraft(db);
                         value={d.slug}
                         class="peer sr-only"
                         checked={d.slug === derived}
+                        required
                       />
                       <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
                         {d.label}
@@ -114,7 +115,7 @@ const continueId = draft ? null : await nextPendingDraft(db);
                 <div class="flex flex-wrap gap-2">
                   {oses.map((o) => (
                     <label class="cursor-pointer">
-                      <input type="radio" name="os" value={o.slug} class="peer sr-only" />
+                      <input type="radio" name="os" value={o.slug} class="peer sr-only" required />
                       <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
                         {o.label}
                       </span>
