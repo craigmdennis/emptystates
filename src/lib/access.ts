@@ -12,7 +12,26 @@ export type AccessConfig = { teamDomain: string; aud: string };
 
 /** `/admin` and `/api/admin`, their subpaths, and nothing else. */
 export function requiresAuth(pathname: string): boolean {
-  return /^\/(?:api\/)?admin(?:\/|$)/.test(pathname);
+  return /^\/(?:api\/)?admin(?:\/|$)/i.test(pathname);
+}
+
+/**
+ * Normalizes a raw request path the same way Astro's router does before
+ * matching: collapse duplicate leading slashes, then decodeURI. A path the
+ * router would resolve to `/admin*` must be gated even as `//admin/new` or
+ * `/%61dmin/new`, so this has to run before `requiresAuth`, not after.
+ *
+ * A malformed escape fails closed: the collapsed-but-undecoded path is
+ * returned rather than thrown, so a guarded route (matched pre-decode by
+ * `requiresAuth`'s own regex) still 401s instead of erroring past the check.
+ */
+export function normalizePath(pathname: string): string {
+  const collapsed = pathname.replace(/^\/{2,}/, "/");
+  try {
+    return decodeURI(collapsed);
+  } catch {
+    return collapsed;
+  }
 }
 
 function b64urlToBytes(s: string): Uint8Array<ArrayBuffer> {

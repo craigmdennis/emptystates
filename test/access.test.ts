@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest";
-import { requiresAuth, verifyAccessJwt } from "../src/lib/access";
+import { normalizePath, requiresAuth, verifyAccessJwt } from "../src/lib/access";
 
 const enc = (o: object) =>
   btoa(JSON.stringify(o)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -74,4 +74,26 @@ describe("requiresAuth", () => {
   it.each(["/", "/s/some-slug", "/administrator", "/api/other", "/img/w640/x.webp"])(
     "leaves %s open", (p) => expect(requiresAuth(p)).toBe(false),
   );
+
+  it("is case-insensitive", () => {
+    expect(requiresAuth("/Admin")).toBe(true);
+  });
+});
+
+describe("normalizePath", () => {
+  it("collapses duplicate leading slashes so //admin/new is gated", () => {
+    expect(requiresAuth(normalizePath("//admin/new"))).toBe(true);
+  });
+
+  it("decodes percent-encoding so /%61dmin/new is gated", () => {
+    expect(requiresAuth(normalizePath("/%61dmin/new"))).toBe(true);
+  });
+
+  it("does not gate a merely doubled-slash api path", () => {
+    expect(requiresAuth(normalizePath("/api//admin"))).toBe(false);
+  });
+
+  it("does not throw on a malformed escape", () => {
+    expect(() => normalizePath("/%ZZbad")).not.toThrow();
+  });
 });
