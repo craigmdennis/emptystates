@@ -40,9 +40,12 @@ Build the following in the Shortcuts app.
    Share Sheet" action, so the shortcut appears in the share sheet for images.
 2. Add "Get Contents of URL", set to `https://emptystat.es/api/admin/upload`,
    method POST. Set the request body to Form, with one field named `file`,
-   type File, value Shortcut Input. Add two headers, `CF-Access-Client-Id`
+   type File, value Shortcut Input. Add three headers: `CF-Access-Client-Id`
    and `CF-Access-Client-Secret`, set to the client ID and secret of the
-   service token created above.
+   service token created above, and `Origin`, set to `https://emptystat.es`.
+   The server rejects a form POST without a matching Origin header as a CSRF
+   protection, and the Shortcuts app sends no Origin header on its own, so
+   this header must be set explicitly.
 3. Add "Get Dictionary Value" for the key `url`, reading from the response of
    the previous action.
 4. Add "Open URLs", set to `https://emptystat.es` followed by that value. The
