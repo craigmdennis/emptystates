@@ -26,8 +26,9 @@
   "compatibility_date": "2026-08-04",
   "compatibility_flags": ["nodejs_compat"],
 
-  // Staging and production read the same data. The rebuild only reads, so a
-  // staging session cannot change what the live site serves.
+  // Staging and production read the same data. The admin under /admin writes;
+  // Access guards it on every hostname, and the middleware returns 401
+  // anywhere Access is not configured.
   "d1_databases": [
     {
       "binding": "DB",
@@ -41,7 +42,10 @@
       "binding": "MEDIA",
       "bucket_name": "emptystates-media"
     }
-  ]
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
 
   // No `queues` block. The ingest producer and consumer belong to spec 02,
   // and nothing in src/ references the INGEST binding. Declaring a consumer
