@@ -65,6 +65,23 @@ describe("verifyAccessJwt", () => {
   it("rejects garbage without throwing", async () => {
     expect(await verifyAccessJwt("not-a-jwt", CFG, async () => [])).toBeNull();
   });
+
+  it("returns the client id for a service-token payload (no email claim)", async () => {
+    const { token, jwk } = await makeToken({
+      type: "app", aud: ["aud-tag"], exp: future,
+      iss: "https://example.cloudflareaccess.com",
+      common_name: "client-id-value", sub: "",
+    });
+    expect(await verifyAccessJwt(token, CFG, async () => [jwk])).toBe("client-id-value");
+  });
+
+  it("returns null for a verified token with no identity claims", async () => {
+    const { token, jwk } = await makeToken({
+      aud: ["aud-tag"], exp: future,
+      iss: "https://example.cloudflareaccess.com",
+    });
+    expect(await verifyAccessJwt(token, CFG, async () => [jwk])).toBeNull();
+  });
 });
 
 describe("requiresAuth", () => {

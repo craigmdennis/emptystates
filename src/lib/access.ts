@@ -75,6 +75,7 @@ export async function verifyAccessJwt(
 
     const payload = decodeJson(p) as {
       aud?: string | string[]; exp?: number; iss?: string; email?: string; sub?: string;
+      common_name?: string;
     };
     const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
     if (!aud.includes(cfg.aud)) return null;
@@ -98,7 +99,10 @@ export async function verifyAccessJwt(
     );
     if (!valid) return null;
 
-    return payload.email ?? payload.sub ?? null;
+    // Service tokens carry no `email`: `common_name` is the client id, and
+    // `sub` is often an empty string rather than absent, so `||` (not `??`)
+    // is what actually falls through it.
+    return payload.email ?? payload.common_name ?? (payload.sub || null);
   } catch {
     return null;
   }
