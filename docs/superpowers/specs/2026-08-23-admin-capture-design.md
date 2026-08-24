@@ -38,8 +38,9 @@ The middleware verifies the `Cf-Access-Jwt-Assertion` JWT against the team's
 public keys (`https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`) and
 returns 401 when the token is missing or invalid. Service-token requests carry
 the same header with an `aud`-matched JWT, so one verification covers both
-identities. Keys are fetched with `caches.default` so the JWKS call is not
-per-request.
+identities. Keys are cached in a module-level variable with a 1-hour TTL so
+the JWKS call is not per-request; a stale set only matters across a key
+rotation, and the next isolate fetches fresh.
 
 **Fail closed.** A hostname without an Access policy — staging on workers.dev
 before the toggle is set, or a misconfigured route — serves 401, never the
