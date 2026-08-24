@@ -1,0 +1,246 @@
+---
+/**
+ * The capture screen. Phone in one hand, this is the whole loop: pick photos,
+ * publish one, land on the next pending draft, repeat.
+ *
+ * Two modes on one route, chosen by the `draft` query param rather than two
+ * pages, because the picker and the editor share nothing worth splitting a
+ * URL over and the redirects in `publish.ts` already speak this shape.
+ * `Base.astro` is deliberately unused: no site header, footer, or canonical
+ * belongs on a screen nobody outside Access ever sees.
+ */
+import "../../styles/global.css";
+import { getDb } from "../../db/client";
+import { getDraft, countPendingDrafts, nextPendingDraft } from "../../db/submissions";
+import {
+  listDeviceRanges, listOsOptions, listTagOptions, listAppNames,
+} from "../../db/taxonomies";
+import { deriveDevice } from "../../lib/device";
+import { mediaUrl } from "../../lib/media";
+
+const db = getDb();
+const draftId = Astro.url.searchParams.get("draft");
+const error = Astro.url.searchParams.get("error");
+const published = Astro.url.searchParams.get("published");
+
+const draft = draftId ? await getDraft(db, draftId) : null;
+const pending = await countPendingDrafts(db);
+
+// A draft id that no longer resolves means it was published from another
+// device in the same batch. That is success, not an error: fall through to
+// the picker with a note instead of a dead form.
+const goneDraft = Boolean(draftId) && !draft;
+
+const [devices, oses, tagOptions, appNames] = draft
+  ? await Promise.all([
+      listDeviceRanges(db), listOsOptions(db), listTagOptions(db), listAppNames(db),
+    ])
+  : [[], [], [], []];
+const derived = draft ? deriveDevice(draft.aspect_ratio, devices) : null;
+
+// Only the picker offers a way back into the queue; the editor already shows
+// "n more" instead.
+const continueId = draft ? null : await nextPendingDraft(db);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>New state — admin</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body class="min-h-dvh bg-[var(--ground)] text-[var(--ink)]">
+    <main class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-4">
+      {
+        draft && !goneDraft ? (
+          <>
+            <div class="mb-3 flex flex-col gap-2">
+              {pending > 1 && (
+                <p class="text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
+              )}
+              {published && (
+                <p class="rounded bg-green-100 px-3 py-2 text-sm text-green-900">
+                  Published {published}
+                </p>
+              )}
+              {error && (
+                <p class="rounded bg-red-100 px-3 py-2 text-sm text-red-900">{error}</p>
+              )}
+            </div>
+
+            <img
+              src={mediaUrl(draft.r2_key)}
+              alt=""
+              class="mx-auto mb-4 w-auto rounded"
+              style="max-height: 45vh; object-fit: contain;"
+            />
+
+            <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
+              <input type="hidden" name="draft" value={draft.id} />
+
+              <fieldset>
+                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Device</legend>
+                <div class="flex flex-wrap gap-2">
+                  {devices.map((d) => (
+                    <label class="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="device_type"
+                        value={d.slug}
+                        class="peer sr-only"
+                        checked={d.slug === derived}
+                      />
+                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                        {d.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">OS</legend>
+                <div class="flex flex-wrap gap-2">
+                  {oses.map((o) => (
+                    <label class="cursor-pointer">
+                      <input type="radio" name="os" value={o.slug} class="peer sr-only" />
+                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                        {o.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                App name
+                <input
+                  name="app_name"
+                  list="apps"
+                  required
+                  autocapitalize="words"
+                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                />
+              </label>
+              <datalist id="apps">
+                {appNames.map((name) => (
+                  <option value={name} />
+                ))}
+              </datalist>
+
+              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                Title
+                <input
+                  name="title"
+                  required
+                  placeholder="No results in Feedly"
+                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                />
+              </label>
+
+              <fieldset>
+                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Tags</legend>
+                <div class="flex flex-wrap gap-2">
+                  {tagOptions.map((t) => (
+                    <label class="cursor-pointer">
+                      <input type="checkbox" name="tags" value={t.slug} class="peer sr-only" />
+                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                        {t.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                App URL (optional)
+                <input
+                  name="app_url"
+                  type="url"
+                  inputmode="url"
+                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                />
+              </label>
+
+              <button
+                type="submit"
+                class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white"
+              >
+                Publish
+              </button>
+            </form>
+          </>
+        ) : (
+          <div class="flex flex-1 flex-col">
+            {goneDraft && (
+              <p class="mb-3 rounded bg-green-100 px-3 py-2 text-sm text-green-900">
+                Draft already published
+              </p>
+            )}
+            {pending > 0 && (
+              <p class="mb-3 text-sm text-[var(--muted)]">
+                {pending} pending
+                {continueId && (
+                  <a href={`/admin/new?draft=${continueId}`} class="ml-2 underline">
+                    Continue
+                  </a>
+                )}
+              </p>
+            )}
+
+            <label
+              for="picker"
+              class="flex flex-1 min-h-[60vh] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)]"
+            >
+              Add screenshots
+              <input
+                id="picker"
+                type="file"
+                name="file"
+                accept="image/*"
+                multiple
+                class="sr-only"
+              />
+            </label>
+
+            <p id="picker-status" class="mt-3 text-sm text-[var(--muted)]" aria-live="polite"></p>
+          </div>
+        )
+      }
+    </main>
+
+    <script>
+      // The only client script on the page: everything else is a native form
+      // POST. Files upload one at a time so a slow phone connection shows
+      // progress instead of a silent multi-megabyte batch; the first
+      // response's `url` is where the edit form for that batch starts.
+      const input = document.getElementById("picker") as HTMLInputElement | null;
+      const status = document.getElementById("picker-status");
+
+      input?.addEventListener("change", async () => {
+        const files = Array.from(input.files ?? []);
+        if (!files.length) return;
+
+        let firstUrl: string | null = null;
+        for (let i = 0; i < files.length; i++) {
+          if (status) status.textContent = `Uploading ${i + 1} of ${files.length}...`;
+          const body = new FormData();
+          body.append("file", files[i]);
+          const res = await fetch("/api/admin/upload", { method: "POST", body });
+          const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+          if (!res.ok || !data?.url) {
+            if (status) status.textContent = data?.error ?? "Upload failed";
+            return;
+          }
+          if (!firstUrl) firstUrl = data.url;
+        }
+        if (firstUrl) location.href = firstUrl;
+      });
+    </script>
+  </body>
+</html>
