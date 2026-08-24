@@ -53,3 +53,14 @@ it("uploads via the picker and publishes via a plain form", () => {
   expect(page).toMatch(/name="tags"/);
   expect(page).toContain("manifest.webmanifest");
 });
+
+it("carries failed uploads instead of stranding drafts mid-batch", () => {
+  // The picker script must not bail out of the loop on a failed file: it has
+  // to keep going and count failures rather than `return` on the first one.
+  expect(page).not.toMatch(/failedCount\+\+;\s*\n\s*return;/);
+  expect(page).toContain("failedCount");
+  expect(page).toMatch(/failed=\$\{failedCount\}/);
+  // ...and the edit strip has to render that count somewhere the phone lands.
+  expect(page).toMatch(/searchParams\.get\("failed"\)/);
+  expect(page).toMatch(/upload\(s\) failed/);
+});
