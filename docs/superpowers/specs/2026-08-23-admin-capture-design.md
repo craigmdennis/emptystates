@@ -142,6 +142,13 @@ write is in the one batch.
 `color_names` and the vision fields stay null, as they do for legacy rows;
 ingest (#33) backfills them.
 
+### No deploy, no commit
+
+The site is `output: "server"`: every page reads D1 at request time, and
+images are served from R2 directly. A publish is therefore live the moment
+step 5's batch commits — no git commit, no build, no deploy. Git carries code
+only.
+
 ---
 
 ## 5. Shortcut
