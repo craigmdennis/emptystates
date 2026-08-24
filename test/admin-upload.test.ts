@@ -51,6 +51,15 @@ it("rejects a format the Images API cannot transform", async () => {
   expect(result).toMatchObject({ ok: false, status: 415 });
 });
 
+it("rejects AVIF: Enterprise-only as a transform input, so publish would fail forever", async () => {
+  const file = new File([PNG], "photo.avif", { type: "image/avif" });
+  const result = await handleUpload(
+    adminEnv(fakeImages({ format: "image/avif", width: 100, height: 100 })),
+    file,
+  );
+  expect(result).toMatchObject({ ok: false, status: 415 });
+});
+
 it("rejects bytes that fail to decode", async () => {
   const broken: ImagesLike = {
     info: async () => { throw new Error("not an image"); },

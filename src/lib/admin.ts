@@ -24,13 +24,15 @@ export type ImagesLike = {
 
 export type AdminEnv = { db: D1Database; media: R2Bucket; images: ImagesLike };
 
+// AVIF is excluded: as a transformation input it is Enterprise-only on
+// Cloudflare Images, so an accepted AVIF upload would create a draft whose
+// publish (the transform step) fails forever.
 /** Formats the Images binding accepts as input and the gallery can serve. */
 const EXT: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
   "image/heic": "heic",
-  "image/avif": "avif",
 };
 
 const MAX_BYTES = 20 * 1024 * 1024; // the Images binding's input ceiling
