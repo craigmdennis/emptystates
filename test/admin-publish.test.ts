@@ -79,6 +79,35 @@ it("rejects missing fields with their names", async () => {
   if (!result.ok) expect(result.error).toMatch(/title.*tags|tags.*title/i);
 });
 
+it("rejects an unknown tag slug", async () => {
+  const id = await freshDraft();
+  const result = await handlePublish(adminEnv, id, { ...FIELDS, tagSlugs: ["not-a-real-tag"] });
+  expect(result).toMatchObject({ ok: false, status: 422 });
+});
+
+it("rejects an unknown device type", async () => {
+  const id = await freshDraft();
+  const result = await handlePublish(adminEnv, id, { ...FIELDS, deviceType: "toaster" });
+  expect(result).toMatchObject({ ok: false, status: 422 });
+});
+
+it("publishes with duplicate tag slugs in the list", async () => {
+  const id = await freshDraft();
+  // Distinct title: keeps this publish's slug out of the base-slug collision
+  // count the later "dedupes a colliding slug" test relies on.
+  const result = await handlePublish(adminEnv, id, {
+    ...FIELDS,
+    title: "No results found (duplicate tag test)",
+    tagSlugs: ["no-results", "no-results"],
+  });
+  if (!result.ok) throw new Error(result.error);
+
+  const tag = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM state_tags st JOIN tags t ON t.id = st.tag_id WHERE st.state_id = ? AND t.slug = 'no-results'",
+  ).bind(id).first<{ n: number }>();
+  expect(tag?.n).toBe(1);
+});
+
 it("dedupes a colliding slug", async () => {
   const id = await freshDraft();
   const result = await handlePublish(adminEnv, id, FIELDS);

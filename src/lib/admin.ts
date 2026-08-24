@@ -98,15 +98,28 @@ export async function handlePublish(
   const draft = await getDraft(env.db, draftId);
   if (!draft) return { ok: false, status: 404, error: "No pending draft with that id" };
 
+  const device = await env.db
+    .prepare("SELECT 1 FROM device_types WHERE slug = ? AND is_active = 1")
+    .bind(f.deviceType)
+    .first();
+  if (!device) return { ok: false, status: 422, error: "Unknown device" };
+
+  const os = await env.db
+    .prepare("SELECT 1 FROM operating_systems WHERE slug = ? AND is_active = 1")
+    .bind(f.os)
+    .first();
+  if (!os) return { ok: false, status: 422, error: "Unknown os" };
+
+  const tagSlugs = [...new Set(f.tagSlugs)];
   const tags = (
     await env.db
       .prepare(
-        `SELECT id, slug, label FROM tags WHERE slug IN (${f.tagSlugs.map(() => "?").join(",")})`,
+        `SELECT id, slug, label FROM tags WHERE slug IN (${tagSlugs.map(() => "?").join(",")})`,
       )
-      .bind(...f.tagSlugs)
+      .bind(...tagSlugs)
       .all<{ id: number; slug: string; label: string }>()
   ).results;
-  if (tags.length !== f.tagSlugs.length) {
+  if (tags.length !== tagSlugs.length) {
     return { ok: false, status: 422, error: "Unknown tag" };
   }
 
@@ -180,7 +193,7 @@ export async function handlePublish(
       )
       .bind(
         f.title.trim(), f.appName.trim(), f.deviceType, f.os,
-        JSON.stringify(f.tagSlugs), now, draft.id, draft.id,
+        JSON.stringify(tagSlugs), now, draft.id, draft.id,
       ),
   ]);
 

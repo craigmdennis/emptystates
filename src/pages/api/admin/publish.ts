@@ -31,7 +31,8 @@ export const POST: APIRoute = async ({ request, url }) => {
     );
   } catch {
     // The draft is still pending; send the phone back to it to retry.
-    return Response.redirect(new URL(`/admin/new?draft=${draftId}&error=retry`, url), 303);
+    const q = new URLSearchParams({ draft: draftId, error: "retry" });
+    return Response.redirect(new URL(`/admin/new?${q}`, url), 303);
   }
 
   if (!result.ok) {
