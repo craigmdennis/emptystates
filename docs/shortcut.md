@@ -88,7 +88,7 @@ exists needs no delete first. Running the command again replaces the value.
 values.
 
 Run the commands from the repository root. After any build, add
-`--config wrangler.jsonc`; the build leaves `.wrangler/deploy/config.json`
+`--config wrangler.jsonc`. The build leaves `.wrangler/deploy/config.json`
 pointing wrangler at the generated configuration, which is the wrong one for
 secret and D1 commands.
 
