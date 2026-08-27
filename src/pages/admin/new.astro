@@ -32,6 +32,18 @@ const pending = await countPendingDrafts(db);
 // the picker with a note instead of a dead form.
 const goneDraft = Boolean(draftId) && !draft;
 
+// One toast per navigation. The params never co-occur: `failed` arrives from
+// the picker, `error` and `published` from the publish redirect.
+const notice = error
+  ? { tone: "bg-red-100 text-red-900", text: error }
+  : failed
+    ? { tone: "bg-amber-100 text-amber-900", text: `${failed} upload(s) failed` }
+    : published
+      ? { tone: "bg-green-100 text-green-900", text: `Published ${published}`, href: `/s/${published}` }
+      : goneDraft
+        ? { tone: "bg-green-100 text-green-900", text: "Draft already published" }
+        : null;
+
 const [devices, oses, tagOptions, appNames] = draft
   ? await Promise.all([
       listDeviceRanges(db), listOsOptions(db), listTagOptions(db), listAppNames(db),
@@ -67,24 +79,9 @@ const continueId = draft ? null : await nextPendingDraft(db);
             />
 
             <div class="flex flex-1 flex-col">
-              <div class="mb-3 flex flex-col gap-2">
-                {pending > 1 && (
-                  <p class="text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
-                )}
-                {published && (
-                  <p class="rounded bg-green-100 px-3 py-2 text-sm text-green-900">
-                    Published {published}
-                  </p>
-                )}
-                {error && (
-                  <p class="rounded bg-red-100 px-3 py-2 text-sm text-red-900">{error}</p>
-                )}
-                {failed && (
-                  <p class="rounded bg-amber-100 px-3 py-2 text-sm text-amber-900">
-                    {failed} upload(s) failed
-                  </p>
-                )}
-              </div>
+              {pending > 1 && (
+                <p class="mb-3 text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
+              )}
 
               <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
                 <input type="hidden" name="draft" value={draft.id} />
@@ -176,7 +173,8 @@ const continueId = draft ? null : await nextPendingDraft(db);
 
                 <button
                   type="submit"
-                  class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white"
+                  id="publish"
+                  class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white transition active:scale-[0.98] active:opacity-80 disabled:opacity-60"
                 >
                   Publish
                 </button>
@@ -185,11 +183,6 @@ const continueId = draft ? null : await nextPendingDraft(db);
           </div>
         ) : (
           <div class="flex flex-1 flex-col">
-            {goneDraft && (
-              <p class="mb-3 rounded bg-green-100 px-3 py-2 text-sm text-green-900">
-                Draft already published
-              </p>
-            )}
             {pending > 0 && (
               <p class="mb-3 text-sm text-[var(--muted)]">
                 {pending} pending
@@ -222,7 +215,41 @@ const continueId = draft ? null : await nextPendingDraft(db);
       }
     </main>
 
+    {
+      notice && (
+        <p
+          role="status"
+          class:list={[
+            "fixed inset-x-4 top-4 z-10 flex items-center justify-between gap-3 rounded px-3 py-2 text-sm shadow md:inset-x-auto md:right-8 md:w-80",
+            notice.tone,
+          ]}
+        >
+          {notice.text}
+          {notice.href && (
+            <a href={notice.href} class="font-semibold underline">
+              View
+            </a>
+          )}
+        </p>
+      )
+    }
+
     <script>
+      // Publish is a native form POST, and the variants it writes take a few
+      // seconds. Change the button on submit so the press registers at once,
+      // and undo that when the page is restored from the back-forward cache.
+      const publish = document.getElementById("publish") as HTMLButtonElement | null;
+      publish?.form?.addEventListener("submit", () => {
+        publish.disabled = true;
+        publish.textContent = "Publishing\u2026";
+      });
+      window.addEventListener("pageshow", (e) => {
+        if (e.persisted && publish) {
+          publish.disabled = false;
+          publish.textContent = "Publish";
+        }
+      });
+
       // The only client script on the page: everything else is a native form
       // POST. Files upload one at a time so a slow phone connection shows
       // progress instead of a silent multi-megabyte batch; the first

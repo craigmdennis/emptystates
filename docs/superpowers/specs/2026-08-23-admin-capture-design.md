@@ -130,8 +130,9 @@ Takes the draft id plus the form fields. In order:
    `state_tags`, the `states_fts` row, and the submission update to
    `approved` with `reviewed_at` and `published_state_id`.
 6. Delete the `submissions/` R2 object.
-7. Redirect: the oldest remaining pending admin draft if one exists, else
-   `/s/<slug>`.
+7. Redirect to `/admin/new?published=<slug>`, with `&draft=<id>` for the
+   oldest remaining pending admin draft if one exists. The capture screen
+   shows a toast with a link to the published state.
 
 D1 has no cross-request transactions with R2, so order matters: R2 writes
 first, the D1 batch next, the source-object delete last. A failure before the

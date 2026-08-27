@@ -1,7 +1,7 @@
 /**
  * Publish a draft. A plain form POST — the capture screen works without any
- * client JavaScript on this step. 303 so the browser lands on the next draft
- * or the published entry with a GET.
+ * client JavaScript on this step. 303 so the browser lands back on the
+ * capture screen with a GET: the next draft if one waits, else the picker.
  */
 
 import type { APIRoute } from "astro";
@@ -39,8 +39,8 @@ export const POST: APIRoute = async ({ request, url }) => {
     const q = new URLSearchParams({ draft: draftId, error: result.error });
     return Response.redirect(new URL(`/admin/new?${q}`, url), 303);
   }
-  const dest = result.nextDraft
-    ? `/admin/new?draft=${result.nextDraft}&published=${result.slug}`
-    : `/s/${result.slug}`;
-  return Response.redirect(new URL(dest, url), 303);
+  // Always back to the capture screen: the toast there links to the post.
+  const q = new URLSearchParams({ published: result.slug });
+  if (result.nextDraft) q.set("draft", result.nextDraft);
+  return Response.redirect(new URL(`/admin/new?${q}`, url), 303);
 };
