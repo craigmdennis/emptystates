@@ -15,8 +15,9 @@ do it. Tick each item as it lands.
       columns in `states_fts`. Test: a row with a description keeps it
       after a save.
 - [x] **The gate's 401 path has a test.** `vi.stubEnv("DEV", false)` in
-      a middleware test, so a request to `/admin/new` without a token is
-      answered 401 and one with a valid cookie is let through.
+      a middleware test, so a request to `/admin/new` without a token, or
+      with one that fails verification, is answered 401. The pass path
+      needs the team's JWKS endpoint and stays a staging check.
 - [x] **Launch order is written down.** `docs/deploying.md` gains the
       order for the first production deploy: tag, deploy, set the two
       secrets, then `/admin` answers. Until the secrets exist the gate
