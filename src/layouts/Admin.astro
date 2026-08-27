@@ -1,0 +1,63 @@
+---
+/**
+ * The shell for every admin screen. `Base.astro` is deliberately unused: no
+ * site header, footer, or canonical belongs on a screen nobody outside Access
+ * ever sees. One column on a phone, wider from `md` up.
+ */
+import "../styles/global.css";
+import Notice, { type NoticeProps } from "../components/admin/Notice.astro";
+
+interface Props {
+  title: string;
+  notice?: NoticeProps | null;
+}
+
+const { title, notice = null } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title} — admin</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body class="min-h-dvh bg-[var(--ground)] text-[var(--ink)]">
+    <main class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-4 md:max-w-5xl md:px-8">
+      <slot />
+    </main>
+
+    {notice && <Notice {...notice} />}
+
+    <script>
+      // Every admin form is a native POST, and publish in particular takes a
+      // few seconds. A button carrying `data-busy` changes to that text on
+      // submit so the press registers at once. The disable waits one tick:
+      // a submitter disabled during the event is left out of the form data,
+      // and the edit screen's buttons carry the `intent` field.
+      for (const form of document.querySelectorAll("form")) {
+        form.addEventListener("submit", (e) => {
+          const b = (e as SubmitEvent).submitter as HTMLButtonElement | null;
+          if (!b?.dataset.busy) return;
+          setTimeout(() => {
+            b.dataset.label = b.textContent ?? "";
+            b.textContent = b.dataset.busy ?? "";
+            b.disabled = true;
+          }, 0);
+        });
+      }
+      // Restored from the back-forward cache: undo the above.
+      window.addEventListener("pageshow", (e) => {
+        if (!e.persisted) return;
+        for (const b of document.querySelectorAll<HTMLButtonElement>("button[data-label]")) {
+          b.textContent = b.dataset.label ?? "";
+          b.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -25,6 +25,19 @@ export function requiresAuth(pathname: string): boolean {
  * returned rather than thrown, so a guarded route (matched pre-decode by
  * `requiresAuth`'s own regex) still 401s instead of erroring past the check.
  */
+/**
+ * The Access JWT a request carries, if any. Access puts it in a header on
+ * paths its application covers, and in the `CF_Authorization` cookie for the
+ * whole domain after a login, which is how a public page can tell the admin
+ * apart from a visitor.
+ */
+export function accessToken(request: Request): string | null {
+  const header = request.headers.get("cf-access-jwt-assertion");
+  if (header) return header;
+  const m = /(?:^|;\s*)CF_Authorization=([^;]+)/.exec(request.headers.get("cookie") ?? "");
+  return m ? m[1] : null;
+}
+
 export function normalizePath(pathname: string): string {
   const collapsed = pathname.replace(/^\/{2,}/, "/");
   try {

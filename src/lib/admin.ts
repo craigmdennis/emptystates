@@ -81,13 +81,18 @@ export type PublishFields = {
   tagSlugs: string[];
 };
 
-export async function handlePublish(
-  env: AdminEnv,
-  draftId: string,
+type Tag = { id: number; slug: string; label: string };
+type Rejected = { ok: false; status: number; error: string };
+
+/**
+ * The field rules publish and update share: every required field present,
+ * device and OS active taxonomy rows, every tag known. D1 does not enforce
+ * the foreign keys, so this is the only place an unknown slug is stopped.
+ */
+async function validateFields(
+  db: D1Database,
   f: PublishFields,
-): Promise<
-  { ok: true; slug: string; nextDraft: string | null } | { ok: false; status: number; error: string }
-> {
+): Promise<{ ok: true; tags: Tag[]; tagSlugs: string[] } | Rejected> {
   const missing = [
     !f.title?.trim() && "title",
     !f.appName?.trim() && "app name",
@@ -97,16 +102,13 @@ export async function handlePublish(
   ].filter(Boolean);
   if (missing.length) return { ok: false, status: 422, error: `Missing: ${missing.join(", ")}` };
 
-  const draft = await getDraft(env.db, draftId);
-  if (!draft) return { ok: false, status: 404, error: "No pending draft with that id" };
-
-  const device = await env.db
+  const device = await db
     .prepare("SELECT 1 FROM device_types WHERE slug = ? AND is_active = 1")
     .bind(f.deviceType)
     .first();
   if (!device) return { ok: false, status: 422, error: "Unknown device" };
 
-  const os = await env.db
+  const os = await db
     .prepare("SELECT 1 FROM operating_systems WHERE slug = ? AND is_active = 1")
     .bind(f.os)
     .first();
@@ -114,16 +116,30 @@ export async function handlePublish(
 
   const tagSlugs = [...new Set(f.tagSlugs)];
   const tags = (
-    await env.db
+    await db
       .prepare(
         `SELECT id, slug, label FROM tags WHERE slug IN (${tagSlugs.map(() => "?").join(",")})`,
       )
       .bind(...tagSlugs)
-      .all<{ id: number; slug: string; label: string }>()
+      .all<Tag>()
   ).results;
   if (tags.length !== tagSlugs.length) {
     return { ok: false, status: 422, error: "Unknown tag" };
   }
+  return { ok: true, tags, tagSlugs };
+}
+
+export async function handlePublish(
+  env: AdminEnv,
+  draftId: string,
+  f: PublishFields,
+): Promise<{ ok: true; slug: string; nextDraft: string | null } | Rejected> {
+  const valid = await validateFields(env.db, f);
+  if (!valid.ok) return valid;
+  const { tags, tagSlugs } = valid;
+
+  const draft = await getDraft(env.db, draftId);
+  if (!draft) return { ok: false, status: 404, error: "No pending draft with that id" };
 
   // Same collision rule as the importer: base slug, then -2, -3, ...
   const base = slugify(f.title.trim(), f.appName.trim());
@@ -204,4 +220,57 @@ export async function handlePublish(
   await env.media.delete(draft.r2_key);
 
   return { ok: true, slug, nextDraft: await nextPendingDraft(env.db, draft.id) };
+}
+
+export type UpdateIntent = "save" | "unpublish" | "publish";
+
+/**
+ * Rewrite a published or unpublished state's fields, and its status when the
+ * intent says so. Slug, image, and `published_at` never change here: the
+ * public URL stays put, and a state published again after an unpublish
+ * returns to its original place in the gallery.
+ */
+export async function handleUpdate(
+  db: D1Database,
+  id: string,
+  f: PublishFields,
+  intent: UpdateIntent,
+): Promise<{ ok: true; slug: string; status: "published" | "draft" } | Rejected> {
+  const valid = await validateFields(db, f);
+  if (!valid.ok) return valid;
+  const { tags } = valid;
+
+  const row = await db
+    .prepare("SELECT slug, status FROM states WHERE id = ?")
+    .bind(id)
+    .first<{ slug: string; status: "published" | "draft" }>();
+  if (!row) return { ok: false, status: 404, error: "No state with that id" };
+
+  const status =
+    intent === "unpublish" ? "draft" : intent === "publish" ? "published" : row.status;
+
+  await db.batch([
+    db
+      .prepare(
+        `UPDATE states
+            SET title = ?, app_name = ?, app_url = ?, device_type = ?, os = ?, status = ?
+          WHERE id = ?`,
+      )
+      .bind(
+        f.title.trim(), f.appName.trim(), f.appUrl?.trim() || null,
+        f.deviceType, f.os, status, id,
+      ),
+    db.prepare("DELETE FROM state_tags WHERE state_id = ?").bind(id),
+    ...tags.map((t) =>
+      db.prepare("INSERT INTO state_tags (state_id, tag_id) VALUES (?, ?)").bind(id, t.id),
+    ),
+    ...writeFtsRow(db, {
+      stateId: id,
+      title: f.title.trim(),
+      appName: f.appName.trim(),
+      tags: tags.map((t) => t.label).join(" "),
+    }),
+  ]);
+
+  return { ok: true, slug: row.slug, status };
 }

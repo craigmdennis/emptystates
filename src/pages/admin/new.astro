@@ -6,10 +6,10 @@
  * Two modes on one route, chosen by the `draft` query param rather than two
  * pages, because the picker and the editor share nothing worth splitting a
  * URL over and the redirects in `publish.ts` already speak this shape.
- * `Base.astro` is deliberately unused: no site header, footer, or canonical
- * belongs on a screen nobody outside Access ever sees.
  */
-import "../../styles/global.css";
+import Admin from "../../layouts/Admin.astro";
+import StateFields from "../../components/admin/StateFields.astro";
+import type { NoticeProps } from "../../components/admin/Notice.astro";
 import { getDb } from "../../db/client";
 import { getDraft, countPendingDrafts, nextPendingDraft } from "../../db/submissions";
 import {
@@ -34,14 +34,14 @@ const goneDraft = Boolean(draftId) && !draft;
 
 // One toast per navigation. The params never co-occur: `failed` arrives from
 // the picker, `error` and `published` from the publish redirect.
-const notice = error
-  ? { tone: "bg-red-100 text-red-900", text: error }
+const notice: NoticeProps | null = error
+  ? { tone: "err", text: error }
   : failed
-    ? { tone: "bg-amber-100 text-amber-900", text: `${failed} upload(s) failed` }
+    ? { tone: "warn", text: `${failed} upload(s) failed` }
     : published
-      ? { tone: "bg-green-100 text-green-900", text: `Published ${published}`, href: `/s/${published}` }
+      ? { tone: "ok", text: `Published ${published}`, href: `/s/${published}` }
       : goneDraft
-        ? { tone: "bg-green-100 text-green-900", text: "Draft already published" }
+        ? { tone: "ok", text: "Draft already published" }
         : null;
 
 const [devices, oses, tagOptions, appNames] = draft
@@ -56,239 +56,114 @@ const derived = draft ? deriveDevice(draft.aspect_ratio, devices) : null;
 const continueId = draft ? null : await nextPendingDraft(db);
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>New state — admin</title>
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  </head>
+<Admin title="New state" notice={notice}>
+  {
+    draft ? (
+      <div class="flex flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:items-start md:gap-10">
+        <img
+          src={mediaUrl(draft.r2_key)}
+          alt=""
+          class="mx-auto mb-4 max-h-[45vh] w-auto rounded object-contain md:sticky md:top-4 md:mb-0 md:max-h-[calc(100dvh-2rem)]"
+        />
 
-  <body class="min-h-dvh bg-[var(--ground)] text-[var(--ink)]">
-    <main class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-4 md:max-w-5xl md:px-8">
-      {
-        draft && !goneDraft ? (
-          <div class="flex flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:items-start md:gap-10">
-            <img
-              src={mediaUrl(draft.r2_key)}
-              alt=""
-              class="mx-auto mb-4 max-h-[45vh] w-auto rounded object-contain md:sticky md:top-4 md:mb-0 md:max-h-[calc(100dvh-2rem)]"
+        <div class="flex flex-1 flex-col">
+          {pending > 1 && (
+            <p class="mb-3 text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
+          )}
+
+          <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
+            <input type="hidden" name="draft" value={draft.id} />
+            <StateFields
+              devices={devices}
+              oses={oses}
+              tagOptions={tagOptions}
+              appNames={appNames}
+              values={{ deviceType: derived }}
             />
-
-            <div class="flex flex-1 flex-col">
-              {pending > 1 && (
-                <p class="mb-3 text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
-              )}
-
-              <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
-                <input type="hidden" name="draft" value={draft.id} />
-
-                <fieldset>
-                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Device</legend>
-                  <div class="flex flex-wrap gap-2">
-                    {devices.map((d) => (
-                      <label class="cursor-pointer">
-                        <input
-                          type="radio"
-                          name="device_type"
-                          value={d.slug}
-                          class="peer sr-only"
-                          checked={d.slug === derived}
-                          required
-                        />
-                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                          {d.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <fieldset>
-                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">OS</legend>
-                  <div class="flex flex-wrap gap-2">
-                    {oses.map((o) => (
-                      <label class="cursor-pointer">
-                        <input type="radio" name="os" value={o.slug} class="peer sr-only" required />
-                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                          {o.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                  App name
-                  <input
-                    name="app_name"
-                    list="apps"
-                    required
-                    autocapitalize="words"
-                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                  />
-                </label>
-                <datalist id="apps">
-                  {appNames.map((name) => (
-                    <option value={name} />
-                  ))}
-                </datalist>
-
-                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                  Title
-                  <input
-                    name="title"
-                    required
-                    placeholder="No results in Feedly"
-                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                  />
-                </label>
-
-                <fieldset>
-                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Tags</legend>
-                  <div class="flex flex-wrap gap-2">
-                    {tagOptions.map((t) => (
-                      <label class="cursor-pointer">
-                        <input type="checkbox" name="tags" value={t.slug} class="peer sr-only" />
-                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                          {t.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                  App URL (optional)
-                  <input
-                    name="app_url"
-                    type="url"
-                    inputmode="url"
-                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  id="publish"
-                  class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white transition active:scale-[0.98] active:opacity-80 disabled:opacity-60"
-                >
-                  Publish
-                </button>
-              </form>
-            </div>
-          </div>
-        ) : (
-          <div class="flex flex-1 flex-col">
-            {pending > 0 && (
-              <p class="mb-3 text-sm text-[var(--muted)]">
-                {pending} pending
-                {continueId && (
-                  <a href={`/admin/new?draft=${continueId}`} class="ml-2 underline">
-                    Continue
-                  </a>
-                )}
-              </p>
-            )}
-
-            <label
-              for="picker"
-              class="flex flex-1 min-h-[60vh] w-full cursor-pointer md:mx-auto md:max-w-2xl md:min-h-[24rem] md:flex-none flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)]"
+            <button
+              type="submit"
+              data-busy="Publishing..."
+              class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white transition active:scale-[0.98] active:opacity-80 disabled:opacity-60"
             >
-              Add screenshots
-              <input
-                id="picker"
-                type="file"
-                name="file"
-                accept="image/*"
-                multiple
-                class="sr-only"
-              />
-            </label>
-
-            <p id="picker-status" class="mt-3 text-sm text-[var(--muted)]" aria-live="polite"></p>
-          </div>
-        )
-      }
-    </main>
-
-    {
-      notice && (
-        <p
-          role="status"
-          class:list={[
-            "fixed inset-x-4 top-4 z-10 flex items-center justify-between gap-3 rounded px-3 py-2 text-sm shadow md:inset-x-auto md:right-8 md:w-80",
-            notice.tone,
-          ]}
-        >
-          {notice.text}
-          {notice.href && (
-            <a href={notice.href} class="font-semibold underline">
-              View
-            </a>
+              Publish
+            </button>
+          </form>
+        </div>
+      </div>
+    ) : (
+      <div class="flex flex-1 flex-col">
+        <p class="mb-3 flex gap-4 text-sm text-[var(--muted)]">
+          <a href="/admin" class="underline">Drafts</a>
+          {pending > 0 && (
+            <span>
+              {pending} pending
+              {continueId && (
+                <a href={`/admin/new?draft=${continueId}`} class="ml-2 underline">
+                  Continue
+                </a>
+              )}
+            </span>
           )}
         </p>
-      )
+
+        <label
+          for="picker"
+          class="flex flex-1 min-h-[60vh] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)] md:mx-auto md:max-w-2xl md:min-h-[24rem] md:flex-none"
+        >
+          Add screenshots
+          <input
+            id="picker"
+            type="file"
+            name="file"
+            accept="image/*"
+            multiple
+            class="sr-only"
+          />
+        </label>
+
+        <p id="picker-status" class="mt-3 text-sm text-[var(--muted)]" aria-live="polite"></p>
+      </div>
+    )
+  }
+</Admin>
+
+<script>
+  // Files upload one at a time so a slow phone connection shows progress
+  // instead of a silent multi-megabyte batch; the first response's `url` is
+  // where the edit form for that batch starts.
+  const input = document.getElementById("picker") as HTMLInputElement | null;
+  const status = document.getElementById("picker-status");
+
+  input?.addEventListener("change", async () => {
+    const files = Array.from(input.files ?? []);
+    if (!files.length) return;
+
+    // A failed file mid-batch does not stop the rest: the drafts already
+    // made for earlier files are real rows, and returning early would
+    // strand them with no route back except a manual reload. Failures
+    // are counted and surfaced instead, on whichever screen has room —
+    // the edit strip for the first success, the picker itself if none.
+    let firstUrl: string | null = null;
+    let failedCount = 0;
+    let firstFailure: string | null = null;
+    for (let i = 0; i < files.length; i++) {
+      if (status) status.textContent = `Uploading ${i + 1} of ${files.length}...`;
+      const body = new FormData();
+      body.append("file", files[i]);
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+      if (!res.ok || !data?.url) {
+        failedCount++;
+        if (!firstFailure) firstFailure = data?.error ?? "Upload failed";
+        continue;
+      }
+      if (!firstUrl) firstUrl = data.url;
     }
 
-    <script>
-      // Publish is a native form POST, and the variants it writes take a few
-      // seconds. Change the button on submit so the press registers at once,
-      // and undo that when the page is restored from the back-forward cache.
-      const publish = document.getElementById("publish") as HTMLButtonElement | null;
-      publish?.form?.addEventListener("submit", () => {
-        publish.disabled = true;
-        publish.textContent = "Publishing\u2026";
-      });
-      window.addEventListener("pageshow", (e) => {
-        if (e.persisted && publish) {
-          publish.disabled = false;
-          publish.textContent = "Publish";
-        }
-      });
-
-      // The only client script on the page: everything else is a native form
-      // POST. Files upload one at a time so a slow phone connection shows
-      // progress instead of a silent multi-megabyte batch; the first
-      // response's `url` is where the edit form for that batch starts.
-      const input = document.getElementById("picker") as HTMLInputElement | null;
-      const status = document.getElementById("picker-status");
-
-      input?.addEventListener("change", async () => {
-        const files = Array.from(input.files ?? []);
-        if (!files.length) return;
-
-        // A failed file mid-batch does not stop the rest: the drafts already
-        // made for earlier files are real rows, and returning early would
-        // strand them with no route back except a manual reload. Failures
-        // are counted and surfaced instead, on whichever screen has room —
-        // the edit strip for the first success, the picker itself if none.
-        let firstUrl: string | null = null;
-        let failedCount = 0;
-        let firstFailure: string | null = null;
-        for (let i = 0; i < files.length; i++) {
-          if (status) status.textContent = `Uploading ${i + 1} of ${files.length}...`;
-          const body = new FormData();
-          body.append("file", files[i]);
-          const res = await fetch("/api/admin/upload", { method: "POST", body });
-          const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
-          if (!res.ok || !data?.url) {
-            failedCount++;
-            if (!firstFailure) firstFailure = data?.error ?? "Upload failed";
-            continue;
-          }
-          if (!firstUrl) firstUrl = data.url;
-        }
-
-        if (firstUrl) {
-          location.href = failedCount ? `${firstUrl}&failed=${failedCount}` : firstUrl;
-        } else if (status) {
-          status.textContent = `${firstFailure ?? "Upload failed"} (${failedCount} failed)`;
-        }
-      });
-    </script>
-  </body>
-</html>
+    if (firstUrl) {
+      location.href = failedCount ? `${firstUrl}&failed=${failedCount}` : firstUrl;
+    } else if (status) {
+      status.textContent = `${firstFailure ?? "Upload failed"} (${failedCount} failed)`;
+    }
+  });
+</script>

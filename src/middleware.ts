@@ -17,24 +17,26 @@ import type { MiddlewareHandler } from "astro";
 import { env } from "cloudflare:workers";
 import { getDb } from "./db/client";
 import { couldBeRedirect, resolveRedirect } from "./db/redirects";
-import { normalizePath, requiresAuth, verifyAccessJwt } from "./lib/access";
+import { accessToken, normalizePath, requiresAuth, verifyAccessJwt } from "./lib/access";
 
 // A type-only import, so this module loads outside Astro's build and its
 // behaviour is testable. `defineMiddleware` from `astro:middleware` returns its
 // argument unchanged and buys nothing but the annotation, while making the
 // module unloadable anywhere the virtual module does not exist.
+async function isAdmin(request: Request): Promise<boolean> {
+  const token = accessToken(request);
+  const e = env as unknown as { ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string };
+  if (!token || !e.ACCESS_TEAM_DOMAIN || !e.ACCESS_AUD) return false;
+  const who = await verifyAccessJwt(token, { teamDomain: e.ACCESS_TEAM_DOMAIN, aud: e.ACCESS_AUD });
+  return who !== null;
+}
+
 export const onRequest: MiddlewareHandler = async (context, next) => {
-  if (requiresAuth(normalizePath(context.url.pathname)) && !import.meta.env.DEV) {
-    const e = env as unknown as { ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string };
-    const token = context.request.headers.get("cf-access-jwt-assertion");
-    const email =
-      token && e.ACCESS_TEAM_DOMAIN && e.ACCESS_AUD
-        ? await verifyAccessJwt(token, {
-            teamDomain: e.ACCESS_TEAM_DOMAIN,
-            aud: e.ACCESS_AUD,
-          })
-        : null;
-    if (!email) return new Response("Unauthorized", { status: 401 });
+  // Verified on any request that carries a token, so a public page can show
+  // the admin an Edit link. A visitor carries none and costs nothing here.
+  context.locals.admin = import.meta.env.DEV || (await isAdmin(context.request));
+  if (requiresAuth(normalizePath(context.url.pathname)) && !context.locals.admin) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const response = await next();

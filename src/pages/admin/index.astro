@@ -1,0 +1,58 @@
+---
+/**
+ * The admin's front door: unpublished states as thumbnails, each a link to
+ * its edit screen, and the way into the capture screen. An unpublished state
+ * has no public page, so this grid is its only route back.
+ */
+import Admin from "../../layouts/Admin.astro";
+import type { NoticeProps } from "../../components/admin/Notice.astro";
+import { getDb } from "../../db/client";
+import { listDraftStates } from "../../db/states";
+import { countPendingDrafts } from "../../db/submissions";
+import { imageSources } from "../../lib/images";
+
+const db = getDb();
+const [drafts, pending] = await Promise.all([listDraftStates(db), countPendingDrafts(db)]);
+
+const published = Astro.url.searchParams.get("published");
+const unpublished = Astro.url.searchParams.get("unpublished");
+const notice: NoticeProps | null = published
+  ? { tone: "ok", text: `Published ${published}`, href: `/s/${published}` }
+  : unpublished
+    ? { tone: "ok", text: `Unpublished ${unpublished}` }
+    : null;
+---
+
+<Admin title="Drafts" notice={notice}>
+  <p class="mb-4 flex flex-wrap items-center gap-4 text-sm text-[var(--muted)]">
+    <a href="/admin/new" class="rounded-lg bg-[var(--ink)] px-4 py-2 font-semibold text-white">
+      Add screenshots
+    </a>
+    {pending > 0 && <a href="/admin/new" class="underline">{pending} pending upload(s)</a>}
+    <a href="/" class="ml-auto underline">Gallery</a>
+  </p>
+
+  {
+    drafts.length === 0 ? (
+      <p class="text-sm text-[var(--muted)]">No unpublished states.</p>
+    ) : (
+      <ul class="grid grid-cols-3 gap-2 md:grid-cols-5 lg:grid-cols-6">
+        {drafts.map((s) => (
+          <li>
+            <a href={`/admin/edit/${s.id}`} class="block">
+              <img
+                src={imageSources(s).src}
+                alt=""
+                width={s.width}
+                height={s.height}
+                loading="lazy"
+                class="aspect-square w-full rounded bg-[var(--chip)] object-contain"
+              />
+              <span class="mt-1 block truncate text-xs text-[var(--muted)]">{s.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Admin>

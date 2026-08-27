@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest";
-import { normalizePath, requiresAuth, verifyAccessJwt } from "../src/lib/access";
+import { accessToken, normalizePath, requiresAuth, verifyAccessJwt } from "../src/lib/access";
 
 const enc = (o: object) =>
   btoa(JSON.stringify(o)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -112,5 +112,26 @@ describe("normalizePath", () => {
 
   it("does not throw on a malformed escape", () => {
     expect(() => normalizePath("/%ZZbad")).not.toThrow();
+  });
+});
+
+describe("accessToken", () => {
+  it("prefers the header Access adds on gated paths", () => {
+    const req = new Request("https://x/admin/new", {
+      headers: { "cf-access-jwt-assertion": "h.h.h", cookie: "CF_Authorization=c.c.c" },
+    });
+    expect(accessToken(req)).toBe("h.h.h");
+  });
+
+  it("falls back to the domain-wide cookie on a public page", () => {
+    const req = new Request("https://x/s/slug", {
+      headers: { cookie: "es:view=square; CF_Authorization=c.c.c; other=1" },
+    });
+    expect(accessToken(req)).toBe("c.c.c");
+  });
+
+  it("is null for a visitor", () => {
+    expect(accessToken(new Request("https://x/s/slug"))).toBeNull();
+    expect(accessToken(new Request("https://x/", { headers: { cookie: "a=1" } }))).toBeNull();
   });
 });

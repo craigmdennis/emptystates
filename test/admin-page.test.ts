@@ -40,9 +40,13 @@ it("lists distinct app names for the datalist", async () => {
 
 // The page itself renders in workerd, so assert over its source the way
 // source.test.ts does: the load-bearing attributes must exist.
-const page = Object.entries(env.TEST_SOURCES as Record<string, string>).find(
-  ([p]) => p.endsWith("src/pages/admin/new.astro"),
-)?.[1] as string;
+const source = (suffix: string) =>
+  Object.entries(env.TEST_SOURCES as Record<string, string>).find(([p]) =>
+    p.endsWith(suffix),
+  )?.[1] as string;
+const page = source("src/pages/admin/new.astro");
+const fields = source("src/components/admin/StateFields.astro");
+const layout = source("src/layouts/Admin.astro");
 
 it("uploads via the picker and publishes via a plain form", () => {
   expect(page).toContain('type="file"');
@@ -50,8 +54,8 @@ it("uploads via the picker and publishes via a plain form", () => {
   expect(page).toContain("multiple");
   expect(page).toContain('action="/api/admin/publish"');
   expect(page).toContain('method="POST"');
-  expect(page).toMatch(/name="tags"/);
-  expect(page).toContain("manifest.webmanifest");
+  expect(fields).toMatch(/name="tags"/);
+  expect(layout).toContain("manifest.webmanifest");
 });
 
 it("carries failed uploads instead of stranding drafts mid-batch", () => {
@@ -63,4 +67,19 @@ it("carries failed uploads instead of stranding drafts mid-batch", () => {
   // ...and the edit strip has to render that count somewhere the phone lands.
   expect(page).toMatch(/searchParams\.get\("failed"\)/);
   expect(page).toMatch(/upload\(s\) failed/);
+});
+
+const edit = source("src/pages/admin/edit/[id].astro");
+const detail = source("src/pages/s/[slug].astro");
+
+it("edits through the shared fields and names the intent on each button", () => {
+  expect(edit).toContain('action="/api/admin/update"');
+  expect(edit).toContain("<StateFields");
+  expect(edit).toMatch(/name="intent"\s+value="save"/);
+  expect(edit).toMatch(/name="intent"\s+value="unpublish"/);
+  expect(edit).toMatch(/name="intent"\s+value="publish"/);
+});
+
+it("shows the Edit link on the detail page to the admin only", () => {
+  expect(detail).toMatch(/locals\.admin && <a href=\{`\/admin\/edit\//);
 });

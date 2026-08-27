@@ -1,0 +1,115 @@
+---
+/**
+ * Edit an existing state, published or not. The same fields as the capture
+ * screen, pre-filled; the stored image is shown and cannot be replaced (a new
+ * image is a new state). Save keeps the status; the second button flips it.
+ */
+import Admin from "../../../layouts/Admin.astro";
+import StateFields from "../../../components/admin/StateFields.astro";
+import type { NoticeProps } from "../../../components/admin/Notice.astro";
+import { getDb } from "../../../db/client";
+import { getStateById, listStateTags } from "../../../db/states";
+import {
+  listDeviceRanges, listOsOptions, listTagOptions, listAppNames,
+} from "../../../db/taxonomies";
+import { imageSources } from "../../../lib/images";
+
+const { id } = Astro.params;
+const db = getDb();
+const state = id ? await getStateById(db, id) : null;
+if (!state) return new Response("Not found", { status: 404 });
+
+const error = Astro.url.searchParams.get("error");
+const saved = Astro.url.searchParams.get("saved");
+const notice: NoticeProps | null = error
+  ? { tone: "err", text: error }
+  : saved
+    ? state.status === "published"
+      ? { tone: "ok", text: "Saved", href: `/s/${state.slug}` }
+      : { tone: "ok", text: "Saved" }
+    : null;
+
+const [devices, oses, tagOptions, appNames, tags] = await Promise.all([
+  listDeviceRanges(db), listOsOptions(db), listTagOptions(db), listAppNames(db),
+  listStateTags(db, state.id),
+]);
+const { src } = imageSources(state);
+
+const button =
+  "w-full rounded-lg py-4 text-lg font-semibold transition active:scale-[0.98] active:opacity-80 disabled:opacity-60";
+---
+
+<Admin title={state.title} notice={notice}>
+  <div class="flex flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:items-start md:gap-10">
+    <img
+      src={src}
+      alt=""
+      class="mx-auto mb-4 max-h-[45vh] w-auto rounded object-contain md:sticky md:top-4 md:mb-0 md:max-h-[calc(100dvh-2rem)]"
+    />
+
+    <div class="flex flex-1 flex-col">
+      <p class="mb-3 flex gap-4 text-sm text-[var(--muted)]">
+        <a href="/admin" class="underline">Drafts</a>
+        {
+          state.status === "published" ? (
+            <a href={`/s/${state.slug}`} class="underline">View</a>
+          ) : (
+            <span>Unpublished</span>
+          )
+        }
+      </p>
+
+      <form method="POST" action="/api/admin/update" class="flex flex-1 flex-col gap-5">
+        <input type="hidden" name="id" value={state.id} />
+        <StateFields
+          devices={devices}
+          oses={oses}
+          tagOptions={tagOptions}
+          appNames={appNames}
+          values={{
+            deviceType: state.device_type,
+            os: state.os,
+            appName: state.app_name,
+            title: state.title,
+            appUrl: state.app_url,
+            tagSlugs: tags.map((t) => t.slug),
+          }}
+        />
+        <div class="mt-auto flex flex-col gap-3">
+          <button
+            type="submit"
+            name="intent"
+            value="save"
+            data-busy="Saving..."
+            class:list={[button, "bg-[var(--ink)] text-white"]}
+          >
+            Save
+          </button>
+          {
+            state.status === "published" ? (
+              <button
+                type="submit"
+                name="intent"
+                value="unpublish"
+                data-busy="Unpublishing..."
+                class:list={[button, "border border-[var(--rule)] bg-[var(--raised)] text-[var(--ink)]"]}
+              >
+                Unpublish
+              </button>
+            ) : (
+              <button
+                type="submit"
+                name="intent"
+                value="publish"
+                data-busy="Publishing..."
+                class:list={[button, "border border-[var(--rule)] bg-[var(--raised)] text-[var(--ink)]"]}
+              >
+                Publish
+              </button>
+            )
+          }
+        </div>
+      </form>
+    </div>
+  </div>
+</Admin>
