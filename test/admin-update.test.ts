@@ -12,9 +12,9 @@ beforeAll(async () => {
     env.DB.prepare("INSERT INTO tags (slug, label) VALUES ('empty-cart','Empty cart'), ('onboarding','Onboarding')"),
     env.DB.prepare(
       `INSERT INTO states (id, slug, title, app_name, device_type, os, r2_key, width,
-         height, aspect_ratio, byte_size, published_at, created_at)
+         height, aspect_ratio, byte_size, description, published_at, created_at)
        VALUES (?, 'nothing-here-in-feedly', 'Nothing here', 'Feedly', 'phone', 'ios',
-         'originals/x.png', 1170, 2532, 0.46, 1000,
+         'originals/x.png', 1170, 2532, 0.46, 1000, 'A grey inbox',
          '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z')`,
     ).bind(ID),
     env.DB.prepare(
@@ -49,9 +49,13 @@ it("saves fields, tags and the search row without touching slug or published_at"
   expect(state?.published_at).toBe("2026-01-01T00:00:00Z");
   expect((await listStateTags(env.DB, ID)).map((t) => t.slug)).toEqual(["onboarding"]);
 
-  const fts = await env.DB.prepare("SELECT title, tags FROM states_fts WHERE state_id = ?")
-    .bind(ID).all<{ title: string; tags: string }>();
-  expect(fts.results).toEqual([{ title: "No articles yet", tags: "Onboarding" }]);
+  const fts = await env.DB.prepare(
+    "SELECT title, tags, description FROM states_fts WHERE state_id = ?",
+  ).bind(ID).all<{ title: string; tags: string; description: string | null }>();
+  // The vision description is not on the form and has to survive the rewrite.
+  expect(fts.results).toEqual([
+    { title: "No articles yet", tags: "Onboarding", description: "A grey inbox" },
+  ]);
 });
 
 it("unpublish hides the state from public reads and lists it as a draft", async () => {

@@ -41,9 +41,9 @@ export async function handleUpload(
   env: AdminEnv,
   file: File,
 ): Promise<{ ok: true; id: string; url: string } | { ok: false; status: number; error: string }> {
+  if (file.size === 0) return { ok: false, status: 400, error: "Empty file" };
+  if (file.size > MAX_BYTES) return { ok: false, status: 413, error: "Over 20 MB" };
   const bytes = new Uint8Array(await file.arrayBuffer());
-  if (bytes.byteLength === 0) return { ok: false, status: 400, error: "Empty file" };
-  if (bytes.byteLength > MAX_BYTES) return { ok: false, status: 413, error: "Over 20 MB" };
 
   // The bytes are the authority on format and dimensions; the client's
   // claimed content type is discarded (spec 02's rule).
@@ -59,9 +59,15 @@ export async function handleUpload(
   const id = ulid();
   const r2Key = `submissions/${id}.${ext}`;
   await env.media.put(r2Key, bytes, { httpMetadata: { contentType: info.format } });
-  await insertDraft(env.db, {
-    id, r2Key, width: info.width, height: info.height, byteSize: bytes.byteLength,
-  });
+  try {
+    await insertDraft(env.db, {
+      id, r2Key, width: info.width, height: info.height, byteSize: bytes.byteLength,
+    });
+  } catch (e) {
+    // No row means no route to this object: remove it rather than orphan it.
+    await env.media.delete(r2Key);
+    throw e;
+  }
 
   return { ok: true, id, url: `/admin/new?draft=${id}` };
 }
@@ -241,9 +247,15 @@ export async function handleUpdate(
   const { tags } = valid;
 
   const row = await db
-    .prepare("SELECT slug, status FROM states WHERE id = ?")
+    .prepare("SELECT slug, status, color_names, screen_text, description FROM states WHERE id = ?")
     .bind(id)
-    .first<{ slug: string; status: "published" | "draft" }>();
+    .first<{
+      slug: string;
+      status: "published" | "draft";
+      color_names: string | null;
+      screen_text: string | null;
+      description: string | null;
+    }>();
   if (!row) return { ok: false, status: 404, error: "No state with that id" };
 
   const status =
@@ -264,11 +276,16 @@ export async function handleUpdate(
     ...tags.map((t) =>
       db.prepare("INSERT INTO state_tags (state_id, tag_id) VALUES (?, ?)").bind(id, t.id),
     ),
+    // The vision fields are not on the form, so they are carried over from
+    // the row: the FTS rewrite is a replace, and would drop them otherwise.
     ...writeFtsRow(db, {
       stateId: id,
       title: f.title.trim(),
       appName: f.appName.trim(),
       tags: tags.map((t) => t.label).join(" "),
+      colors: row.color_names,
+      screenText: row.screen_text,
+      description: row.description,
     }),
   ]);
 

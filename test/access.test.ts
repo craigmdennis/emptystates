@@ -1,5 +1,44 @@
-import { it, expect, describe } from "vitest";
+import { it, expect, describe, vi, afterEach } from "vitest";
 import { accessToken, normalizePath, requiresAuth, verifyAccessJwt } from "../src/lib/access";
+
+// The gate is skipped under `astro dev`, and vitest reports DEV as well, so
+// the 401 path only runs with the flag stubbed off.
+describe("the /admin gate outside dev", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  async function run(path: string, headers: Record<string, string> = {}) {
+    vi.stubEnv("DEV", false);
+    const { onRequest } = await import("../src/middleware");
+    const context = {
+      url: new URL(`https://x${path}`),
+      request: new Request(`https://x${path}`, { headers }),
+      locals: {} as { admin?: boolean },
+      redirect: () => new Response(null, { status: 301 }),
+    };
+    const res = (await onRequest(
+      context as never,
+      async () => new Response("ok", { status: 200 }),
+    )) as Response;
+    return { res, admin: context.locals.admin };
+  }
+
+  it("answers 401 to /admin/new without a token", async () => {
+    const { res, admin } = await run("/admin/new");
+    expect(res.status).toBe(401);
+    expect(admin).toBe(false);
+  });
+
+  it("answers 401 to a token it cannot verify, header or cookie", async () => {
+    expect((await run("/admin/new", { "cf-access-jwt-assertion": "a.b.c" })).res.status).toBe(401);
+    expect((await run("/api/admin/upload", { cookie: "CF_Authorization=a.b.c" })).res.status).toBe(401);
+  });
+
+  it("serves a public page to a visitor with no token, admin false", async () => {
+    const { res, admin } = await run("/s/some-slug");
+    expect(res.status).toBe(200);
+    expect(admin).toBe(false);
+  });
+});
 
 const enc = (o: object) =>
   btoa(JSON.stringify(o)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
