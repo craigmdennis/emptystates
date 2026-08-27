@@ -6,6 +6,10 @@
 # from the copied data at the end. Run from the repository root.
 set -euo pipefail
 
+# Each remote export asks "Ok to proceed?". Wrangler takes the default answer
+# without asking when it thinks it runs under CI.
+export CI=true
+
 CFG=(--config wrangler.jsonc)
 DB=emptystates-db
 OUT="${TMPDIR:-/tmp}/emptystates-seed"
