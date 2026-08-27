@@ -81,5 +81,5 @@ it("edits through the shared fields and names the intent on each button", () => 
 });
 
 it("shows the Edit link on the detail page to the admin only", () => {
-  expect(detail).toMatch(/locals\.admin && <a href=\{`\/admin\/edit\//);
+  expect(detail).toMatch(/locals\.admin && \(\s*<p class="original">\s*<a href=\{`\/admin\/edit\//);
 });
