@@ -9,29 +9,29 @@ do it. Tick each item as it lands.
 
 ## Without a decision
 
-- [ ] **Search rows keep their vision fields on save.** `handleUpdate`
+- [x] **Search rows keep their vision fields on save.** `handleUpdate`
       reads `description`, `screen_text`, and `color_names` from the row
       and passes them to `writeFtsRow`, so a Save no longer empties those
       columns in `states_fts`. Test: a row with a description keeps it
       after a save.
-- [ ] **The gate's 401 path has a test.** `vi.stubEnv("DEV", false)` in
+- [x] **The gate's 401 path has a test.** `vi.stubEnv("DEV", false)` in
       a middleware test, so a request to `/admin/new` without a token is
       answered 401 and one with a valid cookie is let through.
-- [ ] **Launch order is written down.** `docs/deploying.md` gains the
+- [x] **Launch order is written down.** `docs/deploying.md` gains the
       order for the first production deploy: tag, deploy, set the two
       secrets, then `/admin` answers. Until the secrets exist the gate
       answers 401 and the header link stays hidden.
-- [ ] **The front door is documented.** `docs/shortcut.md` names `/admin`
+- [x] **The front door is documented.** `docs/shortcut.md` names `/admin`
       as the index and `/admin/new` as the capture screen. The manifest
       keeps `/admin/new` as its start URL: the home screen icon exists
       for capture from a phone, and the index is one link away.
-- [ ] **Upload leaves no orphan.** `handleUpload` deletes the R2 object
+- [x] **Upload leaves no orphan.** `handleUpload` deletes the R2 object
       when the `submissions` insert fails, and checks `file.size` before
       reading the bytes so a 20 MB overrun costs no buffering.
-- [ ] **PR #49 body describes the merged state.** Rewritten under the
+- [x] **PR #49 body describes the merged state.** Rewritten under the
       documentation register: the mechanisms, the change, what a reviewer
       checks, verification, files, and what is out of scope.
-- [ ] **Staging runs the branch head.** `npx wrangler deploy` from the
+- [x] **Staging runs the branch head.** `npx wrangler deploy` from the
       branch, so the manual checks below run against current code.
 
 ## Needs a decision or a device
