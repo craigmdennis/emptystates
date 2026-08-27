@@ -56,132 +56,133 @@ const continueId = draft ? null : await nextPendingDraft(db);
   </head>
 
   <body class="min-h-dvh bg-[var(--ground)] text-[var(--ink)]">
-    <main class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-4">
+    <main class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 py-4 md:max-w-5xl md:px-8">
       {
         draft && !goneDraft ? (
-          <>
-            <div class="mb-3 flex flex-col gap-2">
-              {pending > 1 && (
-                <p class="text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
-              )}
-              {published && (
-                <p class="rounded bg-green-100 px-3 py-2 text-sm text-green-900">
-                  Published {published}
-                </p>
-              )}
-              {error && (
-                <p class="rounded bg-red-100 px-3 py-2 text-sm text-red-900">{error}</p>
-              )}
-              {failed && (
-                <p class="rounded bg-amber-100 px-3 py-2 text-sm text-amber-900">
-                  {failed} upload(s) failed
-                </p>
-              )}
-            </div>
-
+          <div class="flex flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:items-start md:gap-10">
             <img
               src={mediaUrl(draft.r2_key)}
               alt=""
-              class="mx-auto mb-4 w-auto rounded"
-              style="max-height: 45vh; object-fit: contain;"
+              class="mx-auto mb-4 max-h-[45vh] w-auto rounded object-contain md:sticky md:top-4 md:mb-0 md:max-h-[calc(100dvh-2rem)]"
             />
 
-            <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
-              <input type="hidden" name="draft" value={draft.id} />
+            <div class="flex flex-1 flex-col">
+              <div class="mb-3 flex flex-col gap-2">
+                {pending > 1 && (
+                  <p class="text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
+                )}
+                {published && (
+                  <p class="rounded bg-green-100 px-3 py-2 text-sm text-green-900">
+                    Published {published}
+                  </p>
+                )}
+                {error && (
+                  <p class="rounded bg-red-100 px-3 py-2 text-sm text-red-900">{error}</p>
+                )}
+                {failed && (
+                  <p class="rounded bg-amber-100 px-3 py-2 text-sm text-amber-900">
+                    {failed} upload(s) failed
+                  </p>
+                )}
+              </div>
 
-              <fieldset>
-                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Device</legend>
-                <div class="flex flex-wrap gap-2">
-                  {devices.map((d) => (
-                    <label class="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="device_type"
-                        value={d.slug}
-                        class="peer sr-only"
-                        checked={d.slug === derived}
-                        required
-                      />
-                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                        {d.label}
-                      </span>
-                    </label>
+              <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
+                <input type="hidden" name="draft" value={draft.id} />
+
+                <fieldset>
+                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Device</legend>
+                  <div class="flex flex-wrap gap-2">
+                    {devices.map((d) => (
+                      <label class="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="device_type"
+                          value={d.slug}
+                          class="peer sr-only"
+                          checked={d.slug === derived}
+                          required
+                        />
+                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                          {d.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">OS</legend>
+                  <div class="flex flex-wrap gap-2">
+                    {oses.map((o) => (
+                      <label class="cursor-pointer">
+                        <input type="radio" name="os" value={o.slug} class="peer sr-only" required />
+                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                          {o.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                  App name
+                  <input
+                    name="app_name"
+                    list="apps"
+                    required
+                    autocapitalize="words"
+                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                  />
+                </label>
+                <datalist id="apps">
+                  {appNames.map((name) => (
+                    <option value={name} />
                   ))}
-                </div>
-              </fieldset>
+                </datalist>
 
-              <fieldset>
-                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">OS</legend>
-                <div class="flex flex-wrap gap-2">
-                  {oses.map((o) => (
-                    <label class="cursor-pointer">
-                      <input type="radio" name="os" value={o.slug} class="peer sr-only" required />
-                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                        {o.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                  Title
+                  <input
+                    name="title"
+                    required
+                    placeholder="No results in Feedly"
+                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                  />
+                </label>
 
-              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                App name
-                <input
-                  name="app_name"
-                  list="apps"
-                  required
-                  autocapitalize="words"
-                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                />
-              </label>
-              <datalist id="apps">
-                {appNames.map((name) => (
-                  <option value={name} />
-                ))}
-              </datalist>
+                <fieldset>
+                  <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Tags</legend>
+                  <div class="flex flex-wrap gap-2">
+                    {tagOptions.map((t) => (
+                      <label class="cursor-pointer">
+                        <input type="checkbox" name="tags" value={t.slug} class="peer sr-only" />
+                        <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
+                          {t.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
 
-              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                Title
-                <input
-                  name="title"
-                  required
-                  placeholder="No results in Feedly"
-                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                />
-              </label>
+                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
+                  App URL (optional)
+                  <input
+                    name="app_url"
+                    type="url"
+                    inputmode="url"
+                    class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
+                  />
+                </label>
 
-              <fieldset>
-                <legend class="mb-2 text-sm font-medium text-[var(--muted)]">Tags</legend>
-                <div class="flex flex-wrap gap-2">
-                  {tagOptions.map((t) => (
-                    <label class="cursor-pointer">
-                      <input type="checkbox" name="tags" value={t.slug} class="peer sr-only" />
-                      <span class="rounded-full bg-[var(--chip)] px-3 py-1.5 text-sm peer-checked:bg-[var(--ink)] peer-checked:text-white">
-                        {t.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <label class="flex flex-col gap-1 text-sm font-medium text-[var(--muted)]">
-                App URL (optional)
-                <input
-                  name="app_url"
-                  type="url"
-                  inputmode="url"
-                  class="rounded border border-[var(--rule)] bg-[var(--raised)] px-3 py-2 text-base text-[var(--ink)]"
-                />
-              </label>
-
-              <button
-                type="submit"
-                class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white"
-              >
-                Publish
-              </button>
-            </form>
-          </>
+                <button
+                  type="submit"
+                  class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white"
+                >
+                  Publish
+                </button>
+              </form>
+            </div>
+          </div>
         ) : (
           <div class="flex flex-1 flex-col">
             {goneDraft && (
@@ -202,7 +203,7 @@ const continueId = draft ? null : await nextPendingDraft(db);
 
             <label
               for="picker"
-              class="flex flex-1 min-h-[60vh] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)]"
+              class="flex flex-1 min-h-[60vh] w-full cursor-pointer md:mx-auto md:max-w-2xl md:min-h-[24rem] md:flex-none flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)]"
             >
               Add screenshots
               <input
