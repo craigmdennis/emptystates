@@ -150,3 +150,20 @@ and does override: wrangler resolves the target as `args.name ?? config.name`.
 Cloudflare Workers Builds would give branch-to-environment mapping without a
 hand-written workflow. It has no equivalent of a required reviewer, which is
 the control this needed, so Actions won.
+
+## Local data
+
+A fresh checkout has an empty local D1, and the built Worker under
+`wrangler dev` answers every page with `no such table: states`.
+`scripts/seed-local.sh` replaces the local database with a copy of
+production. The copy is made one table at a time, because `wrangler d1
+export` refuses a database that contains an FTS5 table, and the search
+index is rebuilt from the copied rows at the end.
+
+```bash
+./scripts/seed-local.sh
+```
+
+Images render from the public bucket hostname, so the local copy needs no
+R2 objects. A publish from the local Worker writes to the local D1 and the
+local R2 only.
