@@ -37,6 +37,33 @@ The purge is part of the promote rather than a step to remember. On 2026-08-23
 a rollback reverted the Worker and the edge kept serving the version that had
 just been rolled back, which made the site read as un-reverted for minutes.
 
+### The admin on the first production deploy
+
+The admin at `/admin` reads two Worker secrets, `ACCESS_TEAM_DOMAIN` and
+`ACCESS_AUD`, and `wrangler secret put` refuses to run while the Worker's
+latest uploaded version differs from the version taking traffic. On
+production that is the state between a tag's upload and its promote, and
+also the state a rollback leaves. The order for the first deploy that carries
+the admin is therefore:
+
+1. Tag, push, and approve the promote as above.
+2. Set the two secrets, from the repository root:
+
+   ```bash
+   npx wrangler secret put ACCESS_TEAM_DOMAIN --name emptystates --config wrangler.jsonc
+   npx wrangler secret put ACCESS_AUD --name emptystates --config wrangler.jsonc
+   ```
+
+   The values come from the Zero Trust dashboard. Where each one is found is
+   in `docs/shortcut.md`.
+3. Open `/admin` while logged in to Access and confirm it renders. Then open
+   any `/s/<slug>` and confirm the Admin link in the header and the Edit link
+   under the details panel render. Both depend on the Access cookie reaching
+   the public paths.
+
+Between steps 1 and 2 the gate answers 401 on `/admin`, and the header link
+stays hidden on every page. Nothing public changes.
+
 ## Rolling back
 
 Find the version to return to:

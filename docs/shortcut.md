@@ -170,8 +170,18 @@ same address.
 Screenshots arrive as PNG, which the upload endpoint accepts. If a HEIC photo
 is ever rejected, insert a "Convert Image to PNG" action before the POST.
 
+## The admin screens
+
+`/admin` is the index: unpublished states as thumbnails, each linking to its
+edit screen, and a link into capture. `/admin/new` is the capture screen the
+Shortcut opens. `/admin/edit/<id>` edits one state, published or not, and
+carries the Unpublish and Publish actions. A logged-in admin also sees an
+Admin link in the site header and an Edit link under the details panel of
+every state page.
+
 ## Home screen
 
 Open `/admin/new` in Safari, then use Share > Add to Home Screen. The page
 links `/manifest.webmanifest`, so the home screen icon and name come from the
-app manifest rather than the page title.
+app manifest rather than the page title. The icon opens the capture screen,
+and the index is one link away from it.
