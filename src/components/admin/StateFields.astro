@@ -78,18 +78,34 @@ const legend = "mb-2 text-sm font-medium text-[var(--muted)]";
 
 <label class={label}>
   App name
-  <input
-    name="app_name"
-    list="apps"
-    required
-    autocapitalize="words"
-    value={values.appName ?? ""}
-    class={field}
-  />
+  <div class="relative">
+    <input
+      name="app_name"
+      required
+      autocapitalize="words"
+      autocomplete="off"
+      role="combobox"
+      aria-expanded="false"
+      aria-controls="app-options"
+      value={values.appName ?? ""}
+      class={`${field} w-full`}
+    />
+    <ul
+      id="app-options"
+      role="listbox"
+      hidden
+      class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded border border-[var(--rule)] bg-[var(--raised)] shadow-lg"
+    >
+      {appNames.map((name) => (
+        <li role="option">
+          <button type="button" class="w-full px-3 py-2 text-left text-base hover:bg-[var(--chip)]">
+            {name}
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
 </label>
-<datalist id="apps">
-  {appNames.map((name) => <option value={name} />)}
-</datalist>
 
 <label class={label}>
   Title
@@ -132,3 +148,49 @@ const legend = "mb-2 text-sm font-medium text-[var(--muted)]";
     class={field}
   />
 </label>
+
+<script>
+  // The app-name combobox: the full list on focus, substring-filtered as the
+  // admin types, and free text stays valid — a new app is typed, never picked.
+  const input = document.querySelector<HTMLInputElement>('input[name="app_name"]');
+  const list = document.getElementById("app-options");
+  const items = list ? Array.from(list.querySelectorAll("button")) : [];
+
+  function filter() {
+    if (!input || !list) return;
+    const q = input.value.trim().toLowerCase();
+    let any = false;
+    for (const b of items) {
+      const hit = (b.textContent ?? "").toLowerCase().includes(q);
+      (b.parentElement as HTMLElement).hidden = !hit;
+      any = any || hit;
+    }
+    list.hidden = !any;
+    input.setAttribute("aria-expanded", String(any));
+  }
+
+  input?.addEventListener("focus", filter);
+  input?.addEventListener("input", filter);
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && list) {
+      list.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+    }
+  });
+  input?.addEventListener("blur", () => {
+    // After the tap on an option lands; pointerdown below runs first.
+    setTimeout(() => {
+      list?.setAttribute("hidden", "");
+      input.setAttribute("aria-expanded", "false");
+    }, 100);
+  });
+  for (const b of items) {
+    b.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (!input || !list) return;
+      input.value = (b.textContent ?? "").trim();
+      list.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+    });
+  }
+</script>

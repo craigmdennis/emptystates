@@ -34,7 +34,7 @@ it("lists OS options and tag options", async () => {
   );
 });
 
-it("lists distinct app names for the datalist", async () => {
+it("lists distinct app names for the combobox", async () => {
   expect(await listAppNames(env.DB)).toEqual(["Feedly"]);
 });
 
