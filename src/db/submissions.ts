@@ -58,6 +58,18 @@ export async function nextPendingDraft(
   return row?.id ?? null;
 }
 
+export async function listPendingDrafts(db: D1Database): Promise<DraftRow[]> {
+  return (
+    await db
+      .prepare(
+        `SELECT id, r2_key, width, height, aspect_ratio, byte_size, created_at
+           FROM submissions WHERE ${DRAFT}
+          ORDER BY created_at ASC, id ASC`,
+      )
+      .all<DraftRow>()
+  ).results;
+}
+
 export async function countPendingDrafts(db: D1Database): Promise<number> {
   const row = await db
     .prepare(`SELECT COUNT(*) AS n FROM submissions WHERE ${DRAFT}`)

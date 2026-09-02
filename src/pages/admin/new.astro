@@ -11,7 +11,7 @@ import Admin from "../../layouts/Admin.astro";
 import StateFields from "../../components/admin/StateFields.astro";
 import type { NoticeProps } from "../../components/admin/Notice.astro";
 import { getDb } from "../../db/client";
-import { getDraft, countPendingDrafts, nextPendingDraft } from "../../db/submissions";
+import { getDraft, countPendingDrafts } from "../../db/submissions";
 import {
   listDeviceRanges, listOsOptions, listTagOptions, listAppNames,
 } from "../../db/taxonomies";
@@ -51,9 +51,6 @@ const [devices, oses, tagOptions, appNames] = draft
   : [[], [], [], []];
 const derived = draft ? deriveDevice(draft.aspect_ratio, devices) : null;
 
-// Only the picker offers a way back into the queue; the editor already shows
-// "n more" instead.
-const continueId = draft ? null : await nextPendingDraft(db);
 ---
 
 <Admin title="New state" notice={notice}>
@@ -94,16 +91,6 @@ const continueId = draft ? null : await nextPendingDraft(db);
       <div class="flex flex-1 flex-col">
         <p class="mb-3 flex gap-4 text-sm text-[var(--muted)]">
           <a href="/admin" class="underline">Drafts</a>
-          {pending > 0 && (
-            <span>
-              {pending} pending
-              {continueId && (
-                <a href={`/admin/new?draft=${continueId}`} class="ml-2 underline">
-                  Continue
-                </a>
-              )}
-            </span>
-          )}
         </p>
 
         <label

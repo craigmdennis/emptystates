@@ -2,7 +2,7 @@ import { applyD1Migrations } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { it, expect, beforeAll } from "vitest";
 import {
-  insertDraft, getDraft, nextPendingDraft, countPendingDrafts,
+  insertDraft, getDraft, nextPendingDraft, countPendingDrafts, listPendingDrafts,
 } from "../src/db/submissions";
 
 beforeAll(async () => {
@@ -25,6 +25,9 @@ it("counts and orders pending drafts oldest first", async () => {
   expect(await countPendingDrafts(env.DB)).toBe(2);
   expect(await nextPendingDraft(env.DB)).toBe("01ARZ3NDEKTSV4RRFFQ69G5FAV");
   expect(await nextPendingDraft(env.DB, "01ARZ3NDEKTSV4RRFFQ69G5FAV")).toBe("01BX0000000000000000000000");
+  expect((await listPendingDrafts(env.DB)).map((d) => d.id)).toEqual([
+    "01ARZ3NDEKTSV4RRFFQ69G5FAV", "01BX0000000000000000000000",
+  ]);
 });
 
 it("getDraft ignores non-pending and non-admin rows", async () => {
