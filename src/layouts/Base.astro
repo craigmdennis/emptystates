@@ -108,6 +108,7 @@ const view = requested === "square" ? "square" : "justified";
         </a>
 
         <nav class="site-nav">
+          {Astro.locals.admin && <a href="/admin">Admin</a>}
           <a href="/privacy">Privacy</a>
         </nav>
       </div>

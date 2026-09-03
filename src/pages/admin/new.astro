@@ -1,0 +1,156 @@
+---
+/**
+ * The capture screen. Phone in one hand, this is the whole loop: pick photos,
+ * publish one, land on the next pending draft, repeat.
+ *
+ * Two modes on one route, chosen by the `draft` query param rather than two
+ * pages, because the picker and the editor share nothing worth splitting a
+ * URL over and the redirects in `publish.ts` already speak this shape.
+ */
+import Admin from "../../layouts/Admin.astro";
+import StateFields from "../../components/admin/StateFields.astro";
+import type { NoticeProps } from "../../components/admin/Notice.astro";
+import { getDb } from "../../db/client";
+import { getDraft, countPendingDrafts } from "../../db/submissions";
+import {
+  listDeviceRanges, listOsOptions, listTagOptions, listAppNames,
+} from "../../db/taxonomies";
+import { deriveDevice } from "../../lib/device";
+import { mediaUrl } from "../../lib/media";
+
+const db = getDb();
+const draftId = Astro.url.searchParams.get("draft");
+const error = Astro.url.searchParams.get("error");
+const published = Astro.url.searchParams.get("published");
+const failed = Astro.url.searchParams.get("failed");
+
+const draft = draftId ? await getDraft(db, draftId) : null;
+const pending = await countPendingDrafts(db);
+
+// A draft id that no longer resolves means it was published from another
+// device in the same batch. That is success, not an error: fall through to
+// the picker with a note instead of a dead form.
+const goneDraft = Boolean(draftId) && !draft;
+
+// One toast per navigation. The params never co-occur: `failed` arrives from
+// the picker, `error` and `published` from the publish redirect.
+const notice: NoticeProps | null = error
+  ? { tone: "err", text: error }
+  : failed
+    ? { tone: "warn", text: `${failed} upload(s) failed` }
+    : published
+      ? { tone: "ok", text: `Published ${published}`, href: `/s/${published}` }
+      : goneDraft
+        ? { tone: "ok", text: "Draft already published" }
+        : null;
+
+const [devices, oses, tagOptions, appNames] = draft
+  ? await Promise.all([
+      listDeviceRanges(db), listOsOptions(db), listTagOptions(db), listAppNames(db),
+    ])
+  : [[], [], [], []];
+const derived = draft ? deriveDevice(draft.aspect_ratio, devices) : null;
+
+---
+
+<Admin title="New state" notice={notice}>
+  {
+    draft ? (
+      <div class="flex flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:items-start md:gap-10">
+        <img
+          src={mediaUrl(draft.r2_key)}
+          alt=""
+          class="mx-auto mb-4 max-h-[45vh] w-auto rounded object-contain md:sticky md:top-4 md:mb-0 md:max-h-[calc(100dvh-2rem)]"
+        />
+
+        <div class="flex flex-1 flex-col">
+          {pending > 1 && (
+            <p class="mb-3 text-sm text-[var(--muted)]">{pending - 1} more waiting</p>
+          )}
+
+          <form method="POST" action="/api/admin/publish" class="flex flex-1 flex-col gap-5">
+            <input type="hidden" name="draft" value={draft.id} />
+            <StateFields
+              devices={devices}
+              oses={oses}
+              tagOptions={tagOptions}
+              appNames={appNames}
+              values={{ deviceType: derived }}
+            />
+            <button
+              type="submit"
+              data-busy="Publishing..."
+              class="mt-auto w-full rounded-lg bg-[var(--ink)] py-4 text-lg font-semibold text-white transition active:scale-[0.98] active:opacity-80 disabled:opacity-60"
+            >
+              Publish
+            </button>
+          </form>
+        </div>
+      </div>
+    ) : (
+      <div class="flex flex-1 flex-col">
+        <p class="mb-3 flex gap-4 text-sm text-[var(--muted)]">
+          <a href="/admin" class="underline">Drafts</a>
+        </p>
+
+        <label
+          for="picker"
+          class="flex flex-1 min-h-[60vh] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[var(--rule)] text-lg font-medium text-[var(--muted)] md:mx-auto md:max-w-2xl md:min-h-[24rem] md:flex-none"
+        >
+          Add screenshots
+          <input
+            id="picker"
+            type="file"
+            name="file"
+            accept="image/*"
+            multiple
+            class="sr-only"
+          />
+        </label>
+
+        <p id="picker-status" class="mt-3 text-sm text-[var(--muted)]" aria-live="polite"></p>
+      </div>
+    )
+  }
+</Admin>
+
+<script>
+  // Files upload one at a time so a slow phone connection shows progress
+  // instead of a silent multi-megabyte batch; the first response's `url` is
+  // where the edit form for that batch starts.
+  const input = document.getElementById("picker") as HTMLInputElement | null;
+  const status = document.getElementById("picker-status");
+
+  input?.addEventListener("change", async () => {
+    const files = Array.from(input.files ?? []);
+    if (!files.length) return;
+
+    // A failed file mid-batch does not stop the rest: the drafts already
+    // made for earlier files are real rows, and returning early would
+    // strand them with no route back except a manual reload. Failures
+    // are counted and surfaced instead, on whichever screen has room —
+    // the edit strip for the first success, the picker itself if none.
+    let firstUrl: string | null = null;
+    let failedCount = 0;
+    let firstFailure: string | null = null;
+    for (let i = 0; i < files.length; i++) {
+      if (status) status.textContent = `Uploading ${i + 1} of ${files.length}...`;
+      const body = new FormData();
+      body.append("file", files[i]);
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+      if (!res.ok || !data?.url) {
+        failedCount++;
+        if (!firstFailure) firstFailure = data?.error ?? "Upload failed";
+        continue;
+      }
+      if (!firstUrl) firstUrl = data.url;
+    }
+
+    if (firstUrl) {
+      location.href = failedCount ? `${firstUrl}&failed=${failedCount}` : firstUrl;
+    } else if (status) {
+      status.textContent = `${firstFailure ?? "Upload failed"} (${failedCount} failed)`;
+    }
+  });
+</script>

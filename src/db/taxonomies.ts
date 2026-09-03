@@ -16,6 +16,63 @@ export type Facet = {
   count: number;
 };
 
+/**
+ * Reads for the admin capture screen: every active option to choose from,
+ * plus the app names already in the gallery for the datalist. Unlike
+ * `listFacets`, these are not gated on anything being published under them —
+ * an admin picking a brand-new device or app name is the point.
+ */
+
+export type DeviceRangeOption = {
+  slug: string;
+  label: string;
+  min_ratio: number | null;
+  max_ratio: number | null;
+  sort_order: number;
+  is_active: number;
+};
+
+export async function listDeviceRanges(
+  db: D1Database,
+): Promise<DeviceRangeOption[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT slug, label, min_ratio, max_ratio, sort_order, is_active
+         FROM device_types WHERE is_active = 1 ORDER BY sort_order`,
+    )
+    .all<DeviceRangeOption>();
+  return results;
+}
+
+export async function listOsOptions(
+  db: D1Database,
+): Promise<{ slug: string; label: string }[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT slug, label FROM operating_systems WHERE is_active = 1 ORDER BY sort_order`,
+    )
+    .all<{ slug: string; label: string }>();
+  return results;
+}
+
+export async function listTagOptions(
+  db: D1Database,
+): Promise<{ slug: string; label: string }[]> {
+  const { results } = await db
+    .prepare(`SELECT slug, label FROM tags ORDER BY label`)
+    .all<{ slug: string; label: string }>();
+  return results;
+}
+
+export async function listAppNames(db: D1Database): Promise<string[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT DISTINCT app_name FROM states WHERE app_name IS NOT NULL ORDER BY app_name`,
+    )
+    .all<{ app_name: string }>();
+  return results.map((r) => r.app_name);
+}
+
 export async function listFacets(db: D1Database): Promise<{
   devices: Facet[];
   oses: Facet[];

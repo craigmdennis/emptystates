@@ -92,6 +92,8 @@ it("redirects a retired path with a 301 and lets a live route through", async ()
 
   const context = {
     url: new URL("https://x/s/tumblr_mggrayiCsC1rdf37to1_1280"),
+    request: new Request("https://x/s/tumblr_mggrayiCsC1rdf37to1_1280"),
+    locals: {},
     redirect: (to: string, status: number) =>
       new Response(null, { status, headers: { Location: to } }),
   };
@@ -114,6 +116,8 @@ it("leaves a genuine 404 alone", async () => {
   const { onRequest } = await import("../src/middleware");
   const context = {
     url: new URL("https://x/s/never-existed"),
+    request: new Request("https://x/s/never-existed"),
+    locals: {},
     redirect: () => new Response(null, { status: 301 }),
   };
   const res = (await onRequest(

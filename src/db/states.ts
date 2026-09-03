@@ -97,6 +97,28 @@ export async function listStates(
   return { rows: rows.results, total: total?.n ?? 0 };
 }
 
+/**
+ * One row by id, whatever its status. Admin only: the edit screen has to
+ * reach an unpublished state, which every other read here hides.
+ */
+export async function getStateById(
+  db: D1Database,
+  id: string,
+): Promise<(StateRow & { status: "published" | "draft" }) | null> {
+  return db
+    .prepare(`SELECT ${COLUMNS}, status FROM states s WHERE s.id = ?`)
+    .bind(id)
+    .first<StateRow & { status: "published" | "draft" }>();
+}
+
+/** Unpublished states, newest first, for the admin's draft index. */
+export async function listDraftStates(db: D1Database): Promise<StateRow[]> {
+  const { results } = await db
+    .prepare(`SELECT ${COLUMNS} FROM states s WHERE s.status = 'draft' ORDER BY s.id DESC`)
+    .all<StateRow>();
+  return results;
+}
+
 export async function getStateBySlug(
   db: D1Database,
   slug: string,

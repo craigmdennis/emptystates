@@ -1,0 +1,38 @@
+---
+/**
+ * One toast per navigation, fixed at the top of the viewport (top-right on a
+ * desktop) so it is in view whatever the page scrolled to. Optional link to
+ * the thing the notice is about.
+ */
+export type NoticeProps = {
+  tone: "ok" | "warn" | "err";
+  text: string;
+  href?: string;
+  linkText?: string;
+};
+
+const { tone, text, href, linkText = "View" } = Astro.props as NoticeProps;
+
+const TONE = {
+  ok: "bg-green-100 text-green-900",
+  warn: "bg-amber-100 text-amber-900",
+  err: "bg-red-100 text-red-900",
+};
+---
+
+<p
+  role="status"
+  class:list={[
+    "fixed inset-x-4 top-4 z-10 flex items-center justify-between gap-3 rounded px-3 py-2 text-sm shadow md:inset-x-auto md:right-8 md:w-80",
+    TONE[tone],
+  ]}
+>
+  {text}
+  {
+    href && (
+      <a href={href} class="font-semibold underline">
+        {linkText}
+      </a>
+    )
+  }
+</p>

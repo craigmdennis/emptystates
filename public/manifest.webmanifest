@@ -1,0 +1,16 @@
+{
+  "name": "emptystat.es admin",
+  "short_name": "emptystates",
+  "start_url": "/admin/new",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
