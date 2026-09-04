@@ -5,7 +5,7 @@
   "version": "2.0.0",
   "author": "Craig Dennis <craig@emptystat.es>",
   "dependencies": {
-    "gatsby": "^4.5.4",
+    "gatsby": "^4.25.9",
     "gatsby-plugin-image": "^2.5.2",
     "gatsby-plugin-manifest": "^4.5.2",
     "gatsby-plugin-offline": "^5.5.2",
